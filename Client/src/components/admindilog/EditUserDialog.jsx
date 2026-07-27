@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes, FaSave } from "react-icons/fa";
 
-const EditUserDialog = ({
-  open,
-  onClose,
-  user,
-  onSave,
-}) => {
+const EditUserDialog = ({ open, onClose, user, onSave }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     role: "User",
     status: "Active",
   });
@@ -20,9 +15,10 @@ const EditUserDialog = ({
       setFormData({
         name: user.name || "",
         email: user.email || "",
-        phone: user.phone || "",
-        role: user.role || "User",
-        status: user.status || "Active",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        role: user.userType || "User",
+      //  status: user.isActive ? "Active" : "Inactive"
       });
     }
   }, [user]);
@@ -47,38 +43,22 @@ const EditUserDialog = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">
-
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl">
-
         {/* Header */}
 
         <div className="flex justify-between items-center border-b p-5">
+          <h2 className="text-2xl font-bold">Edit User</h2>
 
-          <h2 className="text-2xl font-bold">
-            Edit User
-          </h2>
-
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-black"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-black">
             <FaTimes size={20} />
           </button>
-
         </div>
 
         {/* Form */}
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 space-y-5"
-        >
-
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-
-            <label className="font-medium">
-              Full Name
-            </label>
+            <label className="font-medium">Full Name</label>
 
             <input
               type="text"
@@ -87,14 +67,10 @@ const EditUserDialog = ({
               onChange={handleChange}
               className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
             />
-
           </div>
 
           <div>
-
-            <label className="font-medium">
-              Email
-            </label>
+            <label className="font-medium">Email</label>
 
             <input
               type="email"
@@ -103,57 +79,52 @@ const EditUserDialog = ({
               onChange={handleChange}
               className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
             />
-
           </div>
 
           <div>
-
-            <label className="font-medium">
-              Phone Number
-            </label>
+            <label className="font-medium">Phone Number</label>
 
             <input
               type="text"
-              name="phone"
-              value={formData.phone}
+              name="phoneNumber"
+              value={formData.phoneNumber}
               onChange={handleChange}
               className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
             />
-
           </div>
 
+
+<div>
+            <label className="font-medium">Address</label>
+
+            <input
+              type="text"
+              name="address"
+              value={formData.address || ""}
+              onChange={handleChange}
+              className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+    
           <div className="grid md:grid-cols-2 gap-5">
-
             <div>
-
-              <label className="font-medium">
-                Role
-              </label>
+              <label className="font-medium">Role</label>
 
               <select
                 name="role"
-                value={formData.role}
+                value={formData.userType}
                 onChange={handleChange}
                 className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
               >
+                <option value="User">User</option>
 
-                <option value="User">
-                  User
-                </option>
-
-                <option value="Admin">
-                  Admin
-                </option>
-
+                <option value="Admin">Admin</option>
               </select>
-
             </div>
 
-            <div>
-
-              <label className="font-medium">
-                Status
-              </label>
+            {/* <div>
+              <label className="font-medium">Status</label>
 
               <select
                 name="status"
@@ -161,25 +132,16 @@ const EditUserDialog = ({
                 onChange={handleChange}
                 className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
               >
+                <option value="Active">Active</option>
 
-                <option value="Active">
-                  Active
-                </option>
-
-                <option value="Inactive">
-                  Inactive
-                </option>
-
+                <option value="Inactive">Inactive</option>
               </select>
-
-            </div>
-
+            </div> */}
           </div>
 
           {/* Footer */}
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-
             <button
               type="button"
               onClick={onClose}
@@ -192,19 +154,12 @@ const EditUserDialog = ({
               type="submit"
               className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
             >
-
               <FaSave />
-
               Save Changes
-
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 };

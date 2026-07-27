@@ -166,7 +166,7 @@ export const toggleUserStatus = createAsyncThunk(
   "user/toggleUserStatus",
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(
+      const response = await axiosInstance.put(
         `/users/toggleUserStatus?userId=${userId}`
       );
 

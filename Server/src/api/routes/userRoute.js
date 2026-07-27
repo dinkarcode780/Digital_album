@@ -1,7 +1,7 @@
 import express from "express";
 import { getUserByFilter, getUserById, toggleUserStatus, userDeleteById, userForgetPassword, userLogin, userLogout, userRegister, userResetPassword, userUpdateProfile } from "../controllers/userController.js";
 import { upload } from "../middleware/multerS3.js";
-import { isUser } from "../middleware/authMiddleware.js";
+import { isAdmin, isUser } from "../middleware/authMiddleware.js";
 
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.put("/users/userUpdateProfile",isUser,upload.single("profileImage"),userU
 
 router.get("/users/getUserById",isUser,getUserById);
 
-router.post("/users/getUserByFilter",isUser,getUserByFilter);
+router.get("/users/getUserByFilter",getUserByFilter);
 
 router.get("/users/userDeleteById",isUser,userDeleteById);
 
@@ -25,7 +25,7 @@ router.post("/users/userResetPassword",userResetPassword);
 router.get("/users/userLogout",isUser,userLogout);
 
 
-router.get("/users/toggleUserStatus",isUser,toggleUserStatus)
+router.put("/users/toggleUserStatus",isAdmin,toggleUserStatus)
 
 
 export default router;

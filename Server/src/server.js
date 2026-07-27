@@ -9,10 +9,10 @@ const PORT = process.env.PORT || 1000;
 
 await databaseConnection();
 await createDefaultAdmin();
-const serevr = createServer(app);
+const server = createServer(app);
 
 
-serevr.listen(PORT,()=>{
+server.listen(PORT,()=>{
 
-    console.log(`Serevr is running on port ${process.env.PORT}`)
+    console.log(`Server is running on port ${process.env.PORT}`)
 })

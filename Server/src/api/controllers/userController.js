@@ -230,13 +230,114 @@ export const userResetPassword = asyncHandler(async (req, res) => {
   });
 });
 
+// export const getUserByFilter = asyncHandler(async (req, res) => {
+//   const {
+//     search,
+//     userType,
+//     isActive,
+//     page = 1,
+//     limit = 10,
+//   } = req.query;
+
+//   const filter = {};
+
+//  if (search) {
+//   const orConditions = [
+//     {
+//       name: {
+//         $regex: search,
+//         $options: "i",
+//       },
+//     },
+//     {
+//       email: {
+//         $regex: search,
+//         $options: "i",
+//       },
+//     },
+//   ];
+
+//   // Agar search numeric hai tabhi phoneNumber search karo
+//   if (!isNaN(search)) {
+//     orConditions.push({
+//       phoneNumber: Number(search),
+//     });
+//   }
+
+//   filter.$or = orConditions;
+// }
+
+//   if (userType && userType !== "All") {
+//     filter.userType = userType;
+//   }
+
+//   if (
+//     isActive !== undefined &&
+//     isActive !== "" &&
+//     isActive !== "All"
+//   ) {
+//     filter.isActive = isActive === "true";
+//   }
+
+//   const pageNumber = Number(page);
+//   const limitNumber = Number(limit);
+
+//   const skip = (pageNumber - 1) * limitNumber;
+
+//   const users = await userModel
+//     .find(filter)
+//     .select("-password")
+//     .sort({ createdAt: -1 })
+//     .skip(skip)
+//     .limit(limitNumber);
+
+//   const totalUsers = await userModel.countDocuments(filter);
+
+//   res.status(200).json({
+//     success: true,
+//     message: "All users fetched successfully",
+//     data: users,
+//     totalUsers,
+//     currentPage: pageNumber,
+//     totalPages: Math.ceil(totalUsers / limitNumber),
+//   });
+// });
+
+
 export const getUserByFilter = asyncHandler(async (req, res) => {
-  const { search, userType, isActive, page = 1, limit = 10 } = req.query;
+  let {
+    search = "",
+    userType,
+    isActive,
+    page = 1,
+    limit = 10,
+  } = req.query;
 
-  let filter = {};
+  const filter = {};
 
-  if (search) {
-    filter.$or = [
+  // Default sirf User dikhana
+  // if (!userType || userType === "All") {
+  //   filter.userType = "User";
+  // } else {
+  //   filter.userType = userType;
+  // }
+
+   if (userType && userType !== "All") {
+    filter.userType = userType;
+  }
+
+  // Status Filter
+  if (
+    isActive !== undefined &&
+    isActive !== "" &&
+    isActive !== "All"
+  ) {
+    filter.isActive = isActive === "true";
+  }
+
+  // Search
+  if (search.trim()) {
+    const orConditions = [
       {
         name: {
           $regex: search,
@@ -249,41 +350,51 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
           $options: "i",
         },
       },
-      {
-        phoneNumber: {
-          $regex: search,
-          $options: "i",
-        },
-      },
     ];
+
+    // Phone search
+    if (!isNaN(search)) {
+      orConditions.push({
+        phoneNumber: Number(search),
+      });
+    }
+
+    filter.$or = orConditions;
   }
 
-  if (userType) {
-    filter.userType = userType;
+  page = Number(page);
+
+  const totalUsers = await userModel.countDocuments(filter);
+
+  // All option support
+  let limitNumber =
+    limit === "All"
+      ? totalUsers || 1
+      : Number(limit);
+
+  if (!limitNumber || limitNumber <= 0) {
+    limitNumber = 10;
   }
 
-  if (isActive !== undefined) {
-    filter.isActive = isActive === "true";
-  }
-
-  const skip = (page - 1) * limit;
+  const skip = (page - 1) * limitNumber;
 
   const users = await userModel
     .find(filter)
     .select("-password")
+    .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(Number(limit))
-    .sort({ createdAt: -1 });
-
-  const totalUsers = await userModel.countDocuments(filter);
+    .limit(limitNumber);
 
   res.status(200).json({
     success: true,
-    message: "All users fetched successfully",
+    message: "Users fetched successfully",
     data: users,
     totalUsers,
-    currentPage: Number(page),
-    totalPages: Math.ceil(totalUsers / limit),
+    currentPage: page,
+    totalPages:
+      limit === "All"
+        ? 1
+        : Math.ceil(totalUsers / limitNumber),
   });
 });
 
