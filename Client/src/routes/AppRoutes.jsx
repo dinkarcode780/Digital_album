@@ -245,6 +245,7 @@ import NotificationsPage from "../pages/admin/NotificationsPage";
 import ProfilePage from "../pages/admin/ProfilePage";
 import PrivacyAndSecurity from "../pages/admin/PrivacyAndSecurity";
 import ForgetPassword from "../components/common/ForgetPassword";
+import AdminInvite from "../pages/admin/AdminInvite";
 
 const AppRoutes = () => {
   return (
@@ -271,7 +272,6 @@ const AppRoutes = () => {
 
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/downloads" element={<Downloads />} />
-            <Route path="/invites" element={<Invites />} />
             <Route path="/notifications" element={<Notification />} />
 
             <Route path="/profile" element={<Profile />} />
@@ -312,6 +312,8 @@ const AppRoutes = () => {
               path="/admin/bookings"
               element={<BookingPage />}
             />
+  <Route path="/admin/invites" element={<Invites />} />
+  <Route path="/admin/admininvite" element={<AdminInvite />} />
 
             <Route
               path="/admin/bookings/:id"

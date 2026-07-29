@@ -16,6 +16,10 @@ import eventCategoryRoute from "./api/routes/eventCategoryRoute.js";
 import subcategoryRoute from "./api/routes/subCategoryRoute.js";
 import mediaRoute from "./api/routes/mediaRoute.js";
 import adminRoute from "./api/routes/adminRoute.js";
+import inviteRoute from "./api/routes/inviteRoute.js";
+import aboutRoute from "./api/routes/aboutRoute.js";
+import serviceRoute from "./api/routes/serviceRoute.js";
+import companyRoute from "./api/routes/companyRoute.js";
 
 
 
@@ -38,6 +42,10 @@ app.use("/api",eventCategoryRoute);
 app.use("/api",subcategoryRoute);
 app.use("/api",mediaRoute);
 app.use("/api",adminRoute);
+app.use("/api",inviteRoute);
+app.use("/api",aboutRoute);
+app.use("/api",serviceRoute)
+app.use("/api",companyRoute);
 
 
 
