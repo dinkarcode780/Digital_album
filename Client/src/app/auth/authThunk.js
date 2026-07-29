@@ -184,13 +184,33 @@ export const toggleUserStatus = createAsyncThunk(
 
 // ======================= Forget Password =======================
 
+// export const userForgetPassword = createAsyncThunk(
+//   "user/userForgetPassword",
+//   async (email, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.post(
+//         "/users/userForgetPassword",
+//         { email }
+//       );
+
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(
+//         error.response?.data || {
+//           success: false,
+//           message: "Something went wrong",
+//         }
+//       );
+//     }
+//   }
+// );
 export const userForgetPassword = createAsyncThunk(
   "user/userForgetPassword",
-  async (email, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
         "/users/userForgetPassword",
-        { email }
+        data
       );
 
       return response.data;
@@ -205,7 +225,6 @@ export const userForgetPassword = createAsyncThunk(
   }
 );
 
-// ======================= Reset Password =======================
 
 export const userResetPassword = createAsyncThunk(
   "user/userResetPassword",

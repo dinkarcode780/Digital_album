@@ -7,6 +7,7 @@ import {
   uploadToCloudinary,
 } from "../middleware/multerS3.js";
 import { sendResetPasswordEmail } from "../middleware/nodemailer.js";
+import { sendOtp } from "../../utils/sendOtp.js";
 
 export const userRegister = asyncHandler(async (req, res) => {
   const { name, email, password, phoneNumber } = req.body;
@@ -155,17 +156,55 @@ export const getUserById = asyncHandler(async (req, res) => {
   });
 });
 
-export const userForgetPassword = asyncHandler(async (req, res) => {
-  const { email } = req.body;
+// export const userForgetPassword = asyncHandler(async (req, res) => {
+//   const { email } = req.body;
 
-  if (!email) {
+//   if (!email) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Email is required",
+//     });
+//   }
+
+//   const user = await userModel.findOne({ email });
+
+//   if (!user) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "User not found",
+//     });
+//   }
+
+//   const otp = Math.floor(1000 + Math.random() * 9000).toString();
+//   user.resetOTP = otp;
+//   user.resetOTPExpires = Date.now() + 1 * 60 * 1000;
+//   await user.save();
+
+//   await sendResetPasswordEmail(email, otp);
+
+//   res.status(200).json({
+//     success: true,
+//     message: "Password reset OTP sent to your email",
+//   });
+// });
+
+export const userForgetPassword = asyncHandler(async (req, res) => {
+  const { email, phoneNumber } = req.body;
+
+  if (!email && !phoneNumber) {
     return res.status(400).json({
       success: false,
-      message: "Email is required",
+      message: "Email or Phone Number is required",
     });
   }
 
-  const user = await userModel.findOne({ email });
+  let user;
+
+  if (email) {
+    user = await userModel.findOne({ email });
+  } else {
+    user = await userModel.findOne({ phoneNumber });
+  }
 
   if (!user) {
     return res.status(404).json({
@@ -174,30 +213,58 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
     });
   }
 
+  // Generate OTP
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
   user.resetOTP = otp;
-  user.resetOTPExpires = Date.now() + 1 * 60 * 1000;
+  user.resetOTPExpires = Date.now() + 1 * 60 * 1000; // 1 Minute
+
   await user.save();
 
-  await sendResetPasswordEmail(email, otp);
+  // Send OTP
+  if (email) {
+    await sendResetPasswordEmail(user.email, otp);
 
-  res.status(200).json({
-    success: true,
-    message: "Password reset OTP sent to your email",
-  });
-});
-
-export const userResetPassword = asyncHandler(async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-
-  if (!email || !otp || !newPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "Email, OTP and new password are required",
+    return res.status(200).json({
+      success: true,
+      message: "Password reset OTP sent to your email",
     });
   }
 
-  const user = await userModel.findOne({ email });
+  if (phoneNumber) {
+    const isSent = sendOtp(user.phoneNumber, otp);
+
+    if (!isSent) {
+      return res.status(429).json({
+        success: false,
+        message: "OTP limit exceeded. Please try again later.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset OTP sent to your phone number",
+    });
+  }
+});
+
+export const userResetPassword = asyncHandler(async (req, res) => {
+  const { email, phoneNumber, otp, newPassword } = req.body;
+
+  if ((!email && !phoneNumber) || !otp || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Email or Phone Number, OTP and New Password are required",
+    });
+  }
+
+  let user;
+
+  if (email) {
+    user = await userModel.findOne({ email });
+  } else {
+    user = await userModel.findOne({ phoneNumber });
+  }
 
   if (!user) {
     return res.status(404).json({
@@ -219,9 +286,11 @@ export const userResetPassword = asyncHandler(async (req, res) => {
   }
 
   const hashPassword = await hashValue(newPassword);
+
   user.password = hashPassword;
   user.resetOTP = undefined;
   user.resetOTPExpires = undefined;
+
   await user.save();
 
   res.status(200).json({
@@ -229,6 +298,49 @@ export const userResetPassword = asyncHandler(async (req, res) => {
     message: "Password reset successfully",
   });
 });
+
+// export const userResetPassword = asyncHandler(async (req, res) => {
+//   const { email, otp, newPassword } = req.body;
+
+//   if (!email || !otp || !newPassword) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Email, OTP and new password are required",
+//     });
+//   }
+
+//   const user = await userModel.findOne({ email });
+
+//   if (!user) {
+//     return res.status(404).json({
+//       success: false,
+//       message: "User not found",
+//     });
+//   }
+
+//   if (
+//     !user.resetOTP ||
+//     user.resetOTP !== otp ||
+//     !user.resetOTPExpires ||
+//     user.resetOTPExpires < Date.now()
+//   ) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Invalid or expired OTP",
+//     });
+//   }
+
+//   const hashPassword = await hashValue(newPassword);
+//   user.password = hashPassword;
+//   user.resetOTP = undefined;
+//   user.resetOTPExpires = undefined;
+//   await user.save();
+
+//   res.status(200).json({
+//     success: true,
+//     message: "Password reset successfully",
+//   });
+// });
 
 // export const getUserByFilter = asyncHandler(async (req, res) => {
 //   const {

@@ -30,20 +30,36 @@ const ForgetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (resetType === "mobile") {
-      toast.error("Mobile OTP is not supported yet. Please use Email reset.");
-      return;
-    }
+    // if (resetType === "mobile") {
+    //   toast.error("Mobile OTP is not supported yet. Please use Email reset.");
+    //   return;
+    // }
 
-    if (!formData.email) {
-      toast.error("Please enter your email address.");
-      return;
-    }
+    // if (!formData.email) {
+    //   toast.error("Please enter your email address.");
+    //   return;
+    // }
+
+    if (resetType === "email" && !formData.email) {
+  toast.error("Please enter your email address.");
+  return;
+}
+
+if (resetType === "mobile" && !formData.phoneNumber) {
+  toast.error("Please enter your mobile number.");
+  return;
+}
 
     if (step === "request") {
       try {
         setLoading(true);
-        const result = await dispatch(userForgetPassword(formData.email));
+        // const result = await dispatch(userForgetPassword(formData.email));
+        const payload =
+  resetType === "email"
+    ? { email: formData.email }
+    : { phoneNumber: formData.phoneNumber };
+
+const result = await dispatch(userForgetPassword(payload));
 
         if (userForgetPassword.fulfilled.match(result)) {
           toast.success(result.payload.message || "Password reset OTP sent to your email.");
@@ -77,13 +93,24 @@ const ForgetPassword = () => {
 
     try {
       setLoading(true);
+      // const result = await dispatch(
+      //   userResetPassword({
+      //     email: formData.email,
+      //     otp,
+      //     newPassword,
+      //   }),
+      // );
+
       const result = await dispatch(
-        userResetPassword({
-          email: formData.email,
-          otp,
-          newPassword,
-        }),
-      );
+  userResetPassword({
+    email: resetType === "email" ? formData.email : undefined,
+    phoneNumber:
+      resetType === "mobile" ? formData.phoneNumber : undefined,
+    otp,
+    newPassword,
+  })
+);
+      
 
       if (userResetPassword.fulfilled.match(result)) {
         toast.success(result.payload.message || "Password reset successfully.");
@@ -220,77 +247,76 @@ const ForgetPassword = () => {
 
             ) : (
 
+              <div>
+                <label className="font-semibold">
+                  Email Address
+                </label>
+
+                <div className="relative mt-2">
+
+                  <FaEnvelope className="absolute left-4 top-4 text-gray-400" />
+
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        email: e.target.value,
+                      })
+                    }
+                    placeholder="Enter Email Address"
+                    className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
+                  />
+
+                </div>
+              </div>
+
+            )}
+
+            {step === "verify" && (
               <>
-                <div>
-                  <label className="font-semibold">
-                    Email Address
-                  </label>
-
-                  <div className="relative mt-2">
-
-                    <FaEnvelope className="absolute left-4 top-4 text-gray-400" />
-
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          email: e.target.value,
-                        })
-                      }
-                      placeholder="Enter Email Address"
-                      className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
-                    />
-
-                  </div>
+                <div className="mt-4 p-4 rounded-2xl bg-purple-50 border border-purple-100">
+                  <p className="text-sm text-purple-700">
+                    OTP has been sent to your {resetType === "email" ? "email" : "mobile number"}.
+                    Enter it below and set a new password.
+                  </p>
                 </div>
 
-                {step === "verify" && (
-                  <>
-                    <div className="mt-4 p-4 rounded-2xl bg-purple-50 border border-purple-100">
-                      <p className="text-sm text-purple-700">
-                        OTP has been sent to your email. Enter it below and set a new password.
-                      </p>
-                    </div>
+                <div>
+                  <label className="font-semibold">OTP</label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter OTP"
+                    maxLength={6}
+                    className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-semibold">OTP</label>
-                      <input
-                        type="text"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="Enter OTP"
-                        maxLength={6}
-                        className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
-                      />
-                    </div>
+                <div>
+                  <label className="font-semibold">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter New Password"
+                    className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
+                  />
+                </div>
 
-                    <div>
-                      <label className="font-semibold">New Password</label>
-                      <input
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Enter New Password"
-                        className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="font-semibold">Confirm Password</label>
-                      <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm New Password"
-                        className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
-                      />
-                    </div>
-                  </>
-                )}
+                <div>
+                  <label className="font-semibold">Confirm Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm New Password"
+                    className="w-full border rounded-xl py-3 px-4 mt-2 outline-none focus:ring-2 focus:ring-purple-600"
+                  />
+                </div>
               </>
-
             )}
 
             <button
