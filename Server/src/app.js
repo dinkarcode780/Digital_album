@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan("tiny"));
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: ["https://digital-album-lilac.vercel.app","http://localhost:5173",],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
