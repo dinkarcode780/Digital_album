@@ -13,6 +13,7 @@ import {
   FaCamera,
   FaCameraRetro,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,6 +42,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+     if (loginType === "User") {
+    if (!/^[6-9]\d{9}$/.test(formData.phoneNumber)) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+  }
+
     if (loginType === "Admin") {
       dispatch(
         adminLogin({
@@ -60,7 +68,6 @@ const Login = () => {
 
   useEffect(() => {
     if (adminState.isAuthenticated) {
-      console.log("Admin is authenticated, navigating to dashboard");
       navigate("/admin/dashboard");
     }
 
@@ -178,6 +185,8 @@ const Login = () => {
                     onChange={handleChange}
                     placeholder="Enter Mobile Number"
                     maxLength={10}
+                    required
+                    // pattern="[6-9]{1}[0-9]{9}"
                     className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
                   />
                 </div>
@@ -194,6 +203,7 @@ const Login = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    required
                     placeholder="Enter Email Address"
                     className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
                   />
@@ -215,6 +225,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter Password"
+                  required
                   className="w-full border rounded-xl py-3 pl-12 pr-12 outline-none focus:ring-2 focus:ring-purple-600"
                 />
 
@@ -234,7 +245,7 @@ const Login = () => {
               <Link
                 to={
                   loginType === "Admin"
-                    ? "/admin/forgot-password"
+                    ? "/forgot-password"
                     : "/forgot-password"
                 }
                 className="text-purple-600 hover:underline text-sm"

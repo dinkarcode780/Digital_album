@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaEnvelope,
@@ -17,6 +17,9 @@ import { toast } from "react-toastify";
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  console.log(location.state);
 
   const { loading, success, error, message } = useSelector(
     (state) => state.auth,
@@ -31,17 +34,57 @@ const Register = () => {
     password: "",
   });
 
+  useEffect(() => {
+  if (location.state?.inviteData) {
+    setFormData((prev) => ({
+      ...prev,
+      name: location.state.inviteData.name || "",
+      email: location.state.inviteData.email || "",
+      phoneNumber: location.state.inviteData.phoneNumber || "",
+    }));
+  }
+}, [location.state]);
+
+  // const handleChange = (e) => {
+  //   setFormData({
+  //     ...formData,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
+
   const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "phoneNumber") {
+    const onlyNumbers = value.replace(/\D/g, "");
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      phoneNumber: onlyNumbers,
     });
-  };
+
+    return;
+  }
+
+  setFormData({
+    ...formData,
+    [name]: value,
+  });
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+if (!/^[6-9]\d{9}$/.test(formData.phoneNumber)) {
+  toast.error("Please enter a valid 10-digit mobile number.");
+  return;
+}
+    // const result = await dispatch(userRegister(formData));
+    const payload = {
+  ...formData,
+  inviteToken: location.state?.inviteToken,
+};
 
-    const result = await dispatch(userRegister(formData));
+const result = await dispatch(userRegister(payload));
     console.log(result,"hhh");
 
     if (userRegister.fulfilled.match(result)) {
@@ -110,6 +153,7 @@ const Register = () => {
                   onChange={handleChange}
                   placeholder="Enter Full Name"
                   required
+                  readOnly={!!location.state?.inviteData}
                   className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
                 />
               </div>
@@ -128,6 +172,7 @@ const Register = () => {
                   maxLength={10}
                   placeholder="Enter Mobile Number"
                   required
+                  readOnly={!!location.state?.inviteData}
                   className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
                 />
               </div>
@@ -145,6 +190,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter Email (Optional)"
+                    readOnly={!!location.state?.inviteData}
                     className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
                   />
                 </div>

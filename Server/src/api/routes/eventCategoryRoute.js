@@ -6,14 +6,15 @@ import {
   getEventCategoryById,
   updateEventCategory,
 } from "../controllers/eventCategoryController.js";
+import { isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/admin/createEventCategory", createEventCategory);
-router.put("/admin/updateEventCategory", updateEventCategory);
-router.get("/admin/getEventCategoryById", getEventCategoryById);
+router.post("/admin/createEventCategory",isAdmin, createEventCategory);
+router.put("/admin/updateEventCategory", isAdmin,updateEventCategory);
+router.get("/admin/getEventCategoryById", isAdmin,getEventCategoryById);
 
-router.get("/admin/geteventCategoryByFilter", getEventCategoryByFilter);
+router.get("/admin/geteventCategoryByFilter", isAdmin,getEventCategoryByFilter);
 
-router.delete("/admin/deleteEventCategory", deleteEventCategory);
+router.delete("/admin/deleteEventCategory", isAdmin,deleteEventCategory);
 export default router;

@@ -11,7 +11,6 @@ export const createEvent = asyncHandler(async (req, res) => {
     brideName,
     groomName,
   } = req.body;
-
   if (!userId || !eventSubCategoryId || !eventDate || !location) {
     return res.status(400).json({
       success: false,
@@ -79,8 +78,8 @@ export const updateEvent = asyncHandler(async (req, res) => {
     event.eventDate = eventDate;
   }
 
-  if(eventEndDate){
-    event.eventEndDate = eventEndDate
+  if (eventEndDate) {
+    event.eventEndDate = eventEndDate;
   }
 
   if (location) {
@@ -122,15 +121,28 @@ export const getEventById = asyncHandler(async (req, res) => {
     .findById(eventId)
     .populate("userId", "name email phoneNumber")
     // .populate("eventSubCategoryId", "name",);
+
+    // .populate({
+    //   path: "eventSubCategoryId",
+    //   select: "name description categoryId",
+    //   populate: {
+    //     path: "categoryId",
+    //     select: "name"
+    //   }
+    // });
+
     .populate({
       path: "eventSubCategoryId",
-      select: "name description categoryId",
+      select: "name categoryId",
       populate: {
         path: "categoryId",
-        select: "name"
-      }
-    });
-    
+        select: "name",
+      },
+    })
+
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
 
   if (!event) {
     return res.status(404).json({

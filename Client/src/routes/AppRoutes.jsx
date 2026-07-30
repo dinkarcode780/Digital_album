@@ -246,6 +246,7 @@ import ProfilePage from "../pages/admin/ProfilePage";
 import PrivacyAndSecurity from "../pages/admin/PrivacyAndSecurity";
 import ForgetPassword from "../components/common/ForgetPassword";
 import AdminInvite from "../pages/admin/AdminInvite";
+import InvitePage from "../components/common/InvitePage";
 
 const AppRoutes = () => {
   return (
@@ -257,6 +258,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Login />} />
         <Route path="/users/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
+         <Route path="/invite/:token" element={<InvitePage />} />
       </Route>
 
       {/* ================= USER ================= */}

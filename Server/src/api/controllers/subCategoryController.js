@@ -106,7 +106,7 @@ export const getSubCategoryById = asyncHandler(async (req, res) => {
 
     const { subCategoryId } = req.query;
 
-    const subCategory = await subCategoryModel
+    const subCategory = await subcategoryModel
         .findById(subCategoryId)
         .populate("categoryId");
 
@@ -164,14 +164,14 @@ export const getSubCategoryByFilter = asyncHandler(async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const subCategories = await subCategoryModel
+    const subCategories = await subcategoryModel
         .find(filter)
         .populate("categoryId", "name")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit));
 
-    const totalRecords = await subCategoryModel.countDocuments(filter);
+    const totalRecords = await subcategoryModel.countDocuments(filter);
 
     res.status(200).json({
         success: true,

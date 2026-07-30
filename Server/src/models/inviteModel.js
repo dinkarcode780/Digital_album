@@ -22,6 +22,19 @@ const inviteSchema = new mongoose.Schema(
       type: Number,
     },
 
+    inviteToken: {
+      type: String,
+    },
+
+    expiresAt: {
+      type: Date,
+    },
+
+    isUsed: {
+      type: Boolean,
+      default: false,
+    },
+
     status: {
       type: String,
       enum: ["Pending", "Accepted"],
@@ -35,7 +48,7 @@ const inviteSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Invite = mongoose.model("Invite", inviteSchema);
