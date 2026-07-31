@@ -6,7 +6,7 @@ import { inviteUser } from "../../app/invite/inviteThunk";
 import { getAllEventByFilter } from "../../app/event/eventThunk";
 import { getAllInviteByFilter } from "../../app/invite/inviteThunk";
 import { getEventCategoryByFilter } from "../../app/category/categoryThunk";
-import { getSubCategoryByFilter } from "../../app/subCategory/subcategoryThunk";
+import { getSubCategoryByFilter } from "../../app/subcategory/subcategoryThunk";
 
 const AdminInvite = () => {
   const { invites, pagination, loading } = useSelector((state) => state.invite);
