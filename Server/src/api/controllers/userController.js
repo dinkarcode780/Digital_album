@@ -201,7 +201,9 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
   let user;
 
   if (email) {
-    user = await userModel.findOne({ email });
+    user = await userModel.findOne({
+      email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
+    });
   } else {
     user = await userModel.findOne({ phoneNumber });
   }
@@ -223,28 +225,44 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
 
   // Send OTP
   if (email) {
-    await sendResetPasswordEmail(user.email, otp);
+    try {
+      await sendResetPasswordEmail(user.email, otp);
 
-    return res.status(200).json({
-      success: true,
-      message: "Password reset OTP sent to your email",
-    });
+      return res.status(200).json({
+        success: true,
+        message: "Password reset OTP sent to your email",
+      });
+    } catch (emailErr) {
+      console.error("Nodemailer Error:", emailErr);
+      return res.status(500).json({
+        success: false,
+        message: emailErr?.message || "Failed to send reset email. Check Gmail App Password.",
+      });
+    }
   }
 
   if (phoneNumber) {
-    const isSent = await sendOtp(user.phoneNumber, otp);
+    try {
+      const isSent = await sendOtp(user.phoneNumber, otp);
 
-    if (!isSent) {
-      return res.status(429).json({
+      if (!isSent) {
+        return res.status(429).json({
+          success: false,
+          message: "OTP limit exceeded. Please try again later.",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Password reset OTP sent to your phone number",
+      });
+    } catch (smsErr) {
+      console.error("MSG91 Error:", smsErr);
+      return res.status(500).json({
         success: false,
-        message: "OTP limit exceeded. Please try again later.",
+        message: smsErr?.message || "Failed to send SMS OTP.",
       });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Password reset OTP sent to your phone number",
-    });
   }
 });
 
