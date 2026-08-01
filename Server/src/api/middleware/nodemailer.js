@@ -1,6 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// Force IPv4 resolution order to avoid IPv6 ENETUNREACH on Render cloud servers
+dns.setDefaultResultOrder("ipv4first");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -8,11 +12,12 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  family: 4,
 });
 
 export const sendResetPasswordEmail = async (email, otp) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"Album Studio" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Password Reset OTP",
     html: `
@@ -24,5 +29,12 @@ export const sendResetPasswordEmail = async (email, otp) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Reset Email sent successfully:", info.response);
+    return true;
+  } catch (error) {
+    console.error("Error sending reset password email:", error);
+    throw error;
+  }
 };
