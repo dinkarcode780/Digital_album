@@ -28,7 +28,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(morgan("tiny"));
 app.use(cors({
     // origin: ["http://localhost:5173"],
-    // origin: ["https://digital-album-phi.vercel.app","https://digital-album-phi.vercel.app/","http://localhost:5173"],
+    // origin: ["https://digital-album-ten.vercel.app","https://digital-album-ten.vercel.app/","http://localhost:5173"],
     origin: process.env.CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,

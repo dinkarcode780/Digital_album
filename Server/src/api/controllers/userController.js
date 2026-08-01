@@ -232,7 +232,7 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
   }
 
   if (phoneNumber) {
-    const isSent = sendOtp(user.phoneNumber, otp);
+    const isSent = await sendOtp(user.phoneNumber, otp);
 
     if (!isSent) {
       return res.status(429).json({
