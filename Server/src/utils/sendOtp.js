@@ -1,29 +1,35 @@
-import https from "https"
+import https from "https";
 
 const otpLimits = {};
 
 const OTP_LIMIT = 5;
-const OTP_WINDOW = 60 * 60 * 1000; // 1 Hourx
+const OTP_WINDOW = 60 * 60 * 1000; // 1 Hour
 
 export const sendOtp = (mobile, otp) => {
   return new Promise((resolve, reject) => {
     const currentTime = Date.now();
 
-    if (!otpLimits[mobile]) {
-      otpLimits[mobile] = {
+    // Clean phone number (remove non-digits)
+    let cleanMobile = String(mobile).replace(/\D/g, "");
+    if (cleanMobile.length === 10) {
+      cleanMobile = `91${cleanMobile}`;
+    }
+
+    if (!otpLimits[cleanMobile]) {
+      otpLimits[cleanMobile] = {
         count: 0,
         firstSentTime: currentTime,
       };
     }
 
-    const { count, firstSentTime } = otpLimits[mobile];
+    const { count, firstSentTime } = otpLimits[cleanMobile];
 
     if (currentTime - firstSentTime < OTP_WINDOW) {
       if (count >= OTP_LIMIT) {
         return resolve(false);
       }
     } else {
-      otpLimits[mobile] = {
+      otpLimits[cleanMobile] = {
         count: 0,
         firstSentTime: currentTime,
       };
@@ -39,7 +45,7 @@ export const sendOtp = (mobile, otp) => {
       },
     };
 
-    const req = http.request(options, (res) => {
+    const req = https.request(options, (res) => {
       let data = "";
 
       res.on("data", (chunk) => {
@@ -49,14 +55,14 @@ export const sendOtp = (mobile, otp) => {
       res.on("end", () => {
         console.log("MSG91 Response:", data);
 
-        otpLimits[mobile].count++;
+        otpLimits[cleanMobile].count++;
 
         resolve(true);
       });
     });
 
     req.on("error", (err) => {
-      console.log(err);
+      console.error("MSG91 Request Error:", err);
       reject(err);
     });
 
@@ -64,7 +70,7 @@ export const sendOtp = (mobile, otp) => {
       JSON.stringify({
         flow_id: process.env.MSG91_FLOW_ID,
         sender: process.env.MSG91_SENDER,
-        mobiles: `91${mobile}`,
+        mobiles: cleanMobile,
         otp: otp,
       })
     );
