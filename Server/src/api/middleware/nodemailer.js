@@ -3,16 +3,23 @@ dotenv.config();
 import nodemailer from "nodemailer";
 import dns from "dns";
 
-// Force IPv4 resolution order to avoid IPv6 ENETUNREACH on Render cloud servers
-dns.setDefaultResultOrder("ipv4first");
+// Custom DNS lookup function to strictly enforce IPv4 address resolution
+const ipv4Lookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { family: 4 }, callback);
+};
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  family: 4,
+  lookup: ipv4Lookup,
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const sendResetPasswordEmail = async (email, otp) => {

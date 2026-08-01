@@ -1,15 +1,22 @@
 import nodemailer from "nodemailer";
 import dns from "dns";
 
-dns.setDefaultResultOrder("ipv4first");
+const ipv4Lookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { family: 4 }, callback);
+};
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  family: 4,
+  lookup: ipv4Lookup,
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const sendInviteEmail = async (email, inviteLink, name) => {
