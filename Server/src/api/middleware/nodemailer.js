@@ -66,7 +66,7 @@ export const sendResetPasswordEmail = async (email, otp) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: process.env.RESEND_FROM || `Album Studio <${process.env.EMAIL_USER || 'onboarding@resend.dev'}>`,
+          from: process.env.RESEND_FROM || `Album Studio <${process.env.EMAIL_USER || 'onboarding@resend.dev'}>` ,
           to: [email],
           subject: mailOptions.subject,
           html: mailOptions.html,
@@ -85,6 +85,7 @@ export const sendResetPasswordEmail = async (email, otp) => {
     }
   }
 
+  // Fallback to Nodemailer SMTP
   try {
     console.log("Sending email via Nodemailer SMTP to:", email);
     const info = await transporter.sendMail(mailOptions);
