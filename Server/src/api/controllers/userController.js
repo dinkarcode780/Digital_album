@@ -231,7 +231,6 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
         message: "Password reset OTP sent to your email",
       });
     } catch (emailErr) {
-      console.error("Nodemailer Error:", emailErr);
       return res.status(500).json({
         success: false,
         message: emailErr?.message || "Failed to send reset email.",
