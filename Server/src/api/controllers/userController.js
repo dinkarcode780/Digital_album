@@ -201,9 +201,7 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
   let user;
 
   if (email) {
-    user = await userModel.findOne({
-      email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
-    });
+    user = await userModel.findOne({ email: email.trim() });
   } else {
     user = await userModel.findOne({ phoneNumber });
   }
@@ -236,7 +234,7 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
       console.error("Nodemailer Error:", emailErr);
       return res.status(500).json({
         success: false,
-        message: emailErr?.message || "Failed to send reset email. Check Gmail App Password.",
+        message: emailErr?.message || "Failed to send reset email.",
       });
     }
   }

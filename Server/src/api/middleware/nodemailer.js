@@ -1,31 +1,18 @@
 import dotenv from "dotenv";
 dotenv.config();
 import nodemailer from "nodemailer";
-import dns from "dns";
-
-// Custom DNS lookup function to strictly enforce IPv4 address resolution
-const ipv4Lookup = (hostname, options, callback) => {
-  return dns.lookup(hostname, { family: 4 }, callback);
-};
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
-  lookup: ipv4Lookup,
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
 });
 
 export const sendResetPasswordEmail = async (email, otp) => {
   const mailOptions = {
-    from: `"Album Studio" <${process.env.EMAIL_USER}>`,
+    from: `"Album Studio" <${process.env.EMAIL_USER || "onboarding@resend.dev"}>`,
     to: email,
     subject: "Password Reset OTP",
     html: `
@@ -37,12 +24,27 @@ export const sendResetPasswordEmail = async (email, otp) => {
     `,
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Reset Email sent successfully:", info.response);
+  if (process.env.RESEND_API_KEY) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Album Studio <onboarding@resend.dev>",
+        to: [email],
+        subject: mailOptions.subject,
+        html: mailOptions.html,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to send email via Resend API");
+    }
     return true;
-  } catch (error) {
-    console.error("Error sending reset password email:", error);
-    throw error;
   }
+
+  await transporter.sendMail(mailOptions);
 };
