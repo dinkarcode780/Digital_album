@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendInviteEmail = async (email, inviteLink, name) => {
+export const sendInviteEmail = async (email, inviteLink, name = "Guest") => {
   const mailOptions = {
     from: `"Album Studio" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -56,5 +56,15 @@ export const sendInviteEmail = async (email, inviteLink, name) => {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    console.log("Sending invite email to:", email, "name:", name);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Invite email sent:", info && info.response ? info.response : info);
+    return true;
+  } catch (err) {
+    console.error("Failed to send invite email to", email, err);
+    throw err;
+  }
 };
+
+export default sendInviteEmail;
