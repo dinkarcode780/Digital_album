@@ -29,7 +29,7 @@ export const createEventCategory = asyncHandler(async (req, res) => {
 
   if (req.file) {
     const uploadResult = await uploadToCloudinary(
-      req.file.path,
+      req.file,
       "eventCategories"
     );
 
@@ -88,7 +88,7 @@ export const updateEventCategory = asyncHandler(async (req, res) => {
     }
 
     const uploadResult = await uploadToCloudinary(
-      req.file.path,
+      req.file,
       "eventCategories"
     );
 

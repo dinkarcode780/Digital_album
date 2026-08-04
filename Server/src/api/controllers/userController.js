@@ -109,7 +109,7 @@ export const userUpdateProfile = asyncHandler(async (req, res) => {
       await deleteFromCloudinary(user.publicId);
     }
     const cloudeResult = await uploadToCloudinary(
-      req.file.path,
+      req.file,
       "profileImages",
     );
     user.profileImage = cloudeResult.secure_url;

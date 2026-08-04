@@ -74,7 +74,7 @@ export const adminUpdateProfile = asyncHandler(async (req, res) => {
         }
 
         const uploadResult = await uploadToCloudinary(
-            req.file.path,
+            req.file,
             "adminProfile"
         );
 

@@ -73,12 +73,12 @@ export const createMedia = asyncHandler(async (req, res) => {
   // 1. Upload thumbnail (if present) in parallel with media files
   const thumbnailFile = req.files.thumbnail?.[0];
   const thumbnailPromise = thumbnailFile
-    ? uploadToCloudinary(thumbnailFile.path, "eventThumbnail")
+    ? uploadToCloudinary(thumbnailFile, "eventThumbnail")
     : Promise.resolve(null);
 
   // 2. Upload all media files concurrently
   const mediaUploadPromises = req.files.mediaFiles.map((file) =>
-    uploadToCloudinary(file.path, "eventMedia")
+    uploadToCloudinary(file, "eventMedia")
   );
 
   // 3. Wait for all uploads (including thumbnail) to finish

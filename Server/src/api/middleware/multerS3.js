@@ -1,16 +1,57 @@
+// import dotenv from "dotenv";
+// dotenv.config();
+// import multer from "multer";
+// import path from "path";
+// import fs from "fs";
+// import cloudinary from "cloudinary";
+// import { promises as fsPromises } from "fs";
+
+//--- ye wala
+// cloudinary.v2.config({
+// //  cloud_name:"dew9hrubp",
+// //     api_key:"137392672297596",
+// //     api_secret:"FeatRnxWfTnUC9E2h3VlIQRKM3w"
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET,
+// });
+
+// const allowedTypes = [
+//   "image/jpeg",
+//   "image/png",
+//   "image/jpg",
+//   "video/mp4",
+//   "video/mkv",
+//   "video/webm",
+//   "video/avi",
+// ];
+
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => cb(null, "uploads/"),
+//   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+// });
+
+
+// export const upload = multer({
+//   storage,
+//   fileFilter: (req, file, cb) => {
+//     allowedTypes.includes(file.mimetype)
+//       ? cb(null, true)
+//       : cb(new Error("Only images or video is allowed"), false);
+//   },
+//   // limits: { fileSize: 900 * 1024 * 1024 },
+// });
+//--- ye bs
+
 import dotenv from "dotenv";
 dotenv.config();
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import cloudinary from "cloudinary";
-import { promises as fsPromises } from "fs";
 
+import multer from "multer";
+import cloudinary from "cloudinary";
+import streamifier from "streamifier";
 
 cloudinary.v2.config({
-//  cloud_name:"dew9hrubp",
-//     api_key:"137392672297596",
-//     api_secret:"FeatRnxWfTnUC9E2h3VlIQRKM3w"
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -26,46 +67,73 @@ const allowedTypes = [
   "video/avi",
 ];
 
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-
-
 export const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
+
   fileFilter: (req, file, cb) => {
-    allowedTypes.includes(file.mimetype)
-      ? cb(null, true)
-      : cb(new Error("Only images or video is allowed"), false);
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only images and videos are allowed"));
+    }
   },
-  // limits: { fileSize: 900 * 1024 * 1024 },
+
+  limits: {
+    fileSize: 200 * 1024 * 1024,
+  },
 });
 
+//--- ye wala
 
-export const uploadToCloudinary = async (localFilePath, folder = "uploads") => {
-  if (!localFilePath) return null;
-  try {
-    const result = await cloudinary.v2.uploader.upload(localFilePath, {
-      folder,
-      resource_type: "auto",
-    });
-    // Async cleanup – non-blocking
-    await fsPromises.unlink(localFilePath).catch(() => {});
-    return {
-      secure_url: result.secure_url,
-      public_id: result.public_id,
-    };
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    // Cleanup even on error
-    await fsPromises.unlink(localFilePath).catch(() => {});
-    return null;
-  }
+// export const uploadToCloudinary = async (localFilePath, folder = "uploads") => {
+//   if (!localFilePath) return null;
+//   try {
+//     const result = await cloudinary.v2.uploader.upload(localFilePath, {
+//       folder,
+//       resource_type: "auto",
+//     });
+//     // Async cleanup – non-blocking
+//     await fsPromises.unlink(localFilePath).catch(() => {});
+//     return {
+//       secure_url: result.secure_url,
+//       public_id: result.public_id,
+//     };
+//   } catch (error) {
+//     console.error("Cloudinary Upload Error:", error);
+//     // Cleanup even on error
+//     await fsPromises.unlink(localFilePath).catch(() => {});
+//     return null;
+//   }
+// };
+
+//--- ye bs
+
+export const uploadToCloudinary = (file, folder = "uploads") => {
+  return new Promise((resolve, reject) => {
+
+    const uploadStream = cloudinary.v2.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "auto",
+      },
+      (error, result) => {
+
+        if (error) {
+          return reject(error);
+        }
+
+        resolve({
+          secure_url: result.secure_url,
+          public_id: result.public_id,
+        });
+
+      }
+    );
+
+    streamifier.createReadStream(file.buffer).pipe(uploadStream);
+
+  });
 };
-
-
 
 
 // export const uploadToCloudinary = async (localFilePath, folder = "uploads") => {
