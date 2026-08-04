@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+
 import EditUserDialog from "../../components/admindilog/EditUserDialog";
 import UserStatusDialog from "../../components/admindilog/UserStatusDialog";
 import DeleteUserDialog from "../../components/admindilog/DeleteUserDialog";
+import AddUserDialog from "../../components/admindilog/AddUserDilog";
 import Pagination from "../../components/common/Pagination";
-import { toast } from "react-toastify";
 
 import {
   getUserByFilter,
@@ -14,6 +16,7 @@ import {
   userRegister,
   userUpdateProfile,
 } from "../../app/auth/authThunk";
+
 import {
   FaSearch,
   FaEye,
@@ -23,21 +26,30 @@ import {
   FaUserSlash,
   FaPlus,
 } from "react-icons/fa";
-import AddUserDialog from "../../components/admindilog/AddUserDilog";
 
 const UsersPage = () => {
   const dispatch = useDispatch();
-  const { users, loading, error, totalPages, currentPage, totalUsers } =
-    useSelector((state) => state.auth);
+
+  const {
+    users,
+    loading,
+    error,
+    totalPages,
+    currentPage,
+    totalUsers,
+  } = useSelector((state) => state.auth);
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState(null);
+
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -45,7 +57,6 @@ const UsersPage = () => {
     const params = {
       page,
       limit,
-      // userType: "User",
     };
 
     if (search) params.search = search;
@@ -53,7 +64,7 @@ const UsersPage = () => {
     if (status) params.isActive = status;
 
     dispatch(getUserByFilter(params));
-  }, [dispatch, search, role, status, page, limit]);
+  }, [dispatch, page, limit, search, role, status]);
 
   const buildParams = (nextPage = page) => {
     const params = {
@@ -68,6 +79,8 @@ const UsersPage = () => {
     return params;
   };
 
+  // ================= Update =================
+
   const handleUpdate = async (updatedUser) => {
     const result = await dispatch(
       userUpdateProfile({
@@ -77,69 +90,61 @@ const UsersPage = () => {
         phoneNumber: updatedUser.phoneNumber,
         address: updatedUser.address,
         profileImage: updatedUser.profileImage,
-      }),
+      })
     );
 
     if (userUpdateProfile.fulfilled.match(result)) {
+      toast.success("User updated successfully");
       dispatch(getUserByFilter(buildParams(page)));
       setOpenEdit(false);
     }
   };
 
+  // ================= Delete =================
+
   const handleDelete = async (user) => {
     if (!user?._id) return;
-    await dispatch(userDeleteById(user._id));
-    dispatch(getUserByFilter(buildParams(page)));
-    setOpenDelete(false);
+
+    const result = await dispatch(userDeleteById(user._id));
+
+    if (userDeleteById.fulfilled.match(result)) {
+      toast.success("User deleted successfully");
+      dispatch(getUserByFilter(buildParams(page)));
+      setOpenDelete(false);
+    }
   };
 
-  const handleStatus = async () => {
-    console.log("Selected User", selectedUser);
-    const result = await dispatch(toggleUserStatus(selectedUser._id));
+  // ================= Status =================
 
-    console.log("Result =", result);
+  const handleStatus = async () => {
+    const result = await dispatch(toggleUserStatus(selectedUser._id));
 
     if (toggleUserStatus.fulfilled.match(result)) {
       toast.success(result.payload.message);
-
       dispatch(getUserByFilter(buildParams(page)));
-
       setOpenStatus(false);
     } else {
       toast.error(result.payload?.message);
     }
   };
 
-  //   const handleAddUser = async (userData) => {
-  //   const resultAction = await dispatch(userRegister(userData));
-
-  //   if (userRegister.fulfilled.match(resultAction)) {
-  //     setOpenAdd(false);
-
-  //     // User list refresh
-  //     dispatch(
-  //       getUserByFilter({
-  //         search,
-  //         userType,
-  //         isActive,
-  //         page: currentPage,
-  //         limit: 10,
-  //       })
-  //     );
-  //   }
-  // };
+  // ================= Add User =================
 
   const handleAddUser = async (userData) => {
     const result = await dispatch(userRegister(userData));
 
     if (userRegister.fulfilled.match(result)) {
-      setOpenAdd(false);
-
+      toast.success("User Added Successfully");
       dispatch(getUserByFilter(buildParams(page)));
+      setOpenAdd(false);
     }
   };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
+      {/* ================= Dialogs ================= */}
+
       <EditUserDialog
         open={openEdit}
         user={selectedUser}
@@ -167,76 +172,105 @@ const UsersPage = () => {
         onConfirm={handleStatus}
       />
 
-      <div className="flex flex-col lg:flex-row justify-between gap-5">
+      {/* ================= Heading ================= */}
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
         <div>
-          <h1 className="text-3xl font-bold">Users Management</h1>
-          <p className="text-gray-500 mt-2">Manage all registered users.</p>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Users Management
+          </h1>
+
+          <p className="text-gray-500 mt-1">
+            Manage all registered users.
+          </p>
         </div>
 
-        <Link
+        <button
           onClick={() => setOpenAdd(true)}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl flex items-center gap-3"
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 transition"
         >
           <FaPlus />
           Add User
-        </Link>
+        </button>
+
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="relative flex-1">
-          <FaSearch className="absolute left-4 top-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by Name, Email or Mobile..."
-            value={search}
+      {/* ================= Search ================= */}
+
+      <div className="bg-white rounded-2xl shadow-sm p-4">
+
+        <div className="flex flex-col lg:flex-row gap-4">
+
+          <div className="relative flex-1">
+
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+            <input
+              type="text"
+              placeholder="Search by name, email or phone..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full border rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:ring-purple-500"
+            />
+
+          </div>
+
+          <select
+            value={role}
             onChange={(e) => {
-              setSearch(e.target.value);
+              setRole(e.target.value);
               setPage(1);
             }}
-            className="w-full border rounded-xl py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-purple-500"
-          />
+            className="border rounded-xl px-4 py-3"
+          >
+            <option value="">All Roles</option>
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
+          </select>
+
+          <select
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              setPage(1);
+            }}
+            className="border rounded-xl px-4 py-3"
+          >
+            <option value="">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+
         </div>
 
-        <select
-          value={role}
-          onChange={(e) => {
-            setRole(e.target.value);
-            setPage(1);
-          }}
-          className="border rounded-xl px-5 py-3"
-        >
-          <option value="">All Roles</option>
-          <option value="Admin">Admin</option>
-          <option value="User">User</option>
-        </select>
-
-        <select
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            setPage(1);
-          }}
-          className="border rounded-xl px-5 py-3"
-        >
-          <option value="">All Status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-gray-500">
-        <span>
-          Showing {users.length} of {totalUsers} users
-        </span>
+      {/* ================= Top Info ================= */}
+
+      <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+
+        <p className="text-sm text-gray-500">
+          Showing <span className="font-semibold">{users.length}</span> of{" "}
+          <span className="font-semibold">{totalUsers}</span> users
+        </p>
 
         <div className="flex items-center gap-2">
-          <span>Rows :</span>
+
+          <span className="text-sm text-gray-600">
+            Rows :
+          </span>
 
           <select
             value={limit}
             onChange={(e) => {
               const value =
-                e.target.value === "All" ? totalUsers : Number(e.target.value);
+                e.target.value === "All"
+                  ? totalUsers
+                  : Number(e.target.value);
 
               setLimit(value);
               setPage(1);
@@ -250,148 +284,221 @@ const UsersPage = () => {
             <option value={100}>100</option>
             <option value="All">All</option>
           </select>
+
         </div>
+
       </div>
 
-      <div className="bg-white rounded-2xl shadow overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="text-left p-4">User</th>
-              <th className="text-left p-4">Email</th>
-              <th className="text-left p-4">Phone</th>
-              <th className="text-left p-4">Role</th>
-              <th className="text-left p-4">Status</th>
-              <th className="text-center p-4">Actions</th>
-            </tr>
-          </thead>
+      {/* =====================================================
+             TABLE STARTS HERE
+             👉 Part 2 se replace karna
+      ===================================================== */}
 
-          <tbody>
-            {loading ? (
+
+            {/* ================= Users Table ================= */}
+
+      <div className="bg-white rounded-2xl shadow overflow-hidden">
+        <div className="overflow-x-auto hide-scrollbar">
+          <table className="min-w-[1050px] w-full">
+            <thead className="bg-gray-100 border-b">
               <tr>
-                <td colSpan="6" className="p-8 text-center text-gray-500">
-                  Loading users...
-                </td>
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 w-20">
+                  ID
+                </th>
+
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 min-w-[240px]">
+                  User
+                </th>
+
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 min-w-[260px]">
+                  Email
+                </th>
+
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 min-w-[150px]">
+                  Phone
+                </th>
+
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 min-w-[120px]">
+                  Role
+                </th>
+
+                <th className="px-4 py-4 text-left font-semibold text-gray-700 min-w-[120px]">
+                  Status
+                </th>
+
+                <th className="px-4 py-4 text-center font-semibold text-gray-700 min-w-[220px]">
+                  Actions
+                </th>
               </tr>
-            ) : users?.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="p-8 text-center text-gray-500">
-                  No users found.
-                </td>
-              </tr>
-            ) : (
-              users?.map((user) => (
-                <tr key={user._id} className="border-t hover:bg-gray-50">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={
-                          user.profileImage ||
-                          "https://i.pravatar.cc/150?img=11"
-                        }
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <div>
-                        <h3 className="font-semibold">{user.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          ID : #{user._id?.slice(-6)}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
+            </thead>
 
-                  <td className="p-4">{user.email || "N/A"}</td>
-                  <td className="p-4">{user.phoneNumber || "N/A"}</td>
-
-                  <td className="p-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        user.userType === "Admin"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
-                      {user.userType || "User"}
-                    </span>
-                  </td>
-
-                  <td className="p-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        user.isActive
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {user.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-
-                  <td className="p-4">
-                    <div className="flex justify-center gap-3">
-                      <Link
-                        to={`/admin/users/details/${user._id}`}
-                        className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition"
-                      >
-                        <FaEye />
-                      </Link>
-
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setOpenEdit(true);
-                        }}
-                        className="w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-500 hover:text-white flex items-center justify-center transition"
-                      >
-                        <FaEdit />
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setOpenDelete(true);
-                        }}
-                        className="w-10 h-10 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition flex items-center justify-center"
-                      >
-                        <FaTrash />
-                      </button>
-
-                      {user.isActive ? (
-                        <button
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setOpenStatus(true);
-                          }}
-                          className="w-10 h-10 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-600 hover:text-white transition flex items-center justify-center"
-                        >
-                          <FaUserSlash />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setOpenStatus(true);
-                          }}
-                          className="w-10 h-10 rounded-lg bg-green-100 text-green-600 hover:bg-green-600 hover:text-white transition flex items-center justify-center"
-                        >
-                          <FaUserCheck />
-                        </button>
-                      )}
-                    </div>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="text-center py-16 text-gray-500"
+                  >
+                    Loading Users...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : users?.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="text-center py-16 text-gray-500"
+                  >
+                    No Users Found.
+                  </td>
+                </tr>
+              ) : (
+                users.map((user, index) => (
+                  <tr
+                    key={user._id}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    {/* Serial Number */}
+
+                    <td className="px-4 py-5 font-semibold text-gray-700 whitespace-nowrap align-middle">
+                      {(page - 1) * limit + index + 1}
+                    </td>
+
+                    {/* User */}
+
+                    <td className="px-4 py-5 align-middle">
+                      <div className="flex items-center gap-3 min-w-[220px]">
+                        <img
+                          src={
+                            user.profileImage ||
+                            "https://i.pravatar.cc/150?img=11"
+                          }
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                        />
+
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {user.name}
+                          </h3>
+
+                          {/* <p className="text-xs text-gray-500">
+                            #{user._id.slice(-6)}
+                          </p> */}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Email */}
+
+                    <td className="px-4 py-5 whitespace-nowrap align-middle">
+                      {user.email || "N/A"}
+                    </td>
+
+                    {/* Phone */}
+
+                    <td className="px-4 py-5 whitespace-nowrap align-middle">
+                      {user.phoneNumber || "N/A"}
+                    </td>
+
+                    {/* Role */}
+
+                    <td className="px-4 py-5 align-middle">
+                      <span
+                        className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-medium ${
+                          user.userType === "Admin"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {user.userType}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+
+                    <td className="px-4 py-5 align-middle">
+                      <span
+                        className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-medium ${
+                          user.isActive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {user.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+
+                    <td className="px-4 py-5 align-middle">
+                      <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+                        <Link
+                          to={`/admin/users/details/${user._id}`}
+                          className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center transition"
+                        >
+                          <FaEye />
+                        </Link>
+
+                        <button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setOpenEdit(true);
+                          }}
+                          className="w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-500 hover:text-white flex items-center justify-center transition"
+                        >
+                          <FaEdit />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setOpenDelete(true);
+                          }}
+                          className="w-10 h-10 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white flex items-center justify-center transition"
+                        >
+                          <FaTrash />
+                        </button>
+
+                        {user.isActive ? (
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setOpenStatus(true);
+                            }}
+                            className="w-10 h-10 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-600 hover:text-white flex items-center justify-center transition"
+                          >
+                            <FaUserSlash />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setOpenStatus(true);
+                            }}
+                            className="w-10 h-10 rounded-lg bg-green-100 text-green-600 hover:bg-green-600 hover:text-white flex items-center justify-center transition"
+                          >
+                            <FaUserCheck />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+      {/* Error */}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
           {error}
         </div>
-      ) : null}
+      )}
+
+      {/* Pagination */}
 
       <Pagination
         currentPage={currentPage}

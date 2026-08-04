@@ -177,7 +177,7 @@ const EventPage = () => {
             {events.length > 0 ? (
               events.map((event) => (
                 <tr key={event._id} className="border-t hover:bg-gray-50">
-                  <td className="p-4 font-semibold">
+                  <td className="p-4 font-semibold truncate">
                     {event.groomName} & {event.brideName}
                   </td>
                   <td className="p-4">

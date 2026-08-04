@@ -64,13 +64,21 @@ const AddUserDialog = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center px-4">
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-4">
 
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+      <div className="bg-white
+    w-full
+    max-w-2xl
+    rounded-2xl
+    shadow-2xl
+    flex
+    flex-col
+    max-h-[90vh]
+    overflow-hidden">
 
         {/* Header */}
 
-        <div className="flex justify-between items-center border-b p-5">
+        <div className="sticky top-0 bg-white border-b px-5 py-4 flex items-center justify-between flex-shrink-0 z-10">
 
           <h2 className="text-2xl font-bold">
             Add New User
@@ -86,10 +94,10 @@ const AddUserDialog = ({
 
         <form
           onSubmit={handleSubmit}
-          className="p-6 space-y-5"
+          className="flex-1 overflow-y-auto  p-5 sm:p-6 space-y-5"
         >
 
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2  gap-5">
 
             {/* Name */}
 
@@ -219,7 +227,7 @@ const AddUserDialog = ({
 
           </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             {/* User Type */}
 
