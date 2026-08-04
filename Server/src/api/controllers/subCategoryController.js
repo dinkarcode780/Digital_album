@@ -34,11 +34,13 @@ export const createSubCategory = asyncHandler(async (req, res) => {
     });
   }
 
-  const subCategory = await subcategoryModel.create({
+  let subCategory = await subcategoryModel.create({
     categoryId,
     name,
     description,
   });
+
+  subCategory = await subCategory.populate("categoryId", "name");
 
   res.status(201).json({
     success: true,
@@ -94,10 +96,12 @@ export const updateSubCategory = asyncHandler(async (req, res) => {
 
     await subCategory.save();
 
+    const populatedSubCategory = await subCategory.populate("categoryId", "name");
+
     res.status(200).json({
         success: true,
         message: "Sub category updated successfully",
-        data: subCategory
+        data: populatedSubCategory
     });
 
 });

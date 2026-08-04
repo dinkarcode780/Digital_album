@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserByFilter } from "../../app/auth/authThunk";
+import { getSubCategoryByFilter } from "../../app/subcategory/subcategoryThunk";
 
-const CreateEventDialog = ({ open, onClose, onCreate }) => {
+const CreateEventDialog = ({ open, onClose, onCreate, initialData = null }) => {
+  const dispatch = useDispatch();
+  const { users = [] } = useSelector((state) => state.auth);
+  const { subCategories = [] } = useSelector((state) => state.subCategory);
+
   const [formData, setFormData] = useState({
     userId: "",
     eventSubCategoryId: "",
@@ -11,6 +18,46 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
     location: "",
     status: "Upcoming",
   });
+
+  useEffect(() => {
+    if (open) {
+      dispatch(getUserByFilter({ page: 1, limit: 100 }));
+      dispatch(getSubCategoryByFilter({ page: 1, limit: 100 }));
+    }
+  }, [dispatch, open]);
+
+  useEffect(() => {
+    if (open && initialData) {
+      setFormData({
+        userId: initialData.userId || "",
+        eventSubCategoryId:
+          initialData.eventSubCategoryId?._id ||
+          initialData.eventSubCategoryId ||
+          "",
+        brideName: initialData.brideName || "",
+        groomName: initialData.groomName || "",
+        eventDate: initialData.eventDate
+          ? new Date(initialData.eventDate).toISOString().split("T")[0]
+          : "",
+        eventEndDate: initialData.eventEndDate
+          ? new Date(initialData.eventEndDate).toISOString().split("T")[0]
+          : "",
+        location: initialData.location || "",
+        status: initialData.status || "Upcoming",
+      });
+    } else if (!open) {
+      setFormData({
+        userId: "",
+        eventSubCategoryId: "",
+        brideName: "",
+        groomName: "",
+        eventDate: "",
+        eventEndDate: "",
+        location: "",
+        status: "Upcoming",
+      });
+    }
+  }, [open, initialData]);
 
   const handleChange = (e) => {
     setFormData({
@@ -42,28 +89,19 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl">
-
         {/* Header */}
 
         <div className="border-b p-6">
-
           <h2 className="text-2xl font-bold">
-            Create Event
+            {initialData ? "Update Event" : "Create Event"}
           </h2>
-
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-
           <div className="grid md:grid-cols-2 gap-5">
-
             <div>
-
-              <label className="font-semibold">
-                Bride Name
-              </label>
+              <label className="font-semibold">Bride Name</label>
 
               <input
                 type="text"
@@ -72,14 +110,10 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               />
-
             </div>
 
             <div>
-
-              <label className="font-semibold">
-                Groom Name
-              </label>
+              <label className="font-semibold">Groom Name</label>
 
               <input
                 type="text"
@@ -88,18 +122,12 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               />
-
             </div>
-
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-
             <div>
-
-              <label className="font-semibold">
-                Select User
-              </label>
+              <label className="font-semibold">Select User</label>
 
               <select
                 name="userId"
@@ -107,27 +135,17 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               >
-                <option value="">
-                  Select User
-                </option>
-
-                <option value="1">
-                  Dinkar Paswan
-                </option>
-
-                <option value="2">
-                  Rahul Kumar
-                </option>
-
+                <option value="">Select User</option>
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name || user.email || "Unnamed User"}
+                  </option>
+                ))}
               </select>
-
             </div>
 
             <div>
-
-              <label className="font-semibold">
-                Event Category
-              </label>
+              <label className="font-semibold">Event Category</label>
 
               <select
                 name="eventSubCategoryId"
@@ -135,40 +153,19 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               >
-
-                <option value="">
-                  Select Category
-                </option>
-
-                <option value="1">
-                  Wedding
-                </option>
-
-                <option value="2">
-                  Engagement
-                </option>
-
-                <option value="3">
-                  Reception
-                </option>
-
-                <option value="4">
-                  Haldi
-                </option>
-
+                <option value="">Select Category</option>
+                {subCategories.map((sc) => (
+                  <option key={sc._id} value={sc._id}>
+                    {sc.name}
+                  </option>
+                ))}
               </select>
-
             </div>
-
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-
             <div>
-
-              <label className="font-semibold">
-                Event Date
-              </label>
+              <label className="font-semibold">Event Date</label>
 
               <input
                 type="date"
@@ -177,14 +174,10 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               />
-
             </div>
 
             <div>
-
-              <label className="font-semibold">
-                Event End Date
-              </label>
+              <label className="font-semibold">Event End Date</label>
 
               <input
                 type="date"
@@ -193,18 +186,12 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               />
-
             </div>
-
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-
             <div>
-
-              <label className="font-semibold">
-                Location
-              </label>
+              <label className="font-semibold">Location</label>
 
               <input
                 type="text"
@@ -213,14 +200,10 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               />
-
             </div>
 
             <div>
-
-              <label className="font-semibold">
-                Status
-              </label>
+              <label className="font-semibold">Status</label>
 
               <select
                 name="status"
@@ -228,29 +211,18 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 mt-2"
               >
+                <option>Upcoming</option>
 
-                <option>
-                  Upcoming
-                </option>
+                <option>Ongoing</option>
 
-                <option>
-                  Ongoing
-                </option>
-
-                <option>
-                  Completed
-                </option>
-
+                <option>Completed</option>
               </select>
-
             </div>
-
           </div>
 
           {/* Footer */}
 
           <div className="flex justify-end gap-4 pt-4">
-
             <button
               type="button"
               onClick={onClose}
@@ -263,15 +235,11 @@ const CreateEventDialog = ({ open, onClose, onCreate }) => {
               type="submit"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl"
             >
-              Create Event
+              {initialData ? "Update Event" : "Create Event"}
             </button>
-
           </div>
-
         </form>
-
       </div>
-
     </div>
   );
 };

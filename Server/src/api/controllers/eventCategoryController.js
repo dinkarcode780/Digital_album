@@ -1,5 +1,6 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import eventcategoryModel from "../../models/eventCateogoryModel.js"
+import { deleteFromCloudinary, uploadToCloudinary } from "../middleware/multerS3.js";
 
 export const createEventCategory = asyncHandler(async (req, res) => {
 
@@ -23,8 +24,30 @@ export const createEventCategory = asyncHandler(async (req, res) => {
     });
   }
 
+  let categoryImage = "";
+  let publicId = "";
+
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(
+      req.file.path,
+      "eventCategories"
+    );
+
+    if (!uploadResult) {
+      return res.status(400).json({
+        success: false,
+        message: "Category image upload failed",
+      });
+    }
+
+    categoryImage = uploadResult.secure_url;
+    publicId = uploadResult.public_id;
+  }
+
+
   const category = await eventcategoryModel.create({
-    name
+    name,categoryImage,
+    publicId,
   });
 
   res.status(201).json({
@@ -36,32 +59,57 @@ export const createEventCategory = asyncHandler(async (req, res) => {
 });
 
 
-export const updateEventCategory = asyncHandler(async(req,res)=>{
- 
-    const {eventcategoryId,name} = req.body;
+export const updateEventCategory = asyncHandler(async (req, res) => {
+  const { eventcategoryId, name } = req.body;
 
-    if(!eventcategoryId){
-        return res.status(400).json({
-            success:false,
-            message:"eventcategoryId is required"
-        })
+  if (!eventcategoryId) {
+    return res.status(400).json({
+      success: false,
+      message: "eventcategoryId is required",
+    });
+  }
+
+  const event = await eventcategoryModel.findById(eventcategoryId);
+
+  if (!event) {
+    return res.status(404).json({
+      success: false,
+      message: "event data is not found",
+    });
+  }
+
+  if (name && name.trim()) {
+    event.name = name.trim();
+  }
+
+  if (req.file) {
+    if (event.publicId) {
+      await deleteFromCloudinary(event.publicId, "image");
     }
 
-    const event = await eventcategoryModel.findByIdAndUpdate(eventcategoryId,{name},{new:true});
+    const uploadResult = await uploadToCloudinary(
+      req.file.path,
+      "eventCategories"
+    );
 
-    if(!event){
-        return res.status(404).json({
-            success:false,
-            message:"event data is not found"
-        })
+    if (!uploadResult) {
+      return res.status(400).json({
+        success: false,
+        message: "Category image upload failed",
+      });
     }
 
-    res.status(200).json({
-        success:true,
-        message:"event updated successfully",
-        data:event
-    })
+    event.categoryImage = uploadResult.secure_url;
+    event.publicId = uploadResult.public_id;
+  }
 
+  await event.save();
+
+  res.status(200).json({
+    success: true,
+    message: "event updated successfully",
+    data: event,
+  });
 });
 
 
