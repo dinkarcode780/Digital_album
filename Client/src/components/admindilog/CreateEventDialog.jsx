@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { FaTimes } from "react-icons/fa";
 import { getUserByFilter } from "../../app/auth/authThunk";
 import { getSubCategoryByFilter } from "../../app/subcategory/subcategoryThunk";
 
@@ -92,10 +93,14 @@ const CreateEventDialog = ({ open, onClose, onCreate, initialData = null }) => {
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl mx-2 sm:mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
 
-        <div className="border-b p-4 sm:p-6">
+        <div className="flex justify-between items-center border-b p-4 sm:p-6">
           <h2 className="text-2xl font-bold">
             {initialData ? "Update Event" : "Create Event"}
           </h2>
+
+          <button onClick={onClose} className="p-2 rounded-md hover:bg-gray-100">
+            <FaTimes size={20} />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
