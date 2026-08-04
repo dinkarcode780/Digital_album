@@ -88,17 +88,17 @@ const CreateEventDialog = ({ open, onClose, onCreate, initialData = null }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-xl mx-2 sm:mx-auto max-h-[90vh] overflow-y-auto">
         {/* Header */}
 
-        <div className="border-b p-6">
+        <div className="border-b p-4 sm:p-6">
           <h2 className="text-2xl font-bold">
             {initialData ? "Update Event" : "Create Event"}
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           <div className="grid md:grid-cols-2 gap-5">
             <div>
               <label className="font-semibold">Bride Name</label>
@@ -222,18 +222,18 @@ const CreateEventDialog = ({ open, onClose, onCreate, initialData = null }) => {
 
           {/* Footer */}
 
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 rounded-xl border"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl border"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl"
+              className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl"
             >
               {initialData ? "Update Event" : "Create Event"}
             </button>
