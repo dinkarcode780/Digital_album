@@ -1,6 +1,10 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import mediaModel from "../../models/mediaModel.js";
-import { deleteFromCloudinary, uploadToCloudinary } from "../middleware/multerS3.js";
+import eventModel from "../../models/eventModel.js";
+import {
+  deleteFromCloudinary,
+  uploadToCloudinary,
+} from "../middleware/multerS3.js";
 
 // export const createMedia = asyncHandler(async (req, res) => {
 //   const { eventId } = req.body;
@@ -50,9 +54,6 @@ import { deleteFromCloudinary, uploadToCloudinary } from "../middleware/multerS3
 //   });
 // });
 
-
-
-
 export const createMedia = asyncHandler(async (req, res) => {
   const { eventId } = req.body;
 
@@ -78,7 +79,7 @@ export const createMedia = asyncHandler(async (req, res) => {
 
   // 2. Upload all media files concurrently
   const mediaUploadPromises = req.files.mediaFiles.map((file) =>
-    uploadToCloudinary(file, "eventMedia")
+    uploadToCloudinary(file, "eventMedia"),
   );
 
   // 3. Wait for all uploads (including thumbnail) to finish
@@ -129,8 +130,7 @@ export const createMedia = asyncHandler(async (req, res) => {
 });
 
 export const updateMedia = asyncHandler(async (req, res) => {
-
-  const { mediaId } = req.body;
+  const { mediaId, isDownloadable, isActive } = req.body;
 
   if (!mediaId) {
     return res.status(400).json({
@@ -150,17 +150,13 @@ export const updateMedia = asyncHandler(async (req, res) => {
 
   // Update Thumbnail
   if (req.files?.thumbnail?.length) {
-
     if (media.thumbnailPublicId) {
-      await deleteFromCloudinary(
-        media.thumbnailPublicId,
-        "image"
-      );
+      await deleteFromCloudinary(media.thumbnailPublicId, "image");
     }
 
     const thumbnailUpload = await uploadToCloudinary(
       req.files.thumbnail[0].path,
-      "eventThumbnail"
+      "eventThumbnail",
     );
 
     if (thumbnailUpload) {
@@ -171,32 +167,34 @@ export const updateMedia = asyncHandler(async (req, res) => {
 
   // Update Media File
   if (req.files?.mediaFile?.length) {
-
     await deleteFromCloudinary(
       media.publicId,
-      media.videosOrImageUrlType === "Video"
-        ? "video"
-        : "image"
+      media.videosOrImageUrlType === "Video" ? "video" : "image",
     );
 
     const uploadResult = await uploadToCloudinary(
       req.files.mediaFile[0].path,
-      "eventMedia"
+      "eventMedia",
     );
 
     if (uploadResult) {
       media.videosOrImageUrl = uploadResult.secure_url;
       media.publicId = uploadResult.public_id;
-      media.videosOrImageUrlType =
-        req.files.mediaFile[0].mimetype.startsWith("video/")
-          ? "Video"
-          : "Image";
+      media.videosOrImageUrlType = req.files.mediaFile[0].mimetype.startsWith(
+        "video/",
+      )
+        ? "Video"
+        : "Image";
     }
   }
 
-  // if (isDownloadable !== undefined) {
-  //   media.isDownloadable = isDownloadable;
-  // }
+  if (isDownloadable !== undefined) {
+    media.isDownloadable = isDownloadable === "true" || isDownloadable === true;
+  }
+
+  if (isActive !== undefined) {
+    media.isActive = isActive === "true" || isActive === true;
+  }
 
   await media.save();
 
@@ -205,12 +203,9 @@ export const updateMedia = asyncHandler(async (req, res) => {
     message: "Media updated successfully",
     data: media,
   });
-
 });
 
-
 export const iSdownload = asyncHandler(async (req, res) => {
-
   const { mediaId } = req.body;
 
   if (!mediaId) {
@@ -236,194 +231,238 @@ export const iSdownload = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: `Media ${
-      media.isDownloadable
-        ? "download enabled"
-        : "download disabled"
+      media.isDownloadable ? "download enabled" : "download disabled"
     } successfully`,
     data: media,
   });
+});
 
+export const toggleMediaActive = asyncHandler(async (req, res) => {
+  const { mediaId } = req.body;
+
+  if (!mediaId) {
+    return res.status(400).json({
+      success: false,
+      message: "mediaId is required",
+    });
+  }
+
+  const media = await mediaModel.findById(mediaId);
+
+  if (!media) {
+    return res.status(404).json({
+      success: false,
+      message: "Media not found",
+    });
+  }
+
+  media.isActive = !media.isActive;
+  await media.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Media ${media.isActive ? "activated" : "deactivated"} successfully`,
+    data: media,
+  });
 });
 
 export const getMediaById = asyncHandler(async (req, res) => {
+  const { mediaId } = req.query;
 
-    const { mediaId } = req.query;
-
-    if (!mediaId) {
-        return res.status(400).json({
-            success: false,
-            message: "mediaId is required",
-        });
-    }
-
-    const media = await mediaModel
-        .findById(mediaId)
-        .populate({
-            path: "eventId",
-            populate: [
-                {
-                    path: "userId",
-                    select: "name email phoneNumber"
-                },
-                {
-                    path: "eventSubCategoryId",
-                    select: "name description categoryId",
-                    populate: {
-                        path: "categoryId",
-                        select: "name description"
-                    }
-                }
-            ]
-        });
-
-    if (!media) {
-        return res.status(404).json({
-            success: false,
-            message: "Media not found",
-        });
-    }
-
-    res.status(200).json({
-        success: true,
-        message: "Media fetched successfully",
-        data: media,
+  if (!mediaId) {
+    return res.status(400).json({
+      success: false,
+      message: "mediaId is required",
     });
+  }
 
+  const media = await mediaModel.findById(mediaId).populate({
+    path: "eventId",
+    populate: [
+      {
+        path: "userId",
+        select: "name email phoneNumber",
+      },
+      {
+        path: "eventSubCategoryId",
+        select: "name description categoryId",
+        populate: {
+          path: "categoryId",
+          select: "name description",
+        },
+      },
+    ],
+  });
+
+  if (!media) {
+    return res.status(404).json({
+      success: false,
+      message: "Media not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Media fetched successfully",
+    data: media,
+  });
 });
 
-
 export const getMediaByFilter = asyncHandler(async (req, res) => {
+  const {
+    search,
+    eventId,
+    eventSubCategoryId,
+    categoryId,
+    mediaType,
+    isDownloadable,
+    isActive,
+    page = 1,
+    limit = 10,
+  } = req.query;
 
-    const {
-        search,
-        eventId,
-        mediaType,
-        isDownloadable,
-        page = 1,
-        limit = 10
-    } = req.query;
+  const filter = {};
 
-    const filter = {};
+  // Event Filter
+  if (eventId) {
+    filter.eventId = eventId;
+  }
 
-    // Event Filter
-    if (eventId) {
-        filter.eventId = eventId;
-    }
+  if (eventSubCategoryId) {
+    const events = await eventModel.find({ eventSubCategoryId }).select("_id");
 
-    // Media Type Filter
-    if (mediaType) {
-        filter.videosOrImageUrlType = mediaType;
-    }
+    filter.eventId = {
+      $in: events.map((item) => item._id),
+    };
+  }
 
-    // Download Permission Filter
-    if (isDownloadable !== undefined) {
-        filter.isDownloadable = isDownloadable === "true";
-    }
+  if (categoryId) {
+    const events = await eventModel
+      .find()
+      .populate({
+        path: "eventSubCategoryId",
+        match: { categoryId },
+        select: "_id",
+      })
+      .select("_id eventSubCategoryId");
 
-    // Search
-    if (search) {
-        filter.$or = [
-            {
-                videosOrImageUrlType: {
-                    $regex: search,
-                    $options: "i"
-                }
-            }
-        ];
-    }
+    filter.eventId = {
+      $in: events
+        .filter((item) => item.eventSubCategoryId)
+        .map((item) => item._id),
+    };
+  }
 
-    const skip = (Number(page) - 1) * Number(limit);
+  // Media Type Filter
+  if (mediaType) {
+    filter.videosOrImageUrlType = mediaType;
+  }
 
-    const media = await mediaModel
-        .find(filter)
-        .populate({
-            path: "eventId",
-            select: "brideName groomName location status eventDate",
-            populate: [
-                {
-                    path: "userId",
-                    select: "name email phoneNumber"
-                },
-                {
-                    path: "eventSubCategoryId",
-                    select: "name description categoryId",
-                    populate: {
-                        path: "categoryId",
-                        select: "name"
-                    }
-                }
-            ]
-        })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
+  // Download Permission Filter
+  if (isDownloadable !== undefined) {
+    filter.isDownloadable = isDownloadable === "true";
+  }
 
-    const totalRecords = await mediaModel.countDocuments(filter);
+  // Active Status Filter
+  if (isActive !== undefined) {
+    filter.isActive = isActive === "true";
+  }
 
-    res.status(200).json({
-        success: true,
-        message: "Media fetched successfully",
-        data: media,
-        totalRecords,
-        currentPage: Number(page),
-        totalPages: Math.ceil(totalRecords / Number(limit)),
-    });
+  // Search
+  if (search) {
+    filter.$or = [
+      {
+        videosOrImageUrlType: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
+  }
 
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const media = await mediaModel
+    .find(filter)
+    .populate({
+      path: "eventId",
+      select: "brideName groomName location status eventDate",
+      populate: [
+        {
+          path: "userId",
+          select: "name email phoneNumber",
+        },
+        {
+          path: "eventSubCategoryId",
+          select: "name description categoryId",
+          populate: {
+            path: "categoryId",
+            select: "name",
+          },
+        },
+      ],
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
+
+  const totalRecords = await mediaModel.countDocuments(filter);
+
+  res.status(200).json({
+    success: true,
+    message: "Media fetched successfully",
+    data: media,
+    totalRecords,
+    currentPage: Number(page),
+    totalPages: Math.ceil(totalRecords / Number(limit)),
+  });
 });
 
 export const deleteMedia = asyncHandler(async (req, res) => {
+  const { mediaId } = req.body;
 
-    const { mediaId } = req.body;
+  if (!mediaId) {
+    return res.status(400).json({
+      success: false,
+      message: "mediaId is required",
+    });
+  }
 
-    if (!mediaId) {
-        return res.status(400).json({
-            success: false,
-            message: "mediaId is required"
-        });
-    }
+  const media = await mediaModel.findById(mediaId);
 
-    const media = await mediaModel.findById(mediaId);
+  if (!media) {
+    return res.status(404).json({
+      success: false,
+      message: "Media not found",
+    });
+  }
 
-    if (!media) {
-        return res.status(404).json({
-            success: false,
-            message: "Media not found"
-        });
-    }
+  // Delete Media File from Cloudinary
+  if (media.publicId) {
+    await deleteFromCloudinary(
+      media.publicId,
+      media.videosOrImageUrlType === "Video" ? "video" : "image",
+    );
+  }
 
-    // Delete Media File from Cloudinary
-    if (media.publicId) {
-        await deleteFromCloudinary(
-            media.publicId,
-            media.videosOrImageUrlType === "Video"
-                ? "video"
-                : "image"
-        );
-    }
-
-    // Check if thumbnail is used by another media
-    if (media.thumbnailPublicId) {
-
-        const thumbnailUsed = await mediaModel.countDocuments({
-            thumbnailPublicId: media.thumbnailPublicId,
-            _id: { $ne: media._id }
-        });
-
-        if (thumbnailUsed === 0) {
-            await deleteFromCloudinary(
-                media.thumbnailPublicId,
-                "image"
-            );
-        }
-    }
-
-    await media.deleteOne();
-
-    res.status(200).json({
-        success: true,
-        message: "Media deleted successfully"
+  // Check if thumbnail is used by another media
+  if (media.thumbnailPublicId) {
+    const thumbnailUsed = await mediaModel.countDocuments({
+      thumbnailPublicId: media.thumbnailPublicId,
+      _id: { $ne: media._id },
     });
 
+    if (thumbnailUsed === 0) {
+      await deleteFromCloudinary(media.thumbnailPublicId, "image");
+    }
+  }
+
+  await media.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Media deleted successfully",
+  });
 });
 
 // export const createMedia = asyncHandler(async (req, res) => {

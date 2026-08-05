@@ -205,11 +205,17 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   }
 
   const skip = (Number(page) - 1) * Number(limit);
-
   const events = await eventModel
     .find(filter)
     .populate("userId", "name email phoneNumber")
-    .populate("eventSubCategoryId", "name")
+    .populate({
+      path: "eventSubCategoryId",
+      select: "name categoryId",
+      populate: {
+        path: "categoryId",
+        select: "name",
+      },
+    })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(Number(limit));

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, Link } from "react-router-dom";
 import {
   FaArrowLeft,
   FaDownload,
@@ -6,197 +8,297 @@ import {
   FaImage,
   FaVideo,
   FaSearch,
+  FaCompress,
+  FaExpand,
+  FaInfoCircle,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
-
-const media = [
-  {
-    id: 1,
-    type: "Image",
-    url: "https://picsum.photos/600/600?1",
-  },
-  {
-    id: 2,
-    type: "Video",
-    url: "https://picsum.photos/600/600?2",
-  },
-  {
-    id: 3,
-    type: "Image",
-    url: "https://picsum.photos/600/600?3",
-  },
-  {
-    id: 4,
-    type: "Image",
-    url: "https://picsum.photos/600/600?4",
-  },
-  {
-    id: 5,
-    type: "Video",
-    url: "https://picsum.photos/600/600?5",
-  },
-  {
-    id: 6,
-    type: "Image",
-    url: "https://picsum.photos/600/600?6",
-  },
-];
+import { getMediaById, toggleDownload, toggleMediaActive, deleteMedia, updateMedia } from "../../app/media/mediaThunk";
 
 const AdminAlbumDetailsPage = () => {
-  const [filter, setFilter] = useState("All");
+  const dispatch = useDispatch();
+  const { id } = useParams();
+  const { media, loading } = useSelector((state) => state.media);
 
-  const filteredMedia =
-    filter === "All"
-      ? media
-      : media.filter((item) => item.type === filter);
+  const [search, setSearch] = useState("");
+  const [zoomed, setZoomed] = useState(false);
+  const [videoSize, setVideoSize] = useState("medium");
+  const [newMediaFile, setNewMediaFile] = useState(null);
+  const [newThumbnail, setNewThumbnail] = useState(null);
+  const [newDownloadable, setNewDownloadable] = useState(false);
+  const [newActive, setNewActive] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(getMediaById(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (media) {
+      setNewDownloadable(media.isDownloadable);
+      setNewActive(media.isActive);
+    }
+  }, [media]);
+
+  const handleToggleDownload = async () => {
+    if (!media?._id) return;
+    await dispatch(toggleDownload(media._id));
+    dispatch(getMediaById(media._id));
+  };
+
+  const handleToggleActive = async () => {
+    if (!media?._id) return;
+    await dispatch(toggleMediaActive(media._id));
+    dispatch(getMediaById(media._id));
+  };
+
+  const handleDelete = async () => {
+    if (!media?._id) return;
+    await dispatch(deleteMedia(media._id));
+  };
+
+  const handleUpdateMedia = async () => {
+    if (!media?._id) return;
+
+    const formData = new FormData();
+    formData.append("mediaId", media._id);
+    formData.append("isDownloadable", newDownloadable);
+    formData.append("isActive", newActive);
+
+    if (newMediaFile) {
+      formData.append("mediaFile", newMediaFile);
+    }
+    if (newThumbnail) {
+      formData.append("thumbnail", newThumbnail);
+    }
+
+    await dispatch(updateMedia(formData));
+    dispatch(getMediaById(media._id));
+  };
+
+  const eventLabel = (item) => {
+    const event = item?.eventId;
+    if (!event) return "No event";
+    const names = [event.brideName, event.groomName].filter(Boolean).join(" & ");
+    return names || event.location || "Unnamed event";
+  };
+
+  const objectFitClass =
+    videoSize === "small"
+      ? "h-56"
+      : videoSize === "medium"
+      ? "h-80"
+      : "h-[420px]";
 
   return (
     <div className="space-y-8">
-
-      {/* Header */}
-
       <div className="flex flex-col lg:flex-row justify-between gap-5">
-
         <div>
-
           <Link
             to="/admin/albums"
             className="text-purple-600 font-semibold flex items-center gap-2 mb-3"
           >
-            <FaArrowLeft />
-
-            Back
-
+            <FaArrowLeft /> Back
           </Link>
-
-          <h1 className="text-3xl font-bold">
-            Rahul & Priya Wedding
-          </h1>
-
+          <h1 className="text-3xl font-bold">{eventLabel(media)}</h1>
           <p className="text-gray-500 mt-2">
-            Uploaded by Rahul Kumar • 25 June 2026
+            {media?.eventId?.location}
+            {media?.eventId?.eventDate
+              ? ` • ${new Date(media.eventId.eventDate).toLocaleDateString()}`
+              : ""}
           </p>
-
         </div>
 
         <div className="relative w-full lg:w-80">
-
           <FaSearch className="absolute left-4 top-4 text-gray-400" />
-
           <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             type="text"
-            placeholder="Search media..."
+            placeholder="Search in media..."
             className="w-full border rounded-xl py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-purple-500"
           />
-
         </div>
-
       </div>
 
-      {/* Filter */}
-
-      <div className="flex gap-3 flex-wrap">
-
-        <button
-          onClick={() => setFilter("All")}
-          className={`px-5 py-2 rounded-xl ${
-            filter === "All"
-              ? "bg-purple-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          All
-        </button>
-
-        <button
-          onClick={() => setFilter("Image")}
-          className={`px-5 py-2 rounded-xl ${
-            filter === "Image"
-              ? "bg-purple-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          Images
-        </button>
-
-        <button
-          onClick={() => setFilter("Video")}
-          className={`px-5 py-2 rounded-xl ${
-            filter === "Video"
-              ? "bg-purple-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          Videos
-        </button>
-
-      </div>
-
-      {/* Grid */}
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-
-        {filteredMedia.map((item) => (
-
-          <div
-            key={item.id}
-            className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-xl transition"
-          >
-
-            <div className="relative">
-
-              <img
-                src={item.url}
-                alt=""
-                className="w-full h-60 object-cover"
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white shadow rounded-2xl overflow-hidden">
+          <div className="relative bg-black">
+            {media?.videosOrImageUrlType === "Video" ? (
+              <video
+                src={media.videosOrImageUrl}
+                controls
+                className={`w-full object-cover ${objectFitClass}`}
               />
+            ) : (
+              <img
+                src={media?.videosOrImageUrl}
+                alt={eventLabel(media)}
+                className={`w-full object-contain ${
+                  zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+                } ${zoomed ? "h-[720px]" : "h-[420px]"}`}
+                onClick={() => setZoomed((prev) => !prev)}
+              />
+            )}
 
-              <span className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
-
-                {item.type === "Image" ? (
-                  <>
-                    <FaImage /> Image
-                  </>
-                ) : (
-                  <>
-                    <FaVideo /> Video
-                  </>
-                )}
-
-              </span>
-
-            </div>
-
-            <div className="p-4">
-
-              <div className="flex justify-between">
-
-                <button className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-lg">
-
-                  <FaDownload />
-
-                  Download
-
+            <div className="absolute top-3 right-3 flex items-center gap-2">
+              {media?.videosOrImageUrlType === "Video" ? (
+                <button
+                  onClick={() =>
+                    setVideoSize((prev) =>
+                      prev === "small"
+                        ? "medium"
+                        : prev === "medium"
+                        ? "large"
+                        : "small"
+                    )
+                  }
+                  className="bg-white/90 text-gray-700 rounded-full p-2 shadow"
+                  title="Toggle video size"
+                >
+                  {videoSize === "large" ? <FaCompress /> : <FaExpand />}
                 </button>
-
-                <button className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg">
-
-                  <FaTrash />
-
-                  Delete
-
+              ) : (
+                <button
+                  onClick={() => setZoomed((prev) => !prev)}
+                  className="bg-white/90 text-gray-700 rounded-full p-2 shadow"
+                  title={zoomed ? "Zoom out" : "Zoom in"}
+                >
+                  {zoomed ? <FaCompress /> : <FaExpand />}
                 </button>
-
-              </div>
-
+              )}
             </div>
-
           </div>
 
-        ))}
+          {loading && (
+            <div className="p-6 text-gray-500">Loading media...</div>
+          )}
 
+          {!loading && !media && (
+            <div className="p-6 text-center text-gray-500">
+              Media not found.
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow p-6 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-purple-100 text-purple-700 p-3">
+              <FaInfoCircle />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Media Type</p>
+              <p className="font-semibold">{media?.videosOrImageUrlType || "N/A"}</p>
+            </div>
+          </div>
+
+          <div className="space-y-3 text-sm text-gray-600">
+            <div>
+              <p className="text-gray-500">Download Permission</p>
+              <p className="font-semibold">
+                {media?.isDownloadable ? "Enabled" : "Disabled"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Event</p>
+              <p className="font-semibold">{eventLabel(media)}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Sub Category</p>
+              <p className="font-semibold">
+                {media?.eventId?.eventSubCategoryId?.name || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-gray-500">Category</p>
+              <p className="font-semibold">
+                {media?.eventId?.eventSubCategoryId?.categoryId?.name || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold text-gray-700">
+              Update Media File
+            </label>
+            <input
+              type="file"
+              accept="image/*,video/*"
+              onChange={(e) => setNewMediaFile(e.target.files?.[0] || null)}
+              className="w-full border rounded-xl p-3"
+            />
+
+            <label className="block text-sm font-semibold text-gray-700">
+              Update Thumbnail
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setNewThumbnail(e.target.files?.[0] || null)}
+              className="w-full border rounded-xl p-3"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={newDownloadable}
+                  onChange={(e) => setNewDownloadable(e.target.checked)}
+                />
+                Downloadable
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={newActive}
+                  onChange={(e) => setNewActive(e.target.checked)}
+                />
+                Active
+              </label>
+            </div>
+
+            <button
+              onClick={handleUpdateMedia}
+              className="w-full rounded-xl bg-blue-600 text-white py-3 hover:bg-blue-700 transition"
+            >
+              Save Updates
+            </button>
+            <button
+              onClick={handleToggleDownload}
+              className="w-full rounded-xl bg-purple-600 text-white py-3 hover:bg-purple-700 transition"
+            >
+              {media?.isDownloadable ? "Disable Download" : "Enable Download"}
+            </button>
+            <button
+              onClick={handleToggleActive}
+              className={`w-full rounded-xl py-3 transition ${
+                media?.isActive
+                  ? "bg-orange-500 text-white hover:bg-orange-600"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+            >
+              {media?.isActive ? "Deactivate Media" : "Activate Media"}
+            </button>
+            <button
+              onClick={handleDelete}
+              className="w-full rounded-xl bg-red-600 text-white py-3 hover:bg-red-700 transition"
+            >
+              Delete Media
+            </button>
+            <a
+              href={media?.videosOrImageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full inline-flex justify-center items-center gap-2 rounded-xl border border-gray-200 text-gray-700 py-3 hover:bg-gray-50 transition"
+            >
+              <FaDownload /> Open in new tab
+            </a>
+          </div>
+        </div>
       </div>
-
     </div>
   );
 };

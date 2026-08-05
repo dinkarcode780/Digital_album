@@ -348,6 +348,11 @@ const AppRoutes = () => {
             />
 
             <Route
+              path="/admin/media/:id"
+              element={<AdminAlbumDetailsPage />}
+            />
+
+            <Route
               path="/admin/events"
               element={<EventPage />}
             />
