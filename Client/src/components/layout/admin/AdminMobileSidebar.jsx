@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaTimes,
@@ -93,15 +94,15 @@ const AdminMobileSidebar = ({ isOpen, onClose }) => {
   const { admin } = useSelector((state) => state.admin);
 
   const dispatch = useDispatch();
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleLogout = async () => {
-  const result = await dispatch(adminLogout());
+  const handleLogout = async () => {
+    const result = await dispatch(adminLogout());
 
-  if (adminLogout.fulfilled.match(result)) {
-    navigate("/");
-  }
-};
+    if (adminLogout.fulfilled.match(result)) {
+      navigate("/");
+    }
+  };
   return (
     <>
       {/* Overlay */}
@@ -123,11 +124,11 @@ const handleLogout = async () => {
         {/* Header */}
 
         <div className="flex justify-between items-center p-5 border-b">
-          <div>
+          <Link to="/admin/dashboard" className="cursor-pointer">
             <h2 className="text-2xl font-bold text-purple-600">Album Studio</h2>
 
             <p className="text-sm text-gray-500">Admin Panel</p>
-          </div>
+          </Link>
 
           <button onClick={onClose}>
             <FaTimes size={22} />
@@ -138,14 +139,18 @@ const handleLogout = async () => {
 
         <div className="p-5 border-b">
           <img
-          src={admin?.profileImage || "https://i.pravatar.cc/100?img=12"}
-          alt={admin?.name || "Admin"}
-          className="w-16 h-16 rounded-full object-cover"
-        />
+            src={admin?.profileImage || "https://i.pravatar.cc/100?img=12"}
+            alt={admin?.name || "Admin"}
+            className="w-16 h-16 rounded-full object-cover"
+          />
 
-          <h3 className="font-semibold mt-3">{admin?.name || "Dinkar Paswan"}</h3>
+          <h3 className="font-semibold mt-3">
+            {admin?.name || "Dinkar Paswan"}
+          </h3>
 
-          <p className="text-sm text-gray-500">{admin?.userType || "Super Admin"}</p>
+          <p className="text-sm text-gray-500">
+            {admin?.userType || "Super Admin"}
+          </p>
         </div>
 
         {/* Menu */}
@@ -239,6 +244,7 @@ const handleLogout = async () => {
                       </NavLink>
 
                       <NavLink
+                        onClick={onClose}
                         to="/admin/events"
                         className={({ isActive }) =>
                           `flex items-center gap-3 px-4 py-3 rounded-lg ${
@@ -282,7 +288,7 @@ const handleLogout = async () => {
                         Upload Media
                       </NavLink>
 
-                      <NavLink
+                      {/* <NavLink
                         to="/admin/albums"
                         onClick={onClose}
                         className={({ isActive }) =>
@@ -295,7 +301,7 @@ const handleLogout = async () => {
                       >
                         <FaImages />
                         Albums
-                      </NavLink>
+                      </NavLink> */}
 
                       <NavLink
                         to="/admin/admininvite"
@@ -311,7 +317,6 @@ const handleLogout = async () => {
                         <FaUserPlus />
                         Invites
                       </NavLink>
-
                     </div>
                   )}
                 </div>
@@ -323,14 +328,14 @@ const handleLogout = async () => {
         {/* Logout */}
 
         <div className="border-t p-4">
-         <button
-  onClick={handleLogout}
-  disabled={loading}
-  className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex items-center justify-center gap-3 transition disabled:opacity-50"
->
-  <FaSignOutAlt />
-  {loading ? "Logging out..." : "Logout"}
-</button>
+          <button
+            onClick={handleLogout}
+            disabled={loading}
+            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex items-center justify-center gap-3 transition disabled:opacity-50"
+          >
+            <FaSignOutAlt />
+            {loading ? "Logging out..." : "Logout"}
+          </button>
         </div>
       </div>
     </>

@@ -130,6 +130,52 @@ export const userUpdateProfile = asyncHandler(async (req, res) => {
   });
 });
 
+export const userChangePassword = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Current password and new password are required",
+    });
+  }
+
+  const user = await userModel.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  const isMatch = await compareValue(currentPassword, user.password);
+
+  if (!isMatch) {
+    return res.status(400).json({
+      success: false,
+      message: "Current password is incorrect",
+    });
+  }
+
+  const hashPassword = await hashValue(newPassword);
+  user.password = hashPassword;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Password changed successfully",
+  });
+});
+
 export const getUserById = asyncHandler(async (req, res) => {
   const { userId } = req.query;
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { FaBars, FaBell, FaSearch, FaEnvelope } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminHeader = ({ setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -19,13 +19,13 @@ const AdminHeader = ({ setSidebarOpen }) => {
             <FaBars />
           </button>
 
-          <div>
+          <Link to="/admin/dashboard" className="cursor-pointer">
             <h2 className="text-2xl font-bold">Dashboard</h2>
 
             <p className="text-sm text-gray-500">
               Welcome back, {admin?.name || "Admin"} 👋
             </p>
-          </div>
+          </Link>
         </div>
 
         {/* Search */}

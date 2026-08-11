@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaCalendarCheck,
@@ -104,11 +104,11 @@ const AdminSidebar = () => {
       {/* Logo */}
 
       <div className="h-20 border-b flex items-center justify-center">
-        <div>
+        <Link to="/admin/dashboard">
           <h1 className="text-3xl font-bold text-purple-600">Album Studio</h1>
 
           <p className="text-sm text-gray-500 text-center">Admin Panel</p>
-        </div>
+        </Link>
       </div>
 
       {/* Profile */}

@@ -91,6 +91,27 @@ export const userUpdateProfile = createAsyncThunk(
   }
 );
 
+export const userChangePassword = createAsyncThunk(
+  "user/userChangePassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        "/users/userChangePassword",
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
+    }
+  }
+);
+
 // ======================= Get User By Id =======================
 
 export const getUserById = createAsyncThunk(

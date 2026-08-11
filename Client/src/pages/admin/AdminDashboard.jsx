@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   FaUsers,
   FaCalendarCheck,
@@ -9,15 +11,74 @@ import {
   FaCamera,
   FaArrowRight,
 } from "react-icons/fa";
+import { getUserByFilter } from "../../app/auth/authThunk";
+import { getMediaByFilter } from "../../app/media/mediaThunk";
 
 const AdminDashboard = () => {
-  const stats = [
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAlbums: 0,
+    totalImages: 0,
+    totalVideos: 0,
+  });
+
+  const [showAlbumDetails, setShowAlbumDetails] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardCounts = async () => {
+      try {
+        const usersResult = await dispatch(
+          getUserByFilter({ page: 1, limit: "All" }),
+        ).unwrap();
+
+        const albumsResult = await dispatch(
+          getMediaByFilter({ page: 1, limit: "All" }),
+        ).unwrap();
+
+        const imagesResult = await dispatch(
+          getMediaByFilter({
+            page: 1,
+            limit: "All",
+            mediaType: "Image",
+          }),
+        ).unwrap();
+
+        const videosResult = await dispatch(
+          getMediaByFilter({
+            page: 1,
+            limit: "All",
+            mediaType: "Video",
+          }),
+        ).unwrap();
+
+        setStats({
+          totalUsers: usersResult.totalUsers || 0,
+          totalAlbums: albumsResult.totalRecords || 0,
+          totalImages: imagesResult.totalRecords || 0,
+          totalVideos: videosResult.totalRecords || 0,
+        });
+      } catch (error) {
+        console.error("Dashboard stats fetch failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardCounts();
+  }, [dispatch]);
+
+  const cardData = [
     {
       title: "Total Users",
-      value: "1,248",
+      value: loading ? "Loading..." : stats.totalUsers,
       icon: <FaUsers />,
       bg: "bg-blue-100",
       color: "text-blue-600",
+      path: "/admin/users",
     },
     {
       title: "Bookings",
@@ -28,10 +89,12 @@ const AdminDashboard = () => {
     },
     {
       title: "Albums",
-      value: "192",
+      value: loading ? "Loading..." : stats.totalAlbums,
       icon: <FaImages />,
       bg: "bg-purple-100",
       color: "text-purple-600",
+      hasDropdown: true,
+      path: "/admin/albums",
     },
     {
       title: "Revenue",
@@ -75,129 +138,94 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-
-      {/* Welcome */}
-
       <div className="rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white">
-
-        <h1 className="text-4xl font-bold">
-          Welcome Admin 👋
-        </h1>
-
+        <h1 className="text-4xl font-bold">Welcome Admin 👋</h1>
         <p className="mt-3 text-purple-100">
           Manage bookings, events, users and albums from one dashboard.
         </p>
-
       </div>
-
-      {/* Stats */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        {stats.map((item, index) => (
-
+        {cardData.map((item, index) => (
           <div
             key={index}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-xl duration-300 p-6 flex justify-between items-center"
+            onClick={() => item.path && navigate(item.path)}
+            className={`bg-white rounded-2xl shadow-sm hover:shadow-xl duration-300 p-6 flex flex-col justify-between ${
+              item.path ? "cursor-pointer hover:bg-gray-50" : ""
+            }`}
           >
-
-            <div>
-
-              <p className="text-gray-500">
-                {item.title}
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {item.value}
-              </h2>
-
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-gray-500">{item.title}</p>
+                <h2 className="text-3xl font-bold mt-2">{item.value}</h2>
+              </div>
+              <div
+                className={`w-16 h-16 rounded-2xl flex justify-center items-center text-3xl ${item.bg} ${item.color}`}
+              >
+                {item.icon}
+              </div>
             </div>
 
-            <div
-              className={`w-16 h-16 rounded-2xl flex justify-center items-center text-3xl ${item.bg} ${item.color}`}
-            >
-              {item.icon}
-            </div>
+            {item.hasDropdown && (
+              <div className="mt-5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAlbumDetails((prev) => !prev);
+                  }}
+                  className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                >
+                  {showAlbumDetails ? "Hide album details" : "Show album details"}
+                </button>
 
+                {showAlbumDetails && (
+                  <div className="mt-3 rounded-2xl bg-purple-50 p-4 text-sm text-gray-700">
+                    <div className="flex justify-between">
+                      <span>Images</span>
+                      <strong>{stats.totalImages}</strong>
+                    </div>
+                    <div className="flex justify-between mt-2">
+                      <span>Videos</span>
+                      <strong>{stats.totalVideos}</strong>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-
         ))}
-
       </div>
 
-      {/* Main */}
-
       <div className="grid lg:grid-cols-3 gap-8">
-
-        {/* Recent Bookings */}
-
         <div className="lg:col-span-2 bg-white rounded-2xl shadow p-6">
-
           <div className="flex justify-between items-center mb-6">
-
-            <h2 className="text-2xl font-bold">
-              Recent Bookings
-            </h2>
-
+            <h2 className="text-2xl font-bold">Recent Bookings</h2>
             <button className="text-purple-600 flex items-center gap-2">
-
               View All
-
               <FaArrowRight />
-
             </button>
-
           </div>
 
           <div className="overflow-x-auto">
-
             <table className="w-full">
-
               <thead>
-
                 <tr className="border-b">
-
                   <th className="text-left py-3">Booking ID</th>
-
                   <th className="text-left py-3">Customer</th>
-
                   <th className="text-left py-3">Event</th>
-
                   <th className="text-left py-3">Date</th>
-
                   <th className="text-left py-3">Status</th>
-
                 </tr>
-
               </thead>
-
               <tbody>
-
                 {bookings.map((booking) => (
-
-                  <tr
-                    key={booking.id}
-                    className="border-b hover:bg-gray-50"
-                  >
-
-                    <td className="py-4">
-                      {booking.id}
-                    </td>
-
+                  <tr key={booking.id} className="border-b hover:bg-gray-50">
+                    <td className="py-4">{booking.id}</td>
+                    <td>{booking.customer}</td>
+                    <td>{booking.event}</td>
+                    <td>{booking.date}</td>
                     <td>
-                      {booking.customer}
-                    </td>
-
-                    <td>
-                      {booking.event}
-                    </td>
-
-                    <td>
-                      {booking.date}
-                    </td>
-
-                    <td>
-
                       <span
                         className={`px-3 py-1 rounded-full text-sm ${
                           booking.status === "Confirmed"
@@ -207,110 +235,50 @@ const AdminDashboard = () => {
                       >
                         {booking.status}
                       </span>
-
                     </td>
-
                   </tr>
-
                 ))}
-
               </tbody>
-
             </table>
-
           </div>
-
         </div>
-
-        {/* Right */}
 
         <div className="space-y-6">
-
-          {/* Today's Events */}
-
           <div className="bg-white rounded-2xl shadow p-6">
-
-            <h2 className="text-xl font-bold mb-5">
-              Today's Events
-            </h2>
-
+            <h2 className="text-xl font-bold mb-5">Today's Events</h2>
             <div className="space-y-4">
-
               {events.map((event, index) => (
-
-                <div
-                  key={index}
-                  className="flex items-center gap-4"
-                >
-
+                <div key={index} className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-purple-100 flex justify-center items-center">
-
                     <FaCamera className="text-purple-600" />
-
                   </div>
-
-                  <p>
-                    {event}
-                  </p>
-
+                  <p>{event}</p>
                 </div>
-
               ))}
-
             </div>
-
           </div>
-
-          {/* Booking Status */}
 
           <div className="bg-white rounded-2xl shadow p-6">
-
-            <h2 className="text-xl font-bold mb-5">
-              Booking Status
-            </h2>
-
+            <h2 className="text-xl font-bold mb-5">Booking Status</h2>
             <div className="space-y-5">
-
               <div className="flex justify-between">
-
                 <span className="flex items-center gap-2">
-
                   <FaClock className="text-yellow-500" />
-
                   Pending
-
                 </span>
-
-                <strong>
-                  21
-                </strong>
-
+                <strong>21</strong>
               </div>
-
               <div className="flex justify-between">
-
                 <span className="flex items-center gap-2">
-
                   <FaCheckCircle className="text-green-600" />
-
                   Confirmed
-
                 </span>
-
-                <strong>
-                  48
-                </strong>
-
+                <strong>48</strong>
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 };

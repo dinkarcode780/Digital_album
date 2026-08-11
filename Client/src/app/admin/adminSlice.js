@@ -65,8 +65,10 @@ const adminSlice = createSlice({
       .addCase(adminLogin.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
-        state.error = action.payload;
-        state.message = action.payload?.message;
+        state.error =
+          action.payload?.message ||
+          (typeof action.payload === "string" ? action.payload : "Something went wrong");
+        state.message = action.payload?.message || state.error;
       })
       
       // ================= Update Profile =================

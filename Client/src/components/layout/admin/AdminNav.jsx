@@ -77,7 +77,7 @@ const AdminNav = ({ setSidebarOpen }) => {
               className="w-11 h-11 rounded-full border object-cover"
             />
 
-            <div className="hidden md:block">
+            <Link to="/admin/profile" className="hidden md:block">
 
               <h3 className="font-semibold">
                 {admin?.name || "Dinkar Paswan"}
@@ -87,7 +87,7 @@ const AdminNav = ({ setSidebarOpen }) => {
                 {admin?.userType || "Super Admin"}
               </p>
 
-            </div>
+            </Link>
 
           </div>
 

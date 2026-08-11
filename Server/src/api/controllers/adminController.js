@@ -34,7 +34,7 @@ export const adminLogin = asyncHandler(async(req,res)=>{
     }
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "1d",
     });
 
     admin._doc.token = token;

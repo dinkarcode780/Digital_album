@@ -11,6 +11,7 @@ import {
   userForgetPassword,
   userLogout,
   userResetPassword,
+  userChangePassword,
 } from "./authThunk";
 
 const initialState = {
@@ -107,6 +108,26 @@ const authSlice = createSlice({
       })
 
       .addCase(userUpdateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.message || "Something went wrong";
+      });
+
+    // ================= Change Password =================
+
+    builder
+      .addCase(userChangePassword.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+
+      .addCase(userChangePassword.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+      })
+
+      .addCase(userChangePassword.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload?.message || "Something went wrong";

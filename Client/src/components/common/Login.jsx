@@ -42,27 +42,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-     if (loginType === "User") {
-    if (!/^[6-9]\d{9}$/.test(formData.phoneNumber)) {
-      toast.error("Please enter a valid 10-digit mobile number.");
-      return;
+    if (loginType === "User") {
+      if (!/^[6-9]\d{9}$/.test(formData.phoneNumber)) {
+        toast.error("Please enter a valid 10-digit mobile number.");
+        return;
+      }
     }
-  }
 
-    if (loginType === "Admin") {
-      dispatch(
-        adminLogin({
-          email: formData.email,
-          password: formData.password,
-        }),
-      );
-    } else {
-      dispatch(
-        userLogin({
-          phoneNumber: formData.phoneNumber,
-          password: formData.password,
-        }),
-      );
+    const action =
+      loginType === "Admin"
+        ? adminLogin({
+            email: formData.email,
+            password: formData.password,
+          })
+        : userLogin({
+            phoneNumber: formData.phoneNumber,
+            password: formData.password,
+          });
+
+    const result = await dispatch(action);
+
+    if (result.type.endsWith("/rejected")) {
+      const errorMessage =
+        result.payload?.message ||
+        result.payload ||
+        result.error?.message ||
+        "Invalid credentials";
+      toast.error(errorMessage);
     }
   };
 
@@ -254,17 +260,19 @@ const Login = () => {
               </Link>
             </div>
 
-            {loginType === "Admin"
-              ? adminState.error && (
-                  <p className="text-red-500 text-sm text-center">
-                    {adminState.error}
-                  </p>
-                )
-              : userState.error && (
-                  <p className="text-red-500 text-sm text-center">
-                    {userState.error}
-                  </p>
-                )}
+            {loginType === "Admin" ? (
+              adminState.error && (
+                <p className="text-red-500 text-sm text-center">
+                  {adminState.error}
+                </p>
+              )
+            ) : (
+              userState.error && (
+                <p className="text-red-500 text-sm text-center">
+                  {userState.error}
+                </p>
+              )
+            )}
 
             {/* Login */}
 

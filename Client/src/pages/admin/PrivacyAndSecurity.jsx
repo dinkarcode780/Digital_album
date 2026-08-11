@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import {
   FaLock,
   FaShieldAlt,
@@ -6,8 +8,11 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import { userChangePassword } from "../../app/auth/authThunk";
 
 const PrivacyAndSecurity = () => {
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -23,12 +28,56 @@ const PrivacyAndSecurity = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const validatePassword = () => {
+    const { currentPassword, newPassword, confirmPassword } = formData;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields.");
+      return false;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters.");
+      return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New password and confirmation do not match.");
+      return false;
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error("New password must be different from current password.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    if (!validatePassword()) {
+      return;
+    }
 
-    alert("Password Updated Successfully");
+    const result = await dispatch(
+      userChangePassword({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      }),
+    );
+
+    if (userChangePassword.fulfilled.match(result)) {
+      toast.success(result.payload.message || "Password updated successfully.");
+      setFormData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } else {
+      toast.error(result.payload?.message || "Unable to change password.");
+    }
   };
 
   return (
@@ -120,6 +169,7 @@ const PrivacyAndSecurity = () => {
             <label className="font-semibold">
               New Password
             </label>
+
 
             <div className="relative mt-2">
 

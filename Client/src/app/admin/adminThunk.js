@@ -1,11 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../../../src/config/axios";
+import axiosInstance from "../../config/axios";
 
 export const adminLogin = createAsyncThunk(
   "admin/adminLogin",
   async (loginData, { rejectWithValue }) => {
     try {
-
       const response = await axiosInstance.post(
         "/admin/adminLogin",
         loginData
@@ -24,14 +23,12 @@ export const adminLogin = createAsyncThunk(
       return response.data;
 
     } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong";
 
-      return rejectWithValue(
-        error.response?.data || {
-          success: false,
-          message: "Something went wrong",
-        }
-      );
-
+      return rejectWithValue(message);
     }
   }
 );
