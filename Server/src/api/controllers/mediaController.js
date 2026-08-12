@@ -312,6 +312,7 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
   const {
     search,
     eventId,
+    userId,
     eventSubCategoryId,
     categoryId,
     mediaType,
@@ -322,6 +323,14 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
   } = req.query;
 
   const filter = {};
+
+  // User Filter
+  if (userId) {
+    const userEvents = await eventModel.find({ userId }).select("_id");
+    filter.eventId = {
+      $in: userEvents.map((item) => item._id),
+    };
+  }
 
   // Event Filter
   if (eventId) {

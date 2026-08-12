@@ -1,6 +1,6 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   FaSearch,
   FaImages,
@@ -24,6 +24,10 @@ import { getSubCategoryByFilter } from "../../app/subcategory/subcategoryThunk";
 
 const AdminAlbumPage = () => {
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const urlEventId = searchParams.get("eventId");
+  const urlUserId = searchParams.get("userId");
+
   const { medias = [], pagination = {}, loading } = useSelector(
     (state) => state.media
   );
@@ -39,9 +43,15 @@ const AdminAlbumPage = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [subCategoryFilter, setSubCategoryFilter] = useState("All");
-  const [eventFilter, setEventFilter] = useState("All");
+  const [eventFilter, setEventFilter] = useState(urlEventId || "All");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(12);
+
+  useEffect(() => {
+    if (urlEventId) {
+      setEventFilter(urlEventId);
+    }
+  }, [urlEventId]);
 
   useEffect(() => {
     dispatch(
@@ -85,6 +95,8 @@ const AdminAlbumPage = () => {
 
     if (eventFilter !== "All") {
       params.eventId = eventFilter;
+    } else if (urlUserId) {
+      params.userId = urlUserId;
     } else if (subCategoryFilter !== "All") {
       params.eventSubCategoryId = subCategoryFilter;
     } else if (categoryFilter !== "All") {

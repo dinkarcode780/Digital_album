@@ -208,8 +208,8 @@ const EventPage = () => {
                     </span>
                   </td>
                   <td className="p-4">
-                    <div className="flex justify-center gap-3 flex-wrap">
-                      <button className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center">
+                    <div className="flex justify-center items-center gap-2 whitespace-nowrap">
+                      <button className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white flex items-center justify-center flex-shrink-0">
                         <FaEye />
                       </button>
                       <button

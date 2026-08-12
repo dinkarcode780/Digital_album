@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -288,15 +288,6 @@ const UsersPage = () => {
         </div>
 
       </div>
-
-      {/* =====================================================
-             TABLE STARTS HERE
-             👉 Part 2 se replace karna
-      ===================================================== */}
-
-
-            {/* ================= Users Table ================= */}
-
       <div className="bg-white rounded-2xl shadow overflow-hidden">
         <div className="overflow-x-auto hide-scrollbar">
           <table className="min-w-[1050px] w-full">
@@ -366,7 +357,7 @@ const UsersPage = () => {
                     {/* User */}
 
                     <td className="px-4 py-5 align-middle">
-                      <div className="flex items-center gap-3 min-w-[220px]">
+                      <Link to={`/admin/users/details/${user._id}`} className="flex items-center gap-3 min-w-[220px]">
                         <img
                           src={
                             user.profileImage ||
@@ -385,7 +376,7 @@ const UsersPage = () => {
                             #{user._id.slice(-6)}
                           </p> */}
                         </div>
-                      </div>
+                      </Link>
                     </td>
 
                     {/* Email */}

@@ -1,5 +1,6 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import eventModel from "../../models/eventModel.js";
+import subcategoryModel from "../../models/subCategoryModel.js";
 
 export const createEvent = asyncHandler(async (req, res) => {
   const {
@@ -162,6 +163,7 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   const {
     search,
     userId,
+    categoryId,
     eventSubCategoryId,
     status,
     page = 1,
@@ -171,6 +173,11 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   let filter = {};
   if (userId) {
     filter.userId = userId;
+  }
+
+  if (categoryId) {
+    const subCats = await subcategoryModel.find({ categoryId }).select("_id");
+    filter.eventSubCategoryId = { $in: subCats.map((s) => s._id) };
   }
 
   if (eventSubCategoryId) {
