@@ -20,6 +20,8 @@ import inviteRoute from "./api/routes/inviteRoute.js";
 import aboutRoute from "./api/routes/aboutRoute.js";
 import serviceRoute from "./api/routes/serviceRoute.js";
 import companyRoute from "./api/routes/companyRoute.js";
+import memberRoute from "./api/routes/memberRoute.js";
+import blogRoute from "./api/routes/blogRoute.js";
 
 
 
@@ -48,6 +50,8 @@ app.use("/api",inviteRoute);
 app.use("/api",aboutRoute);
 app.use("/api",serviceRoute)
 app.use("/api",companyRoute);
+app.use("/api",memberRoute);
+app.use("/api",blogRoute);
 
 
 

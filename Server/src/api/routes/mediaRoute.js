@@ -1,7 +1,7 @@
 import express from "express";
 import { createMedia, deleteMedia, getMediaByFilter, getMediaById, iSdownload, toggleMediaActive, updateMedia } from "../controllers/mediaController.js";
 import { upload } from "../middleware/multerS3.js";
-import { isAdmin } from "../middleware/authMiddleware.js";
+import { isAdmin, isUser } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -24,12 +24,12 @@ router.put(
   updateMedia
 );
 
-router.put("/admin/iSdownload",isAdmin,iSdownload);
+router.put("/admin/iSdownload",isAdmin,isUser,iSdownload);
 router.put("/admin/toggleMediaActive", isAdmin, toggleMediaActive);
 
-router.get("/admin/getMediaById",isAdmin,getMediaById);
+router.get("/admin/getMediaById",isAdmin,isUser,getMediaById);
 
-router.get("/admin/getMediaByFilter",isAdmin,getMediaByFilter);
+router.get("/admin/getMediaByFilter",isAdmin,isUser,getMediaByFilter);
 
 router.delete("/admin/deleteMedia",isAdmin,deleteMedia);
 

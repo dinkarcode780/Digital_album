@@ -12,6 +12,12 @@ const serviceSchema = new mongoose.Schema(
       trim: true,
     },
 
+      icon: {
+      type: String,
+      default: "FaCamera",
+      trim: true,
+    },
+
     mediaUrl: {
       type: String,
     },
@@ -23,6 +29,16 @@ const serviceSchema = new mongoose.Schema(
 
     publicId: {
       type: String,
+    },
+
+     isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {
