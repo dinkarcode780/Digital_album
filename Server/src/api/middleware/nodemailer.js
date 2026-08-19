@@ -2,43 +2,73 @@ import dotenv from "dotenv";
 dotenv.config();
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
+const getResetOtpHtml = (otp) => `
+  <div style="font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:auto;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;">
+    <h2 style="color:#2563eb;">Album Studio</h2>
+    <p>Password Reset Request</p>
+    <p>Your password reset code is:</p>
+    <div style="text-align:center;margin:24px 0;">
+      <span style="display:inline-block;padding:12px 30px;font-size:32px;font-weight:bold;letter-spacing:6px;background:#f3f4f6;color:#2563eb;border-radius:8px;border:2px dashed #2563eb;">
+        ${otp}
+      </span>
+    </div>
+    <p style="color:#555;font-size:14px;">This OTP is valid for 15 minutes.</p>
+    <p style="color:#777;font-size:13px;">If you didn't request this, you can ignore this email.</p>
+  </div>
+`;
 
 export const sendResetPasswordEmail = async (email, otp) => {
+  // 1. Resend HTTPS API
+  if (process.env.RESEND_API_KEY) {
+    const senderEmail = process.env.RESEND_FROM || "Album Studio <onboarding@resend.dev>";
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY.trim()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: senderEmail,
+        to: [email],
+        subject: "Password Reset OTP",
+        html: getResetOtpHtml(otp),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(`Resend OTP Error: ${err.message || JSON.stringify(err)}`);
+    }
+    return true;
+  }
+
+  // 2. Nodemailer SMTP
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: (process.env.EMAIL_USER || "").trim(),
+      pass: (process.env.EMAIL_PASSWORD || "").replace(/\s+/g, ""),
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
+  });
+
   const mailOptions = {
     from: `"Album Studio" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Password Reset OTP",
-    html: `
-      <h2>Password Reset OTP</h2>
-      <p>Your password reset code is:</p>
-      <h1 style="letter-spacing: 6px;">${otp}</h1>
-      <p>This OTP is valid for 15 minutes.</p>
-      <p>If you didn't request this, ignore this email.</p>
-    `,
+    html: getResetOtpHtml(otp),
   };
 
   try {
-    console.log("Sending email via Nodemailer SMTP to:", email);
+    console.log("Sending OTP email to:", email);
     const info = await transporter.sendMail(mailOptions);
-    console.log(
-      "Nodemailer sendMail info:",
-      info && info.response ? info.response : info,
-    );
+    console.log("Nodemailer sendMail info:", info?.response || info);
     return true;
   } catch (err) {
     console.error("Nodemailer Error sending to", email, err);
