@@ -1,32 +1,18 @@
-import https from "https";
+import http from "http";
 
 export const sendSmsInvite = (mobile, inviteLink) => {
   return new Promise((resolve, reject) => {
-    const authKey = process.env.MSG91_AUTH_KEY;
-    const flowId = process.env.MSG91_INVITE_FLOW_ID || process.env.MSG91_FLOW_ID;
-
-    if (!authKey || !flowId) {
-      console.warn("MSG91 Auth Key or Flow ID not configured; skipping SMS invite.");
-      return resolve(false);
-    }
-
-    let cleanMobile = String(mobile).replace(/\D/g, "");
-    if (cleanMobile.length === 10) {
-      cleanMobile = `91${cleanMobile}`;
-    }
-
     const options = {
       method: "POST",
       hostname: "api.msg91.com",
       path: "/api/v5/flow/",
       headers: {
-        authkey: authKey,
+        authkey: process.env.MSG91_AUTH_KEY,
         "content-type": "application/json",
       },
-      timeout: 10000,
     };
 
-    const req = https.request(options, (res) => {
+    const req = http.request(options, (res) => {
       let data = "";
 
       res.on("data", (chunk) => {
@@ -34,28 +20,23 @@ export const sendSmsInvite = (mobile, inviteLink) => {
       });
 
       res.on("end", () => {
-        console.log("MSG91 Invite SMS Response:", data);
+        console.log("MSG91:", data);
         resolve(true);
       });
     });
 
-    req.on("timeout", () => {
-      req.destroy();
-      console.error("MSG91 Invite SMS Request timed out.");
-      resolve(false);
-    });
-
     req.on("error", (err) => {
-      console.error("MSG91 Invite SMS Error:", err.message);
-      resolve(false);
+      reject(err);
     });
 
     req.write(
       JSON.stringify({
-        flow_id: flowId,
-        sender: process.env.MSG91_SENDER || "ALBUM",
-        mobiles: cleanMobile,
+        flow_id: process.env.MSG91_FLOW_ID,
+        sender: process.env.MSG91_SENDER,
+        mobiles: `91${mobile}`,
+
         name: "Album Studio",
+
         link: inviteLink,
       })
     );
@@ -63,5 +44,3 @@ export const sendSmsInvite = (mobile, inviteLink) => {
     req.end();
   });
 };
-
-export default sendSmsInvite;

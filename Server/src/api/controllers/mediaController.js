@@ -389,19 +389,7 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
     ];
   }
 
-  const totalRecords = await mediaModel.countDocuments(filter);
-
-  let limitNumber =
-    limit === "All" || limit === "all"
-      ? totalRecords || 1
-      : Number(limit);
-
-  if (!limitNumber || limitNumber <= 0 || isNaN(limitNumber)) {
-    limitNumber = 10;
-  }
-
-  const pageNumber = Number(page) || 1;
-  const skip = (pageNumber - 1) * limitNumber;
+  const skip = (Number(page) - 1) * Number(limit);
 
   const media = await mediaModel
     .find(filter)
@@ -425,18 +413,17 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
     })
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limitNumber);
+    .limit(Number(limit));
+
+  const totalRecords = await mediaModel.countDocuments(filter);
 
   res.status(200).json({
     success: true,
     message: "Media fetched successfully",
     data: media,
     totalRecords,
-    currentPage: pageNumber,
-    totalPages:
-      limit === "All" || limit === "all"
-        ? 1
-        : Math.ceil(totalRecords / limitNumber),
+    currentPage: Number(page),
+    totalPages: Math.ceil(totalRecords / Number(limit)),
   });
 });
 
