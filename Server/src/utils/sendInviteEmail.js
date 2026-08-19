@@ -1,28 +1,50 @@
+import dotenv from "dotenv";
+dotenv.config();
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
+const getTransporter = (port = 465) => {
+  const user = (process.env.EMAIL_USER || "").trim();
+  // Remove any spaces if user pasted 16-character App Password with spaces
+  const pass = (process.env.EMAIL_PASSWORD || "").replace(/\s+/g, "");
+
+  if (port === 465) {
+    return nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
+    });
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
+  });
+};
 
 export const sendInviteEmail = async (email, inviteLink, name = "Guest") => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+  const user = (process.env.EMAIL_USER || "").trim();
+  const pass = (process.env.EMAIL_PASSWORD || "").trim();
+
+  if (!user || !pass) {
+    console.error("EMAIL_USER or EMAIL_PASSWORD missing. EMAIL_USER:", user ? "Set" : "Missing", "EMAIL_PASSWORD:", pass ? "Set" : "Missing");
     throw new Error("EMAIL_USER or EMAIL_PASSWORD environment variable is missing on server");
   }
 
   const mailOptions = {
-    from: `"Album Studio" <${process.env.EMAIL_USER}>`,
+    from: `"Album Studio" <${user}>`,
     to: email,
     subject: "You're Invited to View Your Wedding Album 💍",
 
@@ -73,14 +95,24 @@ export const sendInviteEmail = async (email, inviteLink, name = "Guest") => {
     `,
   };
 
+  // Try Port 465 (SSL) first, then fallback to service: 'gmail' (Port 587)
   try {
-    console.log("Sending invite email to:", email, "name:", name);
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Invite email sent:", info && info.response ? info.response : info);
+    console.log("Attempting to send invite email to:", email, "via Port 465 SSL...");
+    const transporter465 = getTransporter(465);
+    const info = await transporter465.sendMail(mailOptions);
+    console.log("Invite email sent successfully (Port 465):", info?.response || info);
     return true;
-  } catch (err) {
-    console.error("Failed to send invite email to", email, err);
-    throw err;
+  } catch (err465) {
+    console.warn("Port 465 attempt failed:", err465.message, "-> Retrying via Gmail Service fallback...");
+    try {
+      const fallbackTransporter = getTransporter(587);
+      const fallbackInfo = await fallbackTransporter.sendMail(mailOptions);
+      console.log("Invite email sent successfully (Fallback):", fallbackInfo?.response || fallbackInfo);
+      return true;
+    } catch (fallbackErr) {
+      console.error("All email send attempts failed for:", email, fallbackErr.message);
+      throw new Error(fallbackErr.message || err465.message || "Failed to send email");
+    }
   }
 };
 

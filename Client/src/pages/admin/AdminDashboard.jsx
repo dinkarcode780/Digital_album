@@ -31,35 +31,40 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardCounts = async () => {
       try {
-        const usersResult = await dispatch(
-          getUserByFilter({ page: 1, limit: "All" }),
-        ).unwrap();
+        const [usersRes, albumsRes, imagesRes, videosRes] = await Promise.allSettled([
+          dispatch(getUserByFilter({ page: 1, limit: "All" })).unwrap(),
+          dispatch(getMediaByFilter({ page: 1, limit: "All" })).unwrap(),
+          dispatch(getMediaByFilter({ page: 1, limit: "All", mediaType: "Image" })).unwrap(),
+          dispatch(getMediaByFilter({ page: 1, limit: "All", mediaType: "Video" })).unwrap(),
+        ]);
 
-        const albumsResult = await dispatch(
-          getMediaByFilter({ page: 1, limit: "All" }),
-        ).unwrap();
+        const usersResult = usersRes.status === "fulfilled" ? usersRes.value : null;
+        const albumsResult = albumsRes.status === "fulfilled" ? albumsRes.value : null;
+        const imagesResult = imagesRes.status === "fulfilled" ? imagesRes.value : null;
+        const videosResult = videosRes.status === "fulfilled" ? videosRes.value : null;
 
-        const imagesResult = await dispatch(
-          getMediaByFilter({
-            page: 1,
-            limit: "All",
-            mediaType: "Image",
-          }),
-        ).unwrap();
+        const totalUsers =
+          usersResult?.totalUsers ??
+          usersResult?.totalRecords ??
+          (Array.isArray(usersResult?.data) ? usersResult.data.length : 0);
 
-        const videosResult = await dispatch(
-          getMediaByFilter({
-            page: 1,
-            limit: "All",
-            mediaType: "Video",
-          }),
-        ).unwrap();
+        const totalAlbums =
+          albumsResult?.totalRecords ??
+          (Array.isArray(albumsResult?.data) ? albumsResult.data.length : 0);
+
+        const totalImages =
+          imagesResult?.totalRecords ??
+          (Array.isArray(imagesResult?.data) ? imagesResult.data.length : 0);
+
+        const totalVideos =
+          videosResult?.totalRecords ??
+          (Array.isArray(videosResult?.data) ? videosResult.data.length : 0);
 
         setStats({
-          totalUsers: usersResult.totalUsers || 0,
-          totalAlbums: albumsResult.totalRecords || 0,
-          totalImages: imagesResult.totalRecords || 0,
-          totalVideos: videosResult.totalRecords || 0,
+          totalUsers,
+          totalAlbums,
+          totalImages,
+          totalVideos,
         });
       } catch (error) {
         console.error("Dashboard stats fetch failed:", error);

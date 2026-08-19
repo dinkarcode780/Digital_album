@@ -54,7 +54,7 @@ export const inviteUser = asyncHandler(async (req, res) => {
   if (email && !emailSent && !smsSent) {
     return res.status(500).json({
       success: false,
-      message: `Failed to send email invite: ${emailError || "Email service error. Please check EMAIL_USER and EMAIL_PASSWORD in Render environment settings."}`,
+      message: `Failed to send invite: ${emailError || "Email service error. Please check EMAIL_USER and EMAIL_PASSWORD in server environment variables."}`,
     });
   }
 
@@ -62,6 +62,8 @@ export const inviteUser = asyncHandler(async (req, res) => {
     ? "Invite sent successfully via Email and SMS."
     : emailSent
     ? "Invite sent successfully via Email."
+    : smsSent && email && !emailSent
+    ? `Invite sent via SMS, but Email failed (${emailError || "Check EMAIL_USER/EMAIL_PASSWORD on server"}).`
     : smsSent
     ? "Invite sent successfully via SMS."
     : "Invite created successfully.";
