@@ -1,22 +1,34 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 export const sendInviteEmail = async (email, inviteLink, name = "Guest") => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    throw new Error("EMAIL_USER or EMAIL_PASSWORD environment variable is missing on server");
+  }
+
   const mailOptions = {
     from: `"Album Studio" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "You're Invited to View Your Wedding Album 💍",
 
     html: `
-      <div style="font-family:Arial,sans-serif;padding:20px">
-        <h2>Album Studio</h2>
+      <div style="font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:auto;background:#ffffff;border:1px solid #e5e5e5;border-radius:8px;">
+        <h2 style="color:#7e22ce;">Album Studio</h2>
 
         <p>Hello <strong>${name}</strong>,</p>
 
@@ -25,32 +37,37 @@ export const sendInviteEmail = async (email, inviteLink, name = "Guest") => {
         </p>
 
         <p>
-          Click the button below to accept your invitation.
+          Click the button below to accept your invitation:
         </p>
 
-        <a
-          href="${inviteLink}"
-          style="
-            display:inline-block;
-            background:#7e22ce;
-            color:#fff;
-            padding:12px 24px;
-            text-decoration:none;
-            border-radius:6px;
-          "
-        >
-          Accept Invitation
-        </a>
+        <div style="margin:24px 0;">
+          <a
+            href="${inviteLink}"
+            style="
+              display:inline-block;
+              background:#7e22ce;
+              color:#ffffff;
+              padding:12px 28px;
+              text-decoration:none;
+              border-radius:6px;
+              font-weight:bold;
+            "
+          >
+            Accept Invitation
+          </a>
+        </div>
 
-        <p style="margin-top:20px">
-          Or copy this link:
+        <p style="margin-top:20px;color:#555;font-size:14px;">
+          Or copy this link in your browser:
         </p>
 
-        <p>${inviteLink}</p>
+        <p style="word-break:break-all;font-size:13px;color:#7e22ce;">
+          <a href="${inviteLink}">${inviteLink}</a>
+        </p>
 
-        <p>
+        <p style="margin-top:30px;color:#777;font-size:13px;">
           Regards,<br/>
-          Album Studio
+          <strong>Album Studio Team</strong>
         </p>
       </div>
     `,

@@ -25,22 +25,50 @@ export const inviteUser = asyncHandler(async (req, res) => {
     expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
   });
 
-  const inviteLink = `${process.env.CLIENT_URL}/invite/${token}`;
+  const baseUrl = (process.env.CLIENT_URL || "https://digital-album-ten.vercel.app").replace(/\/+$/, "");
+  const inviteLink = `${baseUrl}/invite/${token}`;
 
-   console.log("MSG91_INVITE_FLOW_ID:", process.env.MSG91_INVITE_FLOW_ID);
-  console.log("MSG91_AUTH_KEY:", process.env.MSG91_AUTH_KEY);
+  let emailSent = false;
+  let smsSent = false;
+  let emailError = null;
 
   if (email) {
-    await sendInviteEmail(email, inviteLink);
+    try {
+      await sendInviteEmail(email, inviteLink, name);
+      emailSent = true;
+    } catch (err) {
+      console.error("Invite email failed:", err.message);
+      emailError = err.message;
+    }
   }
 
   if (phoneNumber) {
-    await sendSmsInvite(phoneNumber, inviteLink);
+    try {
+      smsSent = await sendSmsInvite(phoneNumber, inviteLink);
+    } catch (err) {
+      console.error("Invite SMS failed:", err.message);
+    }
   }
+
+  // If email was provided but failed, and SMS also didn't send:
+  if (email && !emailSent && !smsSent) {
+    return res.status(500).json({
+      success: false,
+      message: `Failed to send email invite: ${emailError || "Email service error. Please check EMAIL_USER and EMAIL_PASSWORD in Render environment settings."}`,
+    });
+  }
+
+  const message = emailSent && smsSent
+    ? "Invite sent successfully via Email and SMS."
+    : emailSent
+    ? "Invite sent successfully via Email."
+    : smsSent
+    ? "Invite sent successfully via SMS."
+    : "Invite created successfully.";
 
   res.status(201).json({
     success: true,
-    message: "Invite sent successfully.",
+    message,
     data: invite,
   });
 });
