@@ -1,6 +1,7 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import mediaModel from "../../models/mediaModel.js";
 import eventModel from "../../models/eventModel.js";
+import inviteModel from "../../models/inviteModel.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
@@ -324,8 +325,28 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
 
   const filter = {};
 
-  // User Filter
-  if (userId) {
+  // User Filter: If regular User, ONLY show media of events they own or are invited to
+  if (req.user && req.user.userType === "User") {
+    const userInvites = await inviteModel.find({
+      $or: [
+        ...(req.user.email ? [{ email: req.user.email.toLowerCase() }] : []),
+        ...(req.user.phoneNumber ? [{ phoneNumber: req.user.phoneNumber }] : []),
+      ],
+    }).select("eventId");
+
+    const invitedEventIds = userInvites.map((inv) => inv.eventId).filter(Boolean);
+
+    const allowedEvents = await eventModel.find({
+      $or: [
+        { userId: req.user._id },
+        { _id: { $in: invitedEventIds } },
+      ],
+    }).select("_id");
+
+    filter.eventId = {
+      $in: allowedEvents.map((item) => item._id),
+    };
+  } else if (userId) {
     const userEvents = await eventModel.find({ userId }).select("_id");
     filter.eventId = {
       $in: userEvents.map((item) => item._id),

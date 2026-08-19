@@ -24,12 +24,12 @@ router.put(
   updateMedia
 );
 
-router.put("/admin/iSdownload",isAdmin,isUser,iSdownload);
+router.put("/admin/iSdownload", isUser, iSdownload);
 router.put("/admin/toggleMediaActive", isAdmin, toggleMediaActive);
 
-router.get("/admin/getMediaById",isAdmin,isUser,getMediaById);
+router.get("/admin/getMediaById", isUser, getMediaById);
 
-router.get("/admin/getMediaByFilter",isAdmin,isUser,getMediaByFilter);
+router.get("/admin/getMediaByFilter", isUser, getMediaByFilter);
 
 router.delete("/admin/deleteMedia",isAdmin,deleteMedia);
 

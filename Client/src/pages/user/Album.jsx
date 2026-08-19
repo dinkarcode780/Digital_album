@@ -245,6 +245,7 @@ import {
   FaSpinner,
   FaCalendarAlt,
   FaMapMarkerAlt,
+  FaDownload,
 } from "react-icons/fa";
 import { getAllEventByFilter } from "../../app/event/eventThunk";
 import { getEventCategoryByFilter } from "../../app/category/categoryThunk";
@@ -452,22 +453,54 @@ const Album = () => {
                         <video
                           src={firstMedia.videosOrImageUrl}
                           controls
+                          controlsList={firstMedia.isDownloadable ? undefined : "nodownload"}
+                          disablePictureInPicture={!firstMedia.isDownloadable}
+                          onContextMenu={(e) => !firstMedia.isDownloadable && e.preventDefault()}
                           className="w-full h-56 object-cover"
                         />
                         <span className="absolute top-3 left-3 bg-red-600/90 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 font-medium pointer-events-none z-10">
                           <FaVideo /> Video
                         </span>
+
+                        {firstMedia.isDownloadable && (
+                          <a
+                            href={firstMedia.videosOrImageUrl}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            title="Download Video"
+                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                          >
+                            <FaDownload className="text-xs" />
+                          </a>
+                        )}
                       </div>
                     ) : (
                       <div className="relative h-56 overflow-hidden">
                         <img
                           src={firstMedia.videosOrImageUrl || firstMedia.thumbnail}
                           alt={albumTitle}
+                          onContextMenu={(e) => !firstMedia.isDownloadable && e.preventDefault()}
                           className="w-full h-56 object-cover hover:scale-105 transition duration-500"
                         />
                         <span className="absolute top-3 left-3 bg-purple-600/90 text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 font-medium z-10">
                           <FaImage /> Photo
                         </span>
+
+                        {firstMedia.isDownloadable && (
+                          <a
+                            href={firstMedia.videosOrImageUrl || firstMedia.thumbnail}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            title="Download Photo"
+                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                          >
+                            <FaDownload className="text-xs" />
+                          </a>
+                        )}
                       </div>
                     )
                   ) : (
@@ -512,7 +545,7 @@ const Album = () => {
 
                   <Link
                     to={`/albums/${album._id}`}
-                    state={{ album, albumMediaList }}
+                    state={{ album, albumMediaList: eventMediaList }}
                     className="block w-full mt-5 bg-purple-600 text-white py-2.5 rounded-xl text-center font-semibold hover:bg-purple-700 transition shadow-md hover:shadow-purple-200"
                   >
                     View Album

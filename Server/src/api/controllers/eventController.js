@@ -1,6 +1,7 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import eventModel from "../../models/eventModel.js";
 import subcategoryModel from "../../models/subCategoryModel.js";
+import inviteModel from "../../models/inviteModel.js";
 
 export const createEvent = asyncHandler(async (req, res) => {
   const {
@@ -171,7 +172,23 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   } = req.query;
 
   let filter = {};
-  if (userId) {
+
+  // If the logged in user is a regular User, ONLY show their events (owned or invited)
+  if (req.user && req.user.userType === "User") {
+    const userInvites = await inviteModel.find({
+      $or: [
+        ...(req.user.email ? [{ email: req.user.email.toLowerCase() }] : []),
+        ...(req.user.phoneNumber ? [{ phoneNumber: req.user.phoneNumber }] : []),
+      ],
+    }).select("eventId");
+
+    const invitedEventIds = userInvites.map((inv) => inv.eventId).filter(Boolean);
+
+    filter.$or = [
+      { userId: req.user._id },
+      { _id: { $in: invitedEventIds } },
+    ];
+  } else if (userId) {
     filter.userId = userId;
   }
 
@@ -189,26 +206,18 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   }
 
   if (search) {
-    filter.$or = [
-      {
-        brideName: {
-          $regex: search,
-          $options: "i",
-        },
-      },
-      {
-        groomName: {
-          $regex: search,
-          $options: "i",
-        },
-      },
-      {
-        location: {
-          $regex: search,
-          $options: "i",
-        },
-      },
+    const searchConditions = [
+      { brideName: { $regex: search, $options: "i" } },
+      { groomName: { $regex: search, $options: "i" } },
+      { location: { $regex: search, $options: "i" } },
     ];
+
+    if (filter.$or) {
+      filter.$and = [{ $or: filter.$or }, { $or: searchConditions }];
+      delete filter.$or;
+    } else {
+      filter.$or = searchConditions;
+    }
   }
 
   const skip = (Number(page) - 1) * Number(limit);

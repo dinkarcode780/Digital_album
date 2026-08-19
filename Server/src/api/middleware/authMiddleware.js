@@ -11,7 +11,6 @@ const authMiddleware = (...allowedRoles) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
 
       // Check if user exists in the database
       const user = await userModel.findById(decoded.id);
@@ -23,6 +22,8 @@ const authMiddleware = (...allowedRoles) => {
       if (!user.isActive) {
         return res.status(403).json({ message: 'User account is deactivated' });
       }
+
+      req.user = user;
 
       const userRole = user.userType; // "Admin" or "User"
 

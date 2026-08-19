@@ -14,9 +14,9 @@ router.post("/admin/createSubcategory", isAdmin, createSubCategory);
 
 router.put("/admin/updateSubCategory", isAdmin, updateSubCategory);
 
-router.get("/admin/getSubCategoryById", isAdmin,isUser, getSubCategoryById);
+router.get("/admin/getSubCategoryById", isUser, getSubCategoryById);
 
-router.get("/admin/getSubCategoryByFilter", isAdmin,isUser, getSubCategoryByFilter);
+router.get("/admin/getSubCategoryByFilter", isUser, getSubCategoryByFilter);
 
 router.delete("/admin/deleteSubCategory", isAdmin, deleteSubCategory);
 

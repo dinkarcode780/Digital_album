@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaArrowLeft, FaImage, FaVideo, FaCheck, FaSpinner } from "react-icons/fa";
+import { FaArrowLeft, FaImage, FaVideo, FaCheck, FaSpinner, FaDownload } from "react-icons/fa";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { getMediaByFilter } from "../../app/media/mediaThunk";
@@ -162,28 +162,58 @@ export default function AlbumDetails() {
               className="relative cursor-pointer group rounded-xl overflow-hidden shadow border bg-black"
             >
               {item.videosOrImageUrlType === "Video" ? (
-                <video
-                  src={item.videosOrImageUrl}
-                  controls
-                  className="rounded-xl w-full h-60 object-cover"
-                />
-              ) : (
-                <img
-                  src={item.videosOrImageUrl || item.thumbnail}
-                  alt="Album Media"
-                  className="rounded-xl w-full h-60 object-cover group-hover:scale-105 transition duration-300"
-                />
-              )}
+                <div className="relative h-60 bg-black flex items-center justify-center">
+                  <video
+                    src={item.videosOrImageUrl}
+                    controls
+                    controlsList={item.isDownloadable ? undefined : "nodownload"}
+                    disablePictureInPicture={!item.isDownloadable}
+                    onContextMenu={(e) => !item.isDownloadable && e.preventDefault()}
+                    className="rounded-xl w-full h-60 object-cover"
+                  />
+                  <div className="absolute top-3 left-3 bg-red-600/90 text-white rounded-full p-2 text-xs flex items-center gap-1 font-medium pointer-events-none z-10">
+                    <FaVideo /> Video
+                  </div>
 
-              {item.videosOrImageUrlType === "Video" && (
-                <div className="absolute top-3 left-3 bg-red-600/90 text-white rounded-full p-2 text-xs flex items-center gap-1 font-medium pointer-events-none z-10">
-                  <FaVideo /> Video
+                  {item.isDownloadable && (
+                    <a
+                      href={item.videosOrImageUrl}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Download Video"
+                      className="absolute top-3 right-3 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                    >
+                      <FaDownload className="text-sm" />
+                    </a>
+                  )}
                 </div>
-              )}
+              ) : (
+                <div className="relative h-60">
+                  <img
+                    src={item.videosOrImageUrl || item.thumbnail}
+                    alt="Album Media"
+                    onContextMenu={(e) => !item.isDownloadable && e.preventDefault()}
+                    className="rounded-xl w-full h-60 object-cover group-hover:scale-105 transition duration-300"
+                  />
+                  <div className="absolute top-3 left-3 bg-purple-600/90 text-white rounded-full p-2 text-xs flex items-center gap-1 font-medium z-10">
+                    <FaImage /> Photo
+                  </div>
 
-              {item.videosOrImageUrlType !== "Video" && (
-                <div className="absolute top-3 left-3 bg-purple-600/90 text-white rounded-full p-2 text-xs flex items-center gap-1 font-medium z-10">
-                  <FaImage /> Photo
+                  {item.isDownloadable && (
+                    <a
+                      href={item.videosOrImageUrl || item.thumbnail}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title="Download Photo"
+                      className="absolute top-3 right-3 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                    >
+                      <FaDownload className="text-sm" />
+                    </a>
+                  )}
                 </div>
               )}
 

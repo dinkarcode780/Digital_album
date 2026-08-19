@@ -13,7 +13,7 @@ const router = express.Router();
 router.post("/admin/createEvent",isAdmin, createEvent);
 router.put("/admin/updateEvent", isAdmin,updateEvent);
 router.delete("/admin/deleteEvent", isAdmin,deleteEvent);
-router.get("/admin/getEventById", isAdmin,isUser,getEventById);
-router.get("/admin/getEventByFilter",isAdmin,isUser, getEventByFilter);
+router.get("/admin/getEventById", isUser, getEventById);
+router.get("/admin/getEventByFilter", isUser, getEventByFilter);
 
 export default router;
