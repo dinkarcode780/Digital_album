@@ -20,6 +20,7 @@ import {
   FaFolderOpen,
   FaFolder,
   FaUserPlus,
+  FaHeart,
 } from "react-icons/fa";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -316,6 +317,21 @@ const AdminMobileSidebar = ({ isOpen, onClose }) => {
                       >
                         <FaUserPlus />
                         Invites
+                      </NavLink>
+
+                      <NavLink
+                        to="/admin/adminfavorite"
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-3 rounded-lg ${
+                            isActive
+                              ? "bg-purple-600 text-white"
+                              : "hover:bg-purple-100"
+                          }`
+                        }
+                      >
+                        <FaHeart />
+                        User Selections
                       </NavLink>
                     </div>
                   )}

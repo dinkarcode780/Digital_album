@@ -6,6 +6,7 @@ import eventReducer from "./event/eventSlice";
 import eventCategoryReducer from "./category/categorySlice";
 import subCategoryReducer from "./subcategory/subcategorySlice";
 import mediaReducer from "./media/mediaSlice";
+import slectedmediaReducer from "./slectedmedia/slectedmediaSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     eventCategory: eventCategoryReducer,
     subCategory: subCategoryReducer,
     media: mediaReducer,
+    slectedmedia: slectedmediaReducer,
   },
 });

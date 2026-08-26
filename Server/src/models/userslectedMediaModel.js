@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSlectedSchema = new mongoose.Schema(
+const userslectedMediaSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -52,6 +52,6 @@ const userSlectedSchema = new mongoose.Schema(
   },
 );
 
-const UserSelected = mongoose.model("UserSelected", userSlectedSchema);
+const UserselectedMedia = mongoose.model("UserselectedMedia", userslectedMediaSchema);
 
-export default UserSelected;
+export default UserselectedMedia;

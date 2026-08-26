@@ -22,6 +22,7 @@ import serviceRoute from "./api/routes/serviceRoute.js";
 import companyRoute from "./api/routes/companyRoute.js";
 import memberRoute from "./api/routes/memberRoute.js";
 import blogRoute from "./api/routes/blogRoute.js";
+import userslectedMediaRoute from "./api/routes/userslectedMediaRoute.js";
 
 
 
@@ -52,6 +53,7 @@ app.use("/api",serviceRoute)
 app.use("/api",companyRoute);
 app.use("/api",memberRoute);
 app.use("/api",blogRoute);
+app.use("/api",userslectedMediaRoute);
 
 
 

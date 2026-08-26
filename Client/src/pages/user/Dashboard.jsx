@@ -24,25 +24,25 @@ const Dashboard = () => {
 
         {/* Albums */}
 
-        <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
+        <div className=" bg-yellow-300 rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
 
           <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center">
 
-            <FaImages className="text-indigo-600 text-3xl" />
+            <FaImages className="text-blue-800 text-3xl" />
 
           </div>
 
           <div>
 
-            <h2 className="text-4xl font-bold">
+            <h2 className="text-4xl font-bold text-gray-900">
               12
             </h2>
 
-            <p className="font-semibold text-gray-800">
+            <p className="font-semibold text-gray-900">
               Total Albums
             </p>
 
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-900">
               View all albums
             </span>
 
@@ -52,7 +52,7 @@ const Dashboard = () => {
 
         {/* Photos */}
 
-        <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
+        <div className="bg-yellow-300 rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
 
           <div className="w-16 h-16 rounded-2xl bg-pink-100 flex items-center justify-center">
 
@@ -62,15 +62,15 @@ const Dashboard = () => {
 
           <div>
 
-            <h2 className="text-4xl font-bold">
+            <h2 className="text-4xl font-bold text-gray-900">
               248
             </h2>
 
-            <p className="font-semibold text-gray-800">
+            <p className="font-semibold text-gray-900">
               Photos & Videos
             </p>
 
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-900">
               Across all albums
             </span>
 
@@ -80,25 +80,25 @@ const Dashboard = () => {
 
         {/* Downloads */}
 
-        <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
+        <div className="bg-yellow-300 rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
 
           <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center">
 
-            <FaDownload className="text-green-600 text-3xl" />
+            <FaDownload className="text-green-900 text-3xl" />
 
           </div>
 
           <div>
 
-            <h2 className="text-4xl font-bold">
+            <h2 className="text-4xl font-bold text-gray-900">
               36
             </h2>
 
-            <p className="font-semibold text-gray-800">
+            <p className="font-semibold text-gray-900">
               Downloads
             </p>
 
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-800">
               Downloaded files
             </span>
 
@@ -108,25 +108,25 @@ const Dashboard = () => {
 
         {/* Favorites */}
 
-        <div className="bg-white rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
+        <div className="bg-yellow-300 rounded-2xl shadow hover:shadow-lg transition-all duration-300 p-6 flex items-center gap-5">
 
-          <div className="w-16 h-16 rounded-2xl bg-orange-100 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-orange-300 flex items-center justify-center">
 
-            <FaHeart className="text-orange-500 text-3xl" />
+            <FaHeart className="text-red-500 text-3xl" />
 
           </div>
 
           <div>
 
-            <h2 className="text-4xl font-bold">
+            <h2 className="text-4xl font-bold text-gray-900">
               18
             </h2>
 
-            <p className="font-semibold text-gray-800">
+            <p className="font-semibold text-gray-900">
               Favorites
             </p>
 
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-800">
               Your favorite moments
             </span>
 

@@ -247,6 +247,7 @@ import PrivacyAndSecurity from "../pages/admin/PrivacyAndSecurity";
 import ForgetPassword from "../components/common/ForgetPassword";
 import AdminInvite from "../pages/admin/AdminInvite";
 import InvitePage from "../components/common/InvitePage";
+import AdminFavorites from "../pages/admin/AdminFavorites";
 
 const AppRoutes = () => {
   return (
@@ -401,6 +402,8 @@ const AppRoutes = () => {
               path="/admin/notifications"
               element={<NotificationsPage />}
             />
+  <Route path="/admin/adminfavorite" element={<AdminFavorites />} />
+
 
           </Route>
         </Route>

@@ -251,6 +251,7 @@ import { getAllEventByFilter } from "../../app/event/eventThunk";
 import { getEventCategoryByFilter } from "../../app/category/categoryThunk";
 import { getMediaByFilter } from "../../app/media/mediaThunk";
 import Pagination from "../../components/common/Pagination";
+import { downloadDirectMedia } from "../../utils/downloadHelper";
 
 const Album = () => {
   const dispatch = useDispatch();
@@ -312,7 +313,7 @@ const Album = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-5 py-8">
+    <div className="max-w-7xl bg-gray-200 mx-auto px-5 py-8 rounded-2xl shadow-sm">
       {/* Heading & Search */}
       <div className="flex flex-col md:flex-row justify-between gap-4 items-center">
         <div>
@@ -463,17 +464,20 @@ const Album = () => {
                         </span>
 
                         {firstMedia.isDownloadable && (
-                          <a
-                            href={firstMedia.videosOrImageUrl}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadDirectMedia(
+                                firstMedia.videosOrImageUrl,
+                                `${albumTitle || "video"}`
+                              );
+                            }}
                             title="Download Video"
-                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md cursor-pointer"
                           >
                             <FaDownload className="text-xs" />
-                          </a>
+                          </button>
                         )}
                       </div>
                     ) : (
@@ -489,17 +493,20 @@ const Album = () => {
                         </span>
 
                         {firstMedia.isDownloadable && (
-                          <a
-                            href={firstMedia.videosOrImageUrl || firstMedia.thumbnail}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadDirectMedia(
+                                firstMedia.videosOrImageUrl || firstMedia.thumbnail,
+                                `${albumTitle || "photo"}`
+                              );
+                            }}
                             title="Download Photo"
-                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md"
+                            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md cursor-pointer"
                           >
                             <FaDownload className="text-xs" />
-                          </a>
+                          </button>
                         )}
                       </div>
                     )
