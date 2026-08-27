@@ -73,6 +73,8 @@
 // export default Banner;
 
 import React from "react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { FaHandSparkles, FaImages, FaHeart, FaPlay } from "react-icons/fa6";
 
 import {
@@ -93,15 +95,19 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 const Banner = () => {
+  const { user } = useSelector((state) => state.auth);
+  const userName =
+    user?.fullName ||
+    user?.name ||
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    user?.email?.split("@")[0] ||
+    "Dear User";
+
   const images = [
     "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=1000&auto=format&fit=crop&q=90",
-
     "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1000&auto=format&fit=crop&q=90",
-
     "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1000&auto=format&fit=crop&q=90",
-
     "https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?w=1000&auto=format&fit=crop&q=90",
-
     "https://images.unsplash.com/photo-1507504031003-b417219a0fde?w=1000&auto=format&fit=crop&q=90",
   ];
 
@@ -169,8 +175,8 @@ const Banner = () => {
 
           <div className="flex items-center gap-3 mt-1">
 
-            <h1 className="text-4xl md:text-5xl xl:text-6xl font-extrabold bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-              Dinkar Paswan
+            <h1 className="text-4xl md:text-5xl xl:text-6xl font-extrabold bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent capitalize">
+              {userName}
             </h1>
 
             <FaHandSparkles className="text-yellow-400 text-3xl md:text-4xl animate-pulse" />
@@ -234,7 +240,8 @@ const Banner = () => {
 
           {/* Explore Button */}
 
-          <button
+          <Link
+            to="/albums"
             className="
               mt-7
               w-fit
@@ -263,7 +270,7 @@ const Banner = () => {
 
             Explore Memories
 
-          </button>
+          </Link>
 
         </div>
 

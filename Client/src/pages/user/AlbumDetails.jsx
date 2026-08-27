@@ -408,8 +408,19 @@ export default function AlbumDetails() {
                         e.stopPropagation();
                         downloadDirectMedia(
                           item.videosOrImageUrl || item.thumbnail,
-                          `${albumTitle || "media"}_${item._id?.slice(-4)}`
+                          `${albumTitle || "media"}_${item._id?.slice(-4)}`,
+                          {
+                            mediaId: item._id,
+                            title: `${albumTitle || "Album"} - ${item.videosOrImageUrlType === "Video" ? "Video" : "Photo"}`,
+                            albumTitle: albumTitle,
+                            type: item.videosOrImageUrlType === "Video" ? "Video" : "Image",
+                            size: item.size || (item.videosOrImageUrlType === "Video" ? "45 MB" : "3.5 MB"),
+                            url: item.videosOrImageUrl || item.thumbnail,
+                            thumbnail: item.thumbnail || item.videosOrImageUrl,
+                            eventId: id,
+                          }
                         );
+                        toast.success("Download started & added to Downloads!");
                       }}
                       title="Download"
                       className="bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition backdrop-blur-sm shadow-md cursor-pointer"

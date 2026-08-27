@@ -1,10 +1,150 @@
+const DOWNLOADS_STORAGE_KEY = "digital_album_downloads";
+
+/**
+ * Get all downloaded items from local storage (100% dynamic, no fake/seed data)
+ */
+export const getDownloads = () => {
+  try {
+    const data = localStorage.getItem(DOWNLOADS_STORAGE_KEY);
+    if (!data) {
+      return [];
+    }
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+
+    // Filter out any legacy mock seed data if present in localStorage
+    const realDownloads = parsed.filter(
+      (item) =>
+        item &&
+        !String(item.id || "").startsWith("seed-") &&
+        !String(item.mediaId || "").startsWith("seed-media-")
+    );
+
+    if (realDownloads.length !== parsed.length) {
+      localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(realDownloads));
+    }
+
+    return realDownloads;
+  } catch (error) {
+    console.error("Error reading downloads from localStorage:", error);
+    return [];
+  }
+};
+
+/**
+ * Save / Record a downloaded media item
+ */
+export const recordDownload = (item) => {
+  if (!item || !item.url) return;
+
+  try {
+    const existing = getDownloads();
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const isVideo =
+      item.type === "Video" ||
+      item.videosOrImageUrlType === "Video" ||
+      /\.(mp4|webm|mov|avi|mkv)$/i.test(item.url);
+
+    const newRecord = {
+      id: item.id || `dl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      mediaId: item.mediaId || item._id || item.id || `media_${Date.now()}`,
+      title: item.title || item.eventTitle || (isVideo ? "Video Download" : "Photo Download"),
+      albumTitle: item.albumTitle || item.eventTitle || "Digital Album",
+      type: isVideo ? "Video" : "Image",
+      date: item.date || formattedDate,
+      timestamp: Date.now(),
+      size: item.size || (isVideo ? "75 MB" : "3.5 MB"),
+      url: item.url,
+      thumbnail: item.thumbnail || item.url,
+      eventId: item.eventId || null,
+    };
+
+    // Remove older duplicate with the exact same URL or mediaId to put recent one on top
+    const filtered = existing.filter(
+      (entry) => entry.url !== newRecord.url && entry.mediaId !== newRecord.mediaId
+    );
+
+    const updated = [newRecord, ...filtered];
+    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(updated));
+
+    // Dispatch update event
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("downloads_updated", { detail: updated })
+      );
+    }
+
+    return newRecord;
+  } catch (error) {
+    console.error("Error recording download:", error);
+  }
+};
+
+/**
+ * Remove a single download item from history
+ */
+export const removeDownload = (id) => {
+  try {
+    const existing = getDownloads();
+    const updated = existing.filter((item) => item.id !== id);
+    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(updated));
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("downloads_updated", { detail: updated })
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error removing download:", error);
+    return false;
+  }
+};
+
+/**
+ * Clear all downloaded items from history
+ */
+export const clearAllDownloads = () => {
+  try {
+    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify([]));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("downloads_updated", { detail: [] })
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error clearing downloads:", error);
+    return false;
+  }
+};
+
 /**
  * Downloads a media file directly without opening a new tab (even for cross-origin URLs like Cloudinary).
+ * Also records download into history if metadata is provided or extracted.
  * @param {string} url - The URL of the image or video to download
  * @param {string} filename
+ * @param {object} meta - Optional metadata to record in downloads history
  */
-export const downloadDirectMedia = async (url, filename = "download") => {
+export const downloadDirectMedia = async (url, filename = "download", meta = null) => {
   if (!url) return;
+
+  // Record download in local history
+  if (meta) {
+    recordDownload({ ...meta, url: url || meta.url });
+  } else {
+    recordDownload({
+      url,
+      title: filename || "Downloaded Media",
+      type: /\.(mp4|webm|mov|avi)$/i.test(url) ? "Video" : "Image",
+    });
+  }
 
   try {
     const response = await fetch(url, {

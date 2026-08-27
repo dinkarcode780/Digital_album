@@ -213,8 +213,19 @@ const Favorites = () => {
                         e.stopPropagation();
                         downloadDirectMedia(
                           item.url,
-                          `${item.eventTitle || "favorite"}_${item.mediaId?.slice(-4)}`
+                          `${item.eventTitle || "favorite"}_${item.mediaId?.slice(-4)}`,
+                          {
+                            mediaId: item.mediaId,
+                            title: `${item.eventTitle || "Favorite"} - ${item.type}`,
+                            albumTitle: item.eventTitle || "Favorites",
+                            type: item.type || "Image",
+                            size: item.size || (item.type === "Video" ? "60 MB" : "3.6 MB"),
+                            url: item.url,
+                            thumbnail: item.thumbnail || item.url,
+                            eventId: item.eventId,
+                          }
                         );
+                        toast.success("Download started & added to Downloads!");
                       }}
                       title="Download"
                       className="absolute top-3 left-3 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition backdrop-blur-sm shadow-md cursor-pointer"

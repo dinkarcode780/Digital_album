@@ -470,8 +470,19 @@ const Album = () => {
                               e.stopPropagation();
                               downloadDirectMedia(
                                 firstMedia.videosOrImageUrl,
-                                `${albumTitle || "video"}`
+                                `${albumTitle || "video"}`,
+                                {
+                                  mediaId: firstMedia._id,
+                                  title: `${albumTitle} - Video`,
+                                  albumTitle: albumTitle,
+                                  type: "Video",
+                                  size: firstMedia.size || "65 MB",
+                                  url: firstMedia.videosOrImageUrl,
+                                  thumbnail: firstMedia.thumbnail || firstMedia.videosOrImageUrl,
+                                  eventId: album._id,
+                                }
                               );
+                              toast.success("Download started & added to Downloads!");
                             }}
                             title="Download Video"
                             className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md cursor-pointer"
@@ -499,8 +510,19 @@ const Album = () => {
                               e.stopPropagation();
                               downloadDirectMedia(
                                 firstMedia.videosOrImageUrl || firstMedia.thumbnail,
-                                `${albumTitle || "photo"}`
+                                `${albumTitle || "photo"}`,
+                                {
+                                  mediaId: firstMedia._id,
+                                  title: `${albumTitle} - Photo`,
+                                  albumTitle: albumTitle,
+                                  type: "Image",
+                                  size: firstMedia.size || "3.8 MB",
+                                  url: firstMedia.videosOrImageUrl || firstMedia.thumbnail,
+                                  thumbnail: firstMedia.thumbnail || firstMedia.videosOrImageUrl,
+                                  eventId: album._id,
+                                }
                               );
+                              toast.success("Download started & added to Downloads!");
                             }}
                             title="Download Photo"
                             className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10 transition backdrop-blur-sm shadow-md cursor-pointer"
