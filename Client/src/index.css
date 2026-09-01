@@ -36,3 +36,475 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+
+
+/* =========================================================
+   ADMIN DASHBOARD ANIMATIONS
+========================================================= */
+
+@keyframes dashboardFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dashboardFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dashboardFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes dashboardPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.65;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes dashboardShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.dashboard-page {
+  animation: dashboardFadeIn 0.5s ease-out;
+}
+
+.dashboard-item {
+  animation: dashboardFadeUp 0.65s ease-out both;
+}
+
+.dashboard-float {
+  animation: dashboardFloat 4s ease-in-out infinite;
+}
+
+.dashboard-pulse {
+  animation: dashboardPulse 4s ease-in-out infinite;
+}
+
+.dashboard-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: dashboardShimmer 4s infinite;
+  pointer-events: none;
+}
+
+.dashboard-card {
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-7px);
+}
+
+.dashboard-icon {
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.dashboard-card:hover .dashboard-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.dashboard-row {
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.dashboard-row:hover {
+  transform: translateX(4px);
+}
+
+.dashboard-event {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.dashboard-event:hover {
+  transform: translateX(5px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-page,
+  .dashboard-item,
+  .dashboard-float,
+  .dashboard-pulse,
+  .dashboard-shimmer,
+  .dashboard-card,
+  .dashboard-row,
+  .dashboard-event {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* =========================================================
+   PREMIUM MEDIA LIBRARY
+========================================================= */
+
+@keyframes mediaPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mediaCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mediaFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes mediaGlow {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes mediaShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.media-page {
+  animation: mediaPageIn 0.55s ease-out;
+}
+
+.media-card {
+  animation: mediaCardIn 0.6s ease-out both;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.media-card:hover {
+  transform: translateY(-8px);
+}
+
+.media-image {
+  transition:
+    transform 0.6s ease,
+    filter 0.4s ease;
+}
+
+.media-card:hover .media-image {
+  transform: scale(1.07);
+}
+
+.media-overlay {
+  opacity: 0;
+  transition:
+    opacity 0.35s ease,
+    background 0.35s ease;
+}
+
+.media-card:hover .media-overlay {
+  opacity: 1;
+}
+
+.media-action {
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.media-action:hover {
+  transform: translateY(-2px);
+}
+
+.media-filter {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.media-filter:focus {
+  border-color: rgb(147 51 234);
+  box-shadow: 0 0 0 4px rgb(168 85 247 / 0.1);
+}
+
+.media-glow {
+  animation: mediaGlow 4s ease-in-out infinite;
+}
+
+.media-float {
+  animation: mediaFloat 4s ease-in-out infinite;
+}
+
+.media-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.media-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+  transform: translateX(-120%);
+  animation: mediaShimmer 4s infinite;
+}
+
+.media-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.media-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.media-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(167 139 250 / 0.5);
+  border-radius: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-page,
+  .media-card,
+  .media-glow,
+  .media-float,
+  .media-shimmer::after {
+    animation: none !important;
+  }
+
+  .media-card,
+  .media-image,
+  .media-overlay,
+  .media-action {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   PREMIUM MEDIA DETAILS
+========================================================= */
+
+@keyframes detailPageIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes detailImageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes detailGlow {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.08);
+  }
+}
+
+.detail-page {
+  animation: detailPageIn 0.55s ease-out;
+}
+
+.detail-image {
+  animation: detailImageIn 0.6s ease-out;
+  transition:
+    transform 0.45s ease,
+    filter 0.35s ease;
+  transform-origin: center;
+}
+
+.detail-preview {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at center,
+      rgb(55 65 81 / 0.8),
+      rgb(3 7 18)
+    );
+}
+
+.detail-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      135deg,
+      rgb(255 255 255 / 0.04),
+      transparent 35%,
+      transparent 65%,
+      rgb(139 92 246 / 0.08)
+    );
+}
+
+.detail-glow {
+  animation: detailGlow 4s ease-in-out infinite;
+}
+
+.detail-control {
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.detail-control:hover {
+  transform: translateY(-2px);
+}
+
+.detail-control:active {
+  transform: scale(0.94);
+}
+
+.detail-info-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.detail-info-card:hover {
+  transform: translateY(-3px);
+}
+
+.detail-input {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.detail-input:focus {
+  border-color: rgb(139 92 246);
+  box-shadow: 0 0 0 4px rgb(139 92 246 / 0.1);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-page,
+  .detail-image,
+  .detail-glow {
+    animation: none !important;
+  }
+
+  .detail-control,
+  .detail-info-card,
+  .detail-input,
+  .detail-image {
+    transition: none !important;
+  }
+}
