@@ -1,11 +1,25 @@
-const DOWNLOADS_STORAGE_KEY = "digital_album_downloads";
+const DOWNLOADS_STORAGE_KEY_PREFIX = "digital_album_downloads";
+
+const getDownloadsStorageKey = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const userId = user?._id || user?.id || user?.email;
+    const token = localStorage.getItem("userToken");
+    const identity = userId || token || "anonymous";
+
+    return `${DOWNLOADS_STORAGE_KEY_PREFIX}_${identity}`;
+  } catch (error) {
+    return `${DOWNLOADS_STORAGE_KEY_PREFIX}_anonymous`;
+  }
+};
 
 /**
  * Get all downloaded items from local storage (100% dynamic, no fake/seed data)
  */
 export const getDownloads = () => {
   try {
-    const data = localStorage.getItem(DOWNLOADS_STORAGE_KEY);
+    const storageKey = getDownloadsStorageKey();
+    const data = localStorage.getItem(storageKey);
     if (!data) {
       return [];
     }
@@ -21,7 +35,7 @@ export const getDownloads = () => {
     );
 
     if (realDownloads.length !== parsed.length) {
-      localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(realDownloads));
+      localStorage.setItem(storageKey, JSON.stringify(realDownloads));
     }
 
     return realDownloads;
@@ -71,7 +85,7 @@ export const recordDownload = (item) => {
     );
 
     const updated = [newRecord, ...filtered];
-    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(getDownloadsStorageKey(), JSON.stringify(updated));
 
     // Dispatch update event
     if (typeof window !== "undefined") {
@@ -93,7 +107,7 @@ export const removeDownload = (id) => {
   try {
     const existing = getDownloads();
     const updated = existing.filter((item) => item.id !== id);
-    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(getDownloadsStorageKey(), JSON.stringify(updated));
 
     if (typeof window !== "undefined") {
       window.dispatchEvent(
@@ -112,7 +126,7 @@ export const removeDownload = (id) => {
  */
 export const clearAllDownloads = () => {
   try {
-    localStorage.setItem(DOWNLOADS_STORAGE_KEY, JSON.stringify([]));
+    localStorage.setItem(getDownloadsStorageKey(), JSON.stringify([]));
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent("downloads_updated", { detail: [] })
