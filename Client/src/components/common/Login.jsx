@@ -373,13 +373,13 @@ const Login = () => {
     }
 
     const action =
-      loginType === "Admin"
-        ? adminLogin({
-            email: formData.email,
+      loginType === "User"
+        ? userLogin({
+            phoneNumber: formData.phoneNumber,
             password: formData.password,
           })
-        : userLogin({
-            phoneNumber: formData.phoneNumber,
+        : adminLogin({
+            email: formData.email,
             password: formData.password,
           });
 
@@ -397,17 +397,23 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (adminState.isAuthenticated) {
+    if (adminState.isAuthenticated && adminState.admin?.userType === "SuperAdmin") {
+      navigate("/super-admin/dashboard");
+      return;
+    }
+
+    if (adminState.isAuthenticated && adminState.admin?.userType === "Admin") {
       navigate("/admin/dashboard");
+      return;
     }
 
     if (userState.token) {
       navigate("/user/dashboard");
     }
-  }, [adminState.isAuthenticated, userState.token, navigate]);
+  }, [adminState.isAuthenticated, adminState.admin, userState.token, navigate]);
 
   const isLoading =
-    loginType === "Admin" ? adminState.loading : userState.loading;
+    loginType === "User" ? userState.loading : adminState.loading;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#f8f6ff]">
@@ -738,7 +744,9 @@ const Login = () => {
 
                     {loginType === "User"
                       ? "Login to access your memories & albums"
-                      : "Studio access for managing your albums"}
+                      : loginType === "SuperAdmin"
+                        ? "Super admin access for full website control"
+                        : "Studio access for managing your albums"}
 
                   </p>
 
@@ -751,7 +759,7 @@ const Login = () => {
 
                 <div className="mt-8 rounded-2xl border border-purple-100 bg-purple-50/60 p-1.5">
 
-                  <div className="grid grid-cols-2 gap-1">
+                  <div className="grid grid-cols-3 gap-1">
 
                     <button
                       type="button"
@@ -781,7 +789,6 @@ const Login = () => {
 
                     </button>
 
-
                     <button
                       type="button"
                       onClick={() => {
@@ -809,6 +816,38 @@ const Login = () => {
                         <FaCameraRetro />
 
                         Studio
+
+                      </span>
+
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginType("SuperAdmin");
+                        setShowPassword(false);
+                      }}
+                      className={`
+                        relative
+                        overflow-hidden
+                        rounded-xl
+                        py-3
+                        font-semibold
+                        transition-all
+                        duration-300
+                        ${
+                          loginType === "SuperAdmin"
+                            ? "bg-white text-purple-700 shadow-md"
+                            : "text-gray-500 hover:text-gray-700"
+                        }
+                      `}
+                    >
+
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+
+                        <FaShieldAlt />
+
+                        Super
 
                       </span>
 
@@ -902,12 +941,10 @@ const Login = () => {
 
                   ) : (
 
-                    /* ADMIN EMAIL */
-
                     <div className="group">
 
                       <label className="ml-1 text-sm font-semibold text-gray-700">
-                        Studio Email
+                        {loginType === "SuperAdmin" ? "Super Admin Email" : "Studio Email"}
                       </label>
 
                       <div className="relative mt-2">
@@ -943,7 +980,7 @@ const Login = () => {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          placeholder="Enter studio email"
+                          placeholder={loginType === "SuperAdmin" ? "Enter super admin email" : "Enter studio email"}
                           className="
                             w-full
                             rounded-xl
@@ -1167,7 +1204,9 @@ const Login = () => {
                         <>
                           {loginType === "Admin"
                             ? "Studio Login"
-                            : "Login to My Album"}
+                            : loginType === "SuperAdmin"
+                              ? "Super Admin Login"
+                              : "Login to My Album"}
 
                           <FaArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
 
@@ -1201,6 +1240,37 @@ const Login = () => {
                         >
 
                           Create Account
+
+                        </Link>
+
+                      </p>
+
+                    </div>
+
+                  )}
+
+                  {/* STUDIO REGISTER */}
+
+                  {loginType === "Admin" && (
+
+                    <div className="pt-2 text-center">
+
+                      <p className="text-sm text-gray-500">
+
+                        Don't have a studio account?{" "}
+
+                        <Link
+                          to="/admin/register"
+                          className="
+                            font-bold
+                            text-purple-600
+                            transition
+                            hover:text-purple-800
+                            hover:underline
+                          "
+                        >
+
+                          Create Studio Account
 
                         </Link>
 

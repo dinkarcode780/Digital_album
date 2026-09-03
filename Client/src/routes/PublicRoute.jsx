@@ -6,8 +6,11 @@ const PublicRoute = () => {
   const { token: adminToken, admin } = useSelector((state) => state.admin);
   const { token: userToken, user } = useSelector((state) => state.auth);
 
-  // Agar koi login hai
   if (adminToken && admin) {
+    if (admin.userType === "SuperAdmin") {
+      return <Navigate to="/super-admin/dashboard" replace />;
+    }
+
     return <Navigate to="/admin/dashboard" replace />;
   }
 

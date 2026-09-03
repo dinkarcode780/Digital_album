@@ -2,6 +2,47 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import eventModel from "../../models/eventModel.js";
 import subcategoryModel from "../../models/subCategoryModel.js";
 import inviteModel from "../../models/inviteModel.js";
+import userModel from "../../models/userModel.js";
+
+const ensureEventAccess = async (req, eventId) => {
+  const event = await eventModel.findById(eventId);
+
+  if (!event) {
+    return { event: null, allowed: false };
+  }
+
+  if (req.user?.userType === "SuperAdmin") {
+    return { event, allowed: true };
+  }
+
+  if (req.user?.userType === "User") {
+    const isOwner = String(event.userId) === String(req.user._id);
+
+    const inviteMatch = await inviteModel.findOne({
+      eventId: event._id,
+      $or: [
+        ...(req.user.email ? [{ email: req.user.email.toLowerCase() }] : []),
+        ...(req.user.phoneNumber
+          ? [{ phoneNumber: req.user.phoneNumber }]
+          : []),
+      ],
+    });
+
+    return { event, allowed: isOwner || !!inviteMatch };
+  }
+
+  if (req.user?.userType === "Admin") {
+    const client = await userModel.findOne({
+      _id: event.userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    return { event, allowed: !!client };
+  }
+
+  return { event, allowed: false };
+};
 
 export const createEvent = asyncHandler(async (req, res) => {
   const {
@@ -21,8 +62,31 @@ export const createEvent = asyncHandler(async (req, res) => {
     });
   }
 
+  if (req.user?.userType === "User" && String(req.user._id) !== String(userId)) {
+    return res.status(403).json({
+      success: false,
+      message: "You can only create events for your own profile",
+    });
+  }
+
+  if (req.user?.userType === "Admin") {
+    const client = await userModel.findOne({
+      _id: userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    if (!client) {
+      return res.status(403).json({
+        success: false,
+        message: "This client is not assigned to your studio",
+      });
+    }
+  }
+
   const event = await eventModel.create({
     userId,
+    adminId: req.user?.userType === "Admin" ? req.user._id : null,
     eventSubCategoryId,
     eventDate,
     location,
@@ -68,7 +132,52 @@ export const updateEvent = asyncHandler(async (req, res) => {
     });
   }
 
+  if (
+    req.user?.userType === "User" &&
+    String(event.userId) !== String(req.user._id)
+  ) {
+    return res.status(403).json({
+      success: false,
+      message: "You are not allowed to update this event",
+    });
+  }
+
+  if (req.user?.userType === "Admin") {
+    const client = await userModel.findOne({
+      _id: event.userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    if (!client) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update events from your assigned clients",
+      });
+    }
+  }
+
   if (userId) {
+    if (req.user?.userType === "User") {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot change the owner of an event",
+      });
+    }
+
+    const targetClient = await userModel.findOne({
+      _id: userId,
+      userType: "User",
+      ownerAdminId: req.user?.userType === "Admin" ? req.user._id : null,
+    });
+
+    if (req.user?.userType === "Admin" && !targetClient) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only assign this event to your own client",
+      });
+    }
+
     event.userId = userId;
   }
 
@@ -119,20 +228,25 @@ export const getEventById = asyncHandler(async (req, res) => {
     });
   }
 
+  const accessCheck = await ensureEventAccess(req, eventId);
+
+  if (!accessCheck.event) {
+    return res.status(404).json({
+      success: false,
+      message: "Event not found",
+    });
+  }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to this event",
+    });
+  }
+
   const event = await eventModel
     .findById(eventId)
     .populate("userId", "name email phoneNumber")
-    // .populate("eventSubCategoryId", "name",);
-
-    // .populate({
-    //   path: "eventSubCategoryId",
-    //   select: "name description categoryId",
-    //   populate: {
-    //     path: "categoryId",
-    //     select: "name"
-    //   }
-    // });
-
     .populate({
       path: "eventSubCategoryId",
       select: "name categoryId",
@@ -140,18 +254,7 @@ export const getEventById = asyncHandler(async (req, res) => {
         path: "categoryId",
         select: "name",
       },
-    })
-
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(Number(limit));
-
-  if (!event) {
-    return res.status(404).json({
-      success: false,
-      message: "Event not found",
     });
-  }
 
   res.status(200).json({
     success: true,
@@ -188,6 +291,24 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
       { userId: req.user._id },
       { _id: { $in: invitedEventIds } },
     ];
+  } else if (req.user && req.user.userType === "Admin") {
+    const clientUsers = await userModel
+      .find({ userType: "User", ownerAdminId: req.user._id })
+      .select("_id");
+
+    const assignedClientIds = clientUsers.map((item) => item._id);
+
+    if (userId) {
+      if (!assignedClientIds.some((id) => String(id) === String(userId))) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have access to that client",
+        });
+      }
+      filter.userId = userId;
+    } else {
+      filter.userId = { $in: assignedClientIds };
+    }
   } else if (userId) {
     filter.userId = userId;
   }
@@ -223,7 +344,14 @@ export const getEventByFilter = asyncHandler(async (req, res) => {
   const skip = (Number(page) - 1) * Number(limit);
   const events = await eventModel
     .find(filter)
-    .populate("userId", "name email phoneNumber")
+    .populate({
+      path: "userId",
+      select: "name email phoneNumber ownerAdminId",
+      populate: {
+        path: "ownerAdminId",
+        select: "name email phoneNumber",
+      },
+    })
     .populate({
       path: "eventSubCategoryId",
       select: "name categoryId",
@@ -255,6 +383,22 @@ export const deleteEvent = asyncHandler(async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "eventId is required",
+    });
+  }
+
+  const accessCheck = await ensureEventAccess(req, eventId);
+
+  if (!accessCheck.event) {
+    return res.status(404).json({
+      success: false,
+      message: "Event not found",
+    });
+  }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to delete this event",
     });
   }
 

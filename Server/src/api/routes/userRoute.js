@@ -16,7 +16,7 @@ router.put("/users/userChangePassword",isUser,userChangePassword);
 
 router.get("/users/getUserById",isUser,getUserById);
 
-router.get("/users/getUserByFilter",getUserByFilter);
+router.get("/users/getUserByFilter",isAdmin,getUserByFilter);
 
 router.get("/users/userDeleteById",isUser,userDeleteById);
 

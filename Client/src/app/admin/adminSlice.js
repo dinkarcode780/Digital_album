@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { adminLogin, adminLogout, adminUpdateProfile, getAdminById, userIsActive } from "../admin/adminThunk";
+import { adminLogin, adminRegister, adminLogout, adminUpdateProfile, getAdminById, userIsActive } from "../admin/adminThunk";
 
 // const initialState = {
 //   loading: false,
@@ -63,6 +63,25 @@ const adminSlice = createSlice({
       })
 
       .addCase(adminLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error =
+          action.payload?.message ||
+          (typeof action.payload === "string" ? action.payload : "Something went wrong");
+        state.message = action.payload?.message || state.error;
+      })
+      
+      // ================= Register Admin =================
+      .addCase(adminRegister.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(adminRegister.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.success;
+        state.message = action.payload.message;
+      })
+      .addCase(adminRegister.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error =

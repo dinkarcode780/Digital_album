@@ -1,6 +1,28 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../config/axios";
 
+export const adminRegister = createAsyncThunk(
+  "admin/adminRegister",
+  async (registerData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/admin/register",
+        registerData
+      );
+
+      return response.data;
+
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong";
+
+      return rejectWithValue(message);
+    }
+  }
+);
+
 export const adminLogin = createAsyncThunk(
   "admin/adminLogin",
   async (loginData, { rejectWithValue }) => {

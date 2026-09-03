@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema(
       default: "User",
     },
 
+    ownerAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     profileImage: {
       type: String,
     },
@@ -67,21 +73,21 @@ export default User;
 const createDefaultAdmin = async () => {
   const password = "admin123";
 
-  const existingAdmin = await User.findOne({ email: "admin@gmail.com" });
+  const existingSuperAdmin = await User.findOne({ email: "superadmin@gmail.com" });
 
-  if (!existingAdmin) {
+  if (!existingSuperAdmin) {
     const hashedPassword = await hashValue(password);
 
     await User.create({
-      name: "Admin",
-      email: "admin@gmail.com",
+      name: "Super Admin",
+      email: "superadmin@gmail.com",
       password: hashedPassword,
-      userType: "Admin",
+      userType: "SuperAdmin",
     });
 
-    console.log("Default admin created successfully");
+    console.log("Default super admin created successfully");
   } else {
-    console.log("Default admin already exists");
+    console.log("Default super admin already exists");
   }
 };
 

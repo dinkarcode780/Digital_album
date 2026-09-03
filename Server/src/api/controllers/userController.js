@@ -482,24 +482,34 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
     search = "",
     userType,
     isActive,
+    ownerAdminId,
     page = 1,
     limit = 10,
   } = req.query;
 
   const filter = {};
 
-  // Default sirf User dikhana
-  // if (!userType || userType === "All") {
-  //   filter.userType = "User";
-  // } else {
-  //   filter.userType = userType;
-  // }
+  if (req.user) {
+    if (req.user.userType === "Admin") {
+      filter.ownerAdminId = req.user._id;
+      filter.userType = "User";
+    } else if (req.user.userType === "User") {
+      filter._id = req.user._id;
+      filter.userType = "User";
+    } else if (req.user.userType === "SuperAdmin") {
+      // SuperAdmin can filter by specific studio admin or unassigned
+      if (ownerAdminId === "unassigned") {
+        filter.ownerAdminId = null;
+      } else if (ownerAdminId && ownerAdminId !== "All") {
+        filter.ownerAdminId = ownerAdminId;
+      }
+    }
+  }
 
-   if (userType && userType !== "All") {
+  if (userType && userType !== "All") {
     filter.userType = userType;
   }
 
-  // Status Filter
   if (
     isActive !== undefined &&
     isActive !== "" &&
@@ -508,28 +518,14 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
     filter.isActive = isActive === "true";
   }
 
-  // Search
   if (search.trim()) {
     const orConditions = [
-      {
-        name: {
-          $regex: search,
-          $options: "i",
-        },
-      },
-      {
-        email: {
-          $regex: search,
-          $options: "i",
-        },
-      },
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
     ];
 
-    // Phone search
     if (!isNaN(search)) {
-      orConditions.push({
-        phoneNumber: Number(search),
-      });
+      orConditions.push({ phoneNumber: Number(search) });
     }
 
     filter.$or = orConditions;
@@ -539,21 +535,16 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
 
   const totalUsers = await userModel.countDocuments(filter);
 
-  // All option support
-  let limitNumber =
-    limit === "All"
-      ? totalUsers || 1
-      : Number(limit);
+  let limitNumber = limit === "All" ? totalUsers || 1 : Number(limit);
 
-  if (!limitNumber || limitNumber <= 0) {
-    limitNumber = 10;
-  }
+  if (!limitNumber || limitNumber <= 0) limitNumber = 10;
 
   const skip = (page - 1) * limitNumber;
 
   const users = await userModel
     .find(filter)
     .select("-password")
+    .populate("ownerAdminId", "name email phoneNumber")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limitNumber);
@@ -564,10 +555,7 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
     data: users,
     totalUsers,
     currentPage: page,
-    totalPages:
-      limit === "All"
-        ? 1
-        : Math.ceil(totalUsers / limitNumber),
+    totalPages: limit === "All" ? 1 : Math.ceil(totalUsers / limitNumber),
   });
 });
 
@@ -607,7 +595,7 @@ export const userLogout = asyncHandler(async (req, res) => {
 });
 
 export const toggleUserStatus = asyncHandler(async (req, res) => {
-  const { userId } = req.query;
+  const userId = req.query?.userId || req.body?.userId;
 
   if (!userId) {
     return res.status(400).json({

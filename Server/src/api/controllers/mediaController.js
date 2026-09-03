@@ -2,10 +2,56 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import mediaModel from "../../models/mediaModel.js";
 import eventModel from "../../models/eventModel.js";
 import inviteModel from "../../models/inviteModel.js";
+import userModel from "../../models/userModel.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
 } from "../middleware/multerS3.js";
+
+const ensureMediaAccess = async (req, mediaId) => {
+  const media = await mediaModel.findById(mediaId).populate("eventId");
+
+  if (!media) {
+    return { media: null, allowed: false };
+  }
+
+  const event = media.eventId;
+
+  if (!event) {
+    return { media, allowed: false };
+  }
+
+  if (req.user?.userType === "SuperAdmin") {
+    return { media, allowed: true };
+  }
+
+  if (req.user?.userType === "User") {
+    const isOwner = String(event.userId) === String(req.user._id);
+    const inviteMatch = await inviteModel.findOne({
+      eventId: event._id,
+      $or: [
+        ...(req.user.email ? [{ email: req.user.email.toLowerCase() }] : []),
+        ...(req.user.phoneNumber
+          ? [{ phoneNumber: req.user.phoneNumber }]
+          : []),
+      ],
+    });
+
+    return { media, allowed: isOwner || !!inviteMatch };
+  }
+
+  if (req.user?.userType === "Admin") {
+    const assignedClient = await userModel.findOne({
+      _id: event.userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    return { media, allowed: !!assignedClient };
+  }
+
+  return { media, allowed: false };
+};
 
 // export const createMedia = asyncHandler(async (req, res) => {
 //   const { eventId } = req.body;
@@ -63,6 +109,37 @@ export const createMedia = asyncHandler(async (req, res) => {
       success: false,
       message: "eventId is required",
     });
+  }
+
+  const event = await eventModel.findById(eventId);
+
+  if (!event) {
+    return res.status(404).json({
+      success: false,
+      message: "Event not found",
+    });
+  }
+
+  if (req.user?.userType === "User" && String(event.userId) !== String(req.user._id)) {
+    return res.status(403).json({
+      success: false,
+      message: "You are not allowed to upload media for this event",
+    });
+  }
+
+  if (req.user?.userType === "Admin") {
+    const assignedClient = await userModel.findOne({
+      _id: event.userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    if (!assignedClient) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only upload media for your own assigned clients",
+      });
+    }
   }
 
   if (!req.files?.mediaFiles?.length) {
@@ -140,13 +217,37 @@ export const updateMedia = asyncHandler(async (req, res) => {
     });
   }
 
-  const media = await mediaModel.findById(mediaId);
+  const media = await mediaModel.findById(mediaId).populate("eventId");
 
   if (!media) {
     return res.status(404).json({
       success: false,
       message: "Media not found",
     });
+  }
+
+  const event = media.eventId;
+
+  if (req.user?.userType === "User" && String(event?.userId) !== String(req.user._id)) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to update this media",
+    });
+  }
+
+  if (req.user?.userType === "Admin") {
+    const assignedClient = await userModel.findOne({
+      _id: event?.userId,
+      userType: "User",
+      ownerAdminId: req.user._id,
+    });
+
+    if (!assignedClient) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update media for your own assigned clients",
+      });
+    }
   }
 
   // Update Thumbnail
@@ -207,7 +308,7 @@ export const updateMedia = asyncHandler(async (req, res) => {
 });
 
 export const iSdownload = asyncHandler(async (req, res) => {
-  const { mediaId } = req.body;
+  const mediaId = req.body?.mediaId || req.query?.mediaId;
 
   if (!mediaId) {
     return res.status(400).json({
@@ -216,14 +317,23 @@ export const iSdownload = asyncHandler(async (req, res) => {
     });
   }
 
-  const media = await mediaModel.findById(mediaId);
+  const accessCheck = await ensureMediaAccess(req, mediaId);
 
-  if (!media) {
+  if (!accessCheck.media) {
     return res.status(404).json({
       success: false,
       message: "Media not found",
     });
   }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to update this media",
+    });
+  }
+
+  const media = accessCheck.media;
 
   media.isDownloadable = !media.isDownloadable;
 
@@ -239,7 +349,7 @@ export const iSdownload = asyncHandler(async (req, res) => {
 });
 
 export const toggleMediaActive = asyncHandler(async (req, res) => {
-  const { mediaId } = req.body;
+  const mediaId = req.body?.mediaId || req.query?.mediaId;
 
   if (!mediaId) {
     return res.status(400).json({
@@ -248,14 +358,23 @@ export const toggleMediaActive = asyncHandler(async (req, res) => {
     });
   }
 
-  const media = await mediaModel.findById(mediaId);
+  const accessCheck = await ensureMediaAccess(req, mediaId);
 
-  if (!media) {
+  if (!accessCheck.media) {
     return res.status(404).json({
       success: false,
       message: "Media not found",
     });
   }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to update this media",
+    });
+  }
+
+  const media = accessCheck.media;
 
   media.isActive = !media.isActive;
   await media.save();
@@ -277,6 +396,22 @@ export const getMediaById = asyncHandler(async (req, res) => {
     });
   }
 
+  const accessCheck = await ensureMediaAccess(req, mediaId);
+
+  if (!accessCheck.media) {
+    return res.status(404).json({
+      success: false,
+      message: "Media not found",
+    });
+  }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to view this media",
+    });
+  }
+
   const media = await mediaModel.findById(mediaId).populate({
     path: "eventId",
     populate: [
@@ -294,13 +429,6 @@ export const getMediaById = asyncHandler(async (req, res) => {
       },
     ],
   });
-
-  if (!media) {
-    return res.status(404).json({
-      success: false,
-      message: "Media not found",
-    });
-  }
 
   res.status(200).json({
     success: true,
@@ -346,6 +474,34 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
     filter.eventId = {
       $in: allowedEvents.map((item) => item._id),
     };
+  } else if (req.user && req.user.userType === "Admin") {
+    const assignedUsers = await userModel
+      .find({ userType: "User", ownerAdminId: req.user._id })
+      .select("_id");
+
+    const assignedUserIds = assignedUsers.map((item) => item._id);
+
+    if (userId) {
+      if (!assignedUserIds.some((id) => String(id) === String(userId))) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have access to that client",
+        });
+      }
+
+      const userEvents = await eventModel.find({ userId }).select("_id");
+      filter.eventId = {
+        $in: userEvents.map((item) => item._id),
+      };
+    } else {
+      const adminEvents = await eventModel
+        .find({ userId: { $in: assignedUserIds } })
+        .select("_id");
+
+      filter.eventId = {
+        $in: adminEvents.map((item) => item._id),
+      };
+    }
   } else if (userId) {
     const userEvents = await eventModel.find({ userId }).select("_id");
     filter.eventId = {
@@ -420,7 +576,11 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
       populate: [
         {
           path: "userId",
-          select: "name email phoneNumber",
+          select: "name email phoneNumber ownerAdminId",
+          populate: {
+            path: "ownerAdminId",
+            select: "name email phoneNumber",
+          },
         },
         {
           path: "eventSubCategoryId",
@@ -449,7 +609,7 @@ export const getMediaByFilter = asyncHandler(async (req, res) => {
 });
 
 export const deleteMedia = asyncHandler(async (req, res) => {
-  const { mediaId } = req.body;
+  const mediaId = req.body?.mediaId || req.query?.mediaId;
 
   if (!mediaId) {
     return res.status(400).json({
@@ -458,14 +618,23 @@ export const deleteMedia = asyncHandler(async (req, res) => {
     });
   }
 
-  const media = await mediaModel.findById(mediaId);
+  const accessCheck = await ensureMediaAccess(req, mediaId);
 
-  if (!media) {
+  if (!accessCheck.media) {
     return res.status(404).json({
       success: false,
       message: "Media not found",
     });
   }
+
+  if (!accessCheck.allowed) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have access to delete this media",
+    });
+  }
+
+  const media = accessCheck.media;
 
   // Delete Media File from Cloudinary
   if (media.publicId) {
