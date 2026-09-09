@@ -75,7 +75,7 @@ export default function PublicStudiosDirectory() {
   const admin = JSON.parse(localStorage.getItem("admin") || "null");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 flex flex-col font-sans">
       {/* Public Top Navbar */}
       <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -179,7 +179,7 @@ export default function PublicStudiosDirectory() {
       </section>
 
       {/* Main Content & Directory Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-8">
+      <main className="w-full max-w-7xl mx-auto min-w-0 px-4 sm:px-6 lg:px-8 py-10 flex-1 space-y-8">
         {/* Filters Bar */}
         <div className="bg-white p-4 sm:p-5 rounded-3xl border border-gray-100 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Specialty Categories */}

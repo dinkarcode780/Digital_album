@@ -13,13 +13,13 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-gray-300 mt-20">
+    <footer className="w-full max-w-full overflow-hidden bg-slate-900 text-gray-300 mt-20">
 
       {/* Top Border */}
 
       <div className="h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500"></div>
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="w-full max-w-7xl mx-auto min-w-0 px-4 sm:px-6 py-12 sm:py-16">
 
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 
@@ -31,13 +31,13 @@ const Footer = () => {
               Album Studio
             </h2>
 
-            <p className="mt-5 leading-8 text-gray-400">
+            <p className="mt-5 max-w-full break-words leading-8 text-gray-400">
               Relive your unforgettable memories with beautifully
               organized albums, cinematic videos and secure cloud
               storage for every special occasion.
             </p>
 
-            <div className="flex gap-4 mt-8">
+            <div className="flex flex-wrap gap-4 mt-8">
 
               <a
                 href="#"
@@ -185,13 +185,13 @@ const Footer = () => {
 
       <div className="border-t border-slate-800">
 
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="w-full max-w-7xl mx-auto min-w-0 px-4 sm:px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
 
           <p className="text-gray-500 text-sm">
             © 2026 Album Studio. All Rights Reserved.
           </p>
 
-          <div className="flex gap-6 text-sm">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
 
             <Link
               to="/privacy-policy"

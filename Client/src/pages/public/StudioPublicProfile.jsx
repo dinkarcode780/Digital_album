@@ -181,7 +181,7 @@ export default function StudioPublicProfile() {
   const showcaseAlbums = studio.showcaseAlbums || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 flex flex-col font-sans">
       {/* Top Navbar Header */}
       <header className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -216,7 +216,7 @@ export default function StudioPublicProfile() {
         </div>
 
         {/* Studio Info Header floating over banner */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-24 relative z-10 pb-8">
+        <div className="w-full max-w-7xl mx-auto min-w-0 px-4 sm:px-6 lg:px-8 -mt-20 sm:-mt-24 relative z-10 pb-8">
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100 text-gray-900 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               <img
