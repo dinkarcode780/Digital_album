@@ -508,3 +508,200 @@
     transition: none !important;
   }
 }
+
+
+/* user Register page css */
+
+/* ================================
+   PREMIUM REGISTER PAGE
+================================ */
+
+.register-page {
+  animation: registerPageIn 0.7s ease-out;
+}
+
+.register-card {
+  animation: registerCardIn 0.7s cubic-bezier(.22, 1, .36, 1);
+}
+
+.register-image {
+  animation: registerImageZoom 12s ease-in-out infinite alternate;
+}
+
+.register-orb {
+  animation: registerOrbFloat 6s ease-in-out infinite;
+}
+
+.register-orb-delay {
+  animation-delay: 2s;
+}
+
+.register-icon {
+  animation: registerIconFloat 3s ease-in-out infinite;
+}
+
+.register-input {
+  transition:
+    border-color .25s ease,
+    box-shadow .25s ease,
+    transform .25s ease,
+    background-color .25s ease;
+}
+
+.register-input:focus {
+  transform: translateY(-1px);
+  border-color: rgb(139 92 246);
+  box-shadow: 0 8px 25px rgb(139 92 246 / 10%);
+  background-color: white;
+  outline: none;
+}
+
+.register-field {
+  animation: registerFieldIn .55s ease both;
+}
+
+.register-field:nth-child(1) {
+  animation-delay: .10s;
+}
+
+.register-field:nth-child(2) {
+  animation-delay: .16s;
+}
+
+.register-field:nth-child(3) {
+  animation-delay: .22s;
+}
+
+.register-field:nth-child(4) {
+  animation-delay: .28s;
+}
+
+.register-field:nth-child(5) {
+  animation-delay: .34s;
+}
+
+.register-button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease;
+}
+
+.register-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgb(255 255 255 / 25%),
+    transparent
+  );
+  transition: transform .65s ease;
+}
+
+.register-button:hover::before {
+  transform: translateX(110%);
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgb(109 40 217 / 25%);
+}
+
+.register-button:active {
+  transform: scale(.98);
+}
+
+.register-logo {
+  transition: transform .3s ease;
+}
+
+.register-logo:hover {
+  transform: rotate(-6deg) scale(1.05);
+}
+
+@keyframes registerPageIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes registerCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes registerImageZoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes registerOrbFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(20px, -25px, 0);
+  }
+}
+
+@keyframes registerIconFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes registerFieldIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .register-page,
+  .register-card,
+  .register-image,
+  .register-orb,
+  .register-icon,
+  .register-field {
+    animation: none !important;
+  }
+
+  .register-input,
+  .register-button,
+  .register-logo {
+    transition: none !important;
+  }
+}

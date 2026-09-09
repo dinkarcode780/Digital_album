@@ -286,7 +286,7 @@
 // export default AdminDashboard;
 
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -319,6 +319,7 @@ const AdminDashboard = () => {
 
   const [showAlbumDetails, setShowAlbumDetails] = useState(false);
   const [loading, setLoading] = useState(true);
+   const { admin } = useSelector((state) => state.admin);
 
   useEffect(() => {
     const fetchDashboardCounts = async () => {
@@ -602,7 +603,7 @@ const AdminDashboard = () => {
                 lg:text-5xl
               "
             >
-              Welcome Admin 👋
+              Welcome To {admin?.name || "Admin"} 👋
             </h1>
 
 

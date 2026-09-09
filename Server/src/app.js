@@ -23,9 +23,12 @@ import companyRoute from "./api/routes/companyRoute.js";
 import memberRoute from "./api/routes/memberRoute.js";
 import blogRoute from "./api/routes/blogRoute.js";
 import userslectedMediaRoute from "./api/routes/userslectedMediaRoute.js";
+import subscriptionRoute from "./api/routes/subscriptionRoute.js";
+import subscriptionWebhookRoute from "./api/routes/subscriptionWebhookRoute.js";
 
 
 
+app.use("/api/subscriptions/webhook", express.raw({ type: "application/json" }), subscriptionWebhookRoute);
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(morgan("tiny"));
@@ -54,6 +57,7 @@ app.use("/api",companyRoute);
 app.use("/api",memberRoute);
 app.use("/api",blogRoute);
 app.use("/api",userslectedMediaRoute);
+app.use("/api", subscriptionRoute);
 
 
 

@@ -52,55 +52,6 @@ const ensureMediaAccess = async (req, mediaId) => {
 
   return { media, allowed: false };
 };
-
-// export const createMedia = asyncHandler(async (req, res) => {
-//   const { eventId } = req.body;
-
-//   if (!eventId) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "eventId is required",
-//     });
-//   }
-
-//   if (!req.files?.mediaFiles?.length) {
-//     return res.status(400).json({
-//       success: false,
-//       message: "Please upload at least one media file",
-//     });
-//   }
-
-//   const thumbnailFile = req.files.thumbnail?.[0];
-//   const thumbnailUpload = thumbnailFile
-//     ? await uploadToCloudinary(thumbnailFile.path, "eventThumbnail")
-//     : null;
-
-//   const mediaDocs = [];
-
-//   for (const file of req.files.mediaFiles) {
-//     const uploadResult = await uploadToCloudinary(file.path, "eventMedia");
-//     if (!uploadResult) continue;
-
-//     mediaDocs.push({
-//       eventId,
-//       thumbnail: thumbnailUpload?.secure_url || "",
-//       videosOrImageUrl: uploadResult.secure_url,
-//       videosOrImageUrlType: file.mimetype.startsWith("video/")
-//         ? "Video"
-//         : "Image",
-//       publicId: uploadResult.public_id,
-//     });
-//   }
-
-//   const savedMedia = await mediaModel.insertMany(mediaDocs);
-
-//   res.status(201).json({
-//     success: true,
-//     message: "Media uploaded successfully",
-//     data: savedMedia,
-//   });
-// });
-
 export const createMedia = asyncHandler(async (req, res) => {
   const { eventId } = req.body;
 
@@ -171,8 +122,8 @@ export const createMedia = asyncHandler(async (req, res) => {
     thumbnailResult.status === "fulfilled" ? thumbnailResult.value : null;
 
   const successfulMedia = mediaResults
-    .filter((r) => r.status === "fulfilled" && r.value !== null)
-    .map((r) => r.value);
+    .map((result, index) => ({ result, index }))
+    .filter(({ result }) => result.status === "fulfilled" && result.value !== null);
 
   if (successfulMedia.length === 0) {
     return res.status(500).json({
@@ -182,7 +133,8 @@ export const createMedia = asyncHandler(async (req, res) => {
   }
 
   // 5. Prepare documents for DB insertion
-  const mediaDocs = successfulMedia.map((upload, index) => {
+  const mediaDocs = successfulMedia.map(({ result, index }) => {
+    const upload = result.value;
     const originalFile = req.files.mediaFiles[index];
     return {
       eventId,
@@ -194,6 +146,7 @@ export const createMedia = asyncHandler(async (req, res) => {
       thumbnailPublicId: successfulThumbnail?.public_id || "",
       // If you still want to store publicId per media, uncomment:
       publicId: upload.public_id,
+      fileSizeBytes: originalFile.size || originalFile.buffer?.length || 0,
     };
   });
 
@@ -257,7 +210,7 @@ export const updateMedia = asyncHandler(async (req, res) => {
     }
 
     const thumbnailUpload = await uploadToCloudinary(
-      req.files.thumbnail[0].path,
+      req.files.thumbnail[0],
       "eventThumbnail",
     );
 
@@ -275,7 +228,7 @@ export const updateMedia = asyncHandler(async (req, res) => {
     );
 
     const uploadResult = await uploadToCloudinary(
-      req.files.mediaFile[0].path,
+      req.files.mediaFile[0],
       "eventMedia",
     );
 
@@ -287,6 +240,7 @@ export const updateMedia = asyncHandler(async (req, res) => {
       )
         ? "Video"
         : "Image";
+      media.fileSizeBytes = req.files.mediaFile[0].size || req.files.mediaFile[0].buffer?.length || 0;
     }
   }
 

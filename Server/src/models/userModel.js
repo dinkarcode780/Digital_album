@@ -62,6 +62,17 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    subscriptionStatus: {
+      type: String,
+      enum: ["trial", "active", "expired"],
+      default: "trial",
+    },
+
+    trialEndsAt: {
+      type: Date,
+      default: () => new Date(Date.now() + Number(process.env.SUBSCRIPTION_TRIAL_DAYS || 7) * 24 * 60 * 60 * 1000),
+    },
   },
   { timestamps: true },
 );

@@ -10,6 +10,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaShieldAlt,
+  FaCreditCard,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "../../../app/admin/adminThunk";
@@ -55,6 +56,12 @@ export const superAdminMenus = [
     name: "Settings",
     path: "/super-admin/settings",
     icon: <FaCog />,
+    badge: null,
+  },
+  {
+    name: "Subscription Plans",
+    path: "/super-admin/subscription-plans",
+    icon: <FaCreditCard />,
     badge: null,
   },
 ];

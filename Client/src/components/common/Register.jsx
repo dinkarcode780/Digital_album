@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaEnvelope,
@@ -9,8 +8,13 @@ import {
   FaEye,
   FaEyeSlash,
   FaCamera,
+  FaArrowRight,
+  FaShieldAlt,
 } from "react-icons/fa";
+
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+
 import { userRegister } from "../../app/auth/authThunk";
 import { toast } from "react-toastify";
 
@@ -19,12 +23,12 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(location.state);
-
-  const { loading, success, error, message } = useSelector(
-    (state) => state.auth,
+  const { loading, error } = useSelector(
+    (state) => state.auth
   );
-  const [showPassword, setShowPassword] = useState(false);
+
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,63 +39,70 @@ const Register = () => {
   });
 
   useEffect(() => {
-  if (location.state?.inviteData) {
-    setFormData((prev) => ({
-      ...prev,
-      name: location.state.inviteData.name || "",
-      email: location.state.inviteData.email || "",
-      phoneNumber: location.state.inviteData.phoneNumber || "",
-    }));
-  }
-}, [location.state]);
-
-  // const handleChange = (e) => {
-  //   setFormData({
-  //     ...formData,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
+    if (location.state?.inviteData) {
+      setFormData((prev) => ({
+        ...prev,
+        name:
+          location.state.inviteData.name || "",
+        email:
+          location.state.inviteData.email || "",
+        phoneNumber:
+          location.state.inviteData.phoneNumber || "",
+      }));
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "phoneNumber") {
-    const onlyNumbers = value.replace(/\D/g, "");
+    if (name === "phoneNumber") {
+      const onlyNumbers =
+        value.replace(/\D/g, "");
 
-    setFormData({
-      ...formData,
-      phoneNumber: onlyNumbers,
-    });
+      setFormData((prev) => ({
+        ...prev,
+        phoneNumber: onlyNumbers,
+      }));
 
-    return;
-  }
+      return;
+    }
 
-  setFormData({
-    ...formData,
-    [name]: value,
-  });
-};
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-if (!/^[6-9]\d{9}$/.test(formData.phoneNumber)) {
-  toast.error("Please enter a valid 10-digit mobile number.");
-  return;
-}
-    // const result = await dispatch(userRegister(formData));
-    const payload = {
-  ...formData,
-  inviteToken: location.state?.inviteToken,
-};
 
-const result = await dispatch(userRegister(payload));
-    console.log(result,"hhh");
+    if (
+      !/^[6-9]\d{9}$/.test(
+        formData.phoneNumber
+      )
+    ) {
+      toast.error(
+        "Please enter a valid 10-digit mobile number."
+      );
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      inviteToken:
+        location.state?.inviteToken,
+    };
+
+    const result = await dispatch(
+      userRegister(payload)
+    );
 
     if (userRegister.fulfilled.match(result)) {
-      toast.success(result.payload.message);
+      toast.success(
+        result.payload.message
+      );
 
       setTimeout(() => {
-        console.log("navi", navigate);
         navigate("/");
       }, 1000);
 
@@ -103,66 +114,376 @@ const result = await dispatch(userRegister(payload));
         password: "",
       });
     } else {
-      toast.error(result.payload?.message || "Registration Failed");
+      toast.error(
+        result.payload?.message ||
+          "Registration Failed"
+      );
     }
   };
 
-  return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left */}
+  const invited =
+    !!location.state?.inviteData;
 
-      <div className="hidden lg:flex relative">
+  return (
+    <div className="register-page min-h-screen bg-slate-950 lg:grid lg:grid-cols-2">
+
+      {/* =====================================
+          LEFT VISUAL
+      ===================================== */}
+
+      <div className="relative hidden overflow-hidden lg:flex">
+
         <img
           src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1400"
-          alt=""
-          className="w-full h-full object-cover"
+          alt="Wedding memories"
+          className="
+            register-image
+            absolute
+            inset-0
+            h-full
+            w-full
+            object-cover
+          "
         />
 
-        <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-white px-10">
-          <FaCamera className="text-7xl mb-6" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/90 via-indigo-950/70 to-black/80" />
 
-          <h1 className="text-5xl font-bold">Album Studio</h1>
+        {/* Floating Orbs */}
 
-          <p className="mt-5 text-center text-lg max-w-md">
-            Create your account and access your albums, photos and memories.
-          </p>
-        </div>
-      </div>
+        <div
+          className="
+            register-orb
+            absolute
+            -left-24
+            top-20
+            h-72
+            w-72
+            rounded-full
+            bg-purple-500/20
+            blur-3xl
+          "
+        />
 
-      {/* Right */}
+        <div
+          className="
+            register-orb
+            register-orb-delay
+            absolute
+            bottom-10
+            right-0
+            h-80
+            w-80
+            rounded-full
+            bg-indigo-400/20
+            blur-3xl
+          "
+        />
 
-      <div className="flex justify-center items-center bg-gray-50 px-5 py-10">
-        <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl p-8">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold">Register</h2>
+        {/* Content */}
 
-            <p className="text-gray-500 mt-2">Create your account</p>
+        <div
+          className="
+            relative
+            z-10
+            flex
+            w-full
+            flex-col
+            justify-center
+            px-14
+            text-white
+            xl:px-20
+          "
+        >
+
+          <div
+            className="
+              register-logo
+              mb-8
+              flex
+              h-20
+              w-20
+              items-center
+              justify-center
+              rounded-3xl
+              border
+              border-white/20
+              bg-white/10
+              shadow-2xl
+              backdrop-blur-xl
+            "
+          >
+            <FaCamera
+              className="
+                register-icon
+                text-4xl
+                text-purple-200
+              "
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 mt-8">
-            <div>
-              <label className="font-semibold">Full Name</label>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[.3em] text-purple-200">
+            Welcome to
+          </p>
 
-              <div className="relative mt-2">
-                <FaUser className="absolute left-4 top-4 text-gray-400" />
+          <h1
+            className="
+              text-5xl
+              font-black
+              tracking-tight
+              xl:text-6xl
+            "
+          >
+            Album Studio
+          </h1>
+
+          <p
+            className="
+              mt-6
+              max-w-lg
+              text-lg
+              leading-8
+              text-white/75
+            "
+          >
+            Your beautiful memories deserve
+            a beautiful place. Create your
+            account and keep your albums,
+            photos and special moments close.
+          </p>
+
+
+          <div
+            className="
+              mt-10
+              flex
+              max-w-lg
+              items-center
+              gap-4
+              rounded-2xl
+              border
+              border-white/10
+              bg-white/10
+              p-4
+              backdrop-blur-xl
+            "
+          >
+
+            <div
+              className="
+                flex
+                h-11
+                w-11
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                bg-white/10
+              "
+            >
+              <FaShieldAlt
+                className="text-purple-200"
+              />
+            </div>
+
+            <div>
+
+              <p className="font-semibold">
+                Your memories, protected
+              </p>
+
+              <p className="mt-1 text-sm text-white/60">
+                Secure access to your private
+                albums and media.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================
+          RIGHT FORM
+      ===================================== */}
+
+      <div
+        className="
+          flex
+          min-h-screen
+          items-center
+          justify-center
+          bg-gradient-to-br
+          from-slate-50
+          via-white
+          to-purple-50
+          px-4
+          py-8
+          sm:px-6
+          lg:px-10
+        "
+      >
+
+        <div
+          className="
+            register-card
+            w-full
+            max-w-2xl
+            rounded-[30px]
+            border
+            border-white
+            bg-white/90
+            p-6
+            shadow-[0_25px_80px_rgba(76,29,149,0.13)]
+            backdrop-blur-xl
+            sm:p-9
+          "
+        >
+
+          {/* Header */}
+
+          <div className="mb-8 text-center">
+
+            <div
+              className="
+                mx-auto
+                mb-4
+                flex
+                h-14
+                w-14
+                items-center
+                justify-center
+                rounded-2xl
+                bg-gradient-to-br
+                from-purple-600
+                to-indigo-600
+                text-white
+                shadow-lg
+                shadow-purple-200
+              "
+            >
+              <FaUser className="text-xl" />
+            </div>
+
+            <h2
+              className="
+                text-3xl
+                font-black
+                tracking-tight
+                text-gray-900
+                sm:text-4xl
+              "
+            >
+              Create Account
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Start managing your memories
+              beautifully.
+            </p>
+
+            {invited && (
+              <div
+                className="
+                  mt-4
+                  rounded-xl
+                  border
+                  border-purple-100
+                  bg-purple-50
+                  px-4
+                  py-3
+                  text-sm
+                  font-medium
+                  text-purple-700
+                "
+              >
+                ✨ Your account details were
+                pre-filled from an invitation.
+              </div>
+            )}
+
+          </div>
+
+
+          {/* Form */}
+
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
+
+            {/* Name */}
+
+            <div className="register-field">
+
+              <label className="mb-2 block text-sm font-bold text-gray-700">
+                Full Name
+              </label>
+
+              <div className="relative">
+
+                <FaUser
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                  "
+                />
 
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter Full Name"
+                  placeholder="Enter your full name"
                   required
-                  readOnly={!!location.state?.inviteData}
-                  className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
+                  readOnly={invited}
+                  className="
+                    register-input
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    py-3.5
+                    pl-12
+                    pr-4
+                    text-sm
+                    text-gray-800
+                    placeholder:text-gray-400
+                    read-only:cursor-not-allowed
+                    read-only:bg-gray-100
+                  "
                 />
-              </div>
-            </div>
-            <div>
-              <label className="font-semibold">Mobile Number</label>
 
-              <div className="relative mt-2">
-                <FaPhoneAlt className="absolute left-4 top-4 text-gray-400" />
+              </div>
+
+            </div>
+
+
+            {/* Phone */}
+
+            <div className="register-field">
+
+              <label className="mb-2 block text-sm font-bold text-gray-700">
+                Mobile Number
+              </label>
+
+              <div className="relative">
+
+                <FaPhoneAlt
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                  "
+                />
 
                 <input
                   type="tel"
@@ -170,97 +491,289 @@ const result = await dispatch(userRegister(payload));
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   maxLength={10}
-                  placeholder="Enter Mobile Number"
+                  placeholder="Enter 10-digit mobile number"
                   required
-                  readOnly={!!location.state?.inviteData}
-                  className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
+                  readOnly={invited}
+                  className="
+                    register-input
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    py-3.5
+                    pl-12
+                    pr-4
+                    text-sm
+                    read-only:cursor-not-allowed
+                    read-only:bg-gray-100
+                  "
                 />
-              </div>
-            </div>
-            <div>
-              <div>
-                <label className="font-semibold">Email (Optional)</label>
 
-                <div className="relative mt-2">
-                  <FaEnvelope className="absolute left-4 top-4 text-gray-400" />
-
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter Email (Optional)"
-                    readOnly={!!location.state?.inviteData}
-                    className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
-                  />
-                </div>
               </div>
+
             </div>
 
-            <div>
-              <label className="font-semibold">Address</label>
 
-              <div className="relative mt-2">
-                <FaMapMarkerAlt className="absolute left-4 top-4 text-gray-400" />
+            {/* Email */}
+
+            <div className="register-field">
+
+              <label className="mb-2 block text-sm font-bold text-gray-700">
+                Email
+                <span className="ml-1 font-normal text-gray-400">
+                  (Optional)
+                </span>
+              </label>
+
+              <div className="relative">
+
+                <FaEnvelope
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                  "
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  readOnly={invited}
+                  className="
+                    register-input
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    py-3.5
+                    pl-12
+                    pr-4
+                    text-sm
+                    read-only:cursor-not-allowed
+                    read-only:bg-gray-100
+                  "
+                />
+
+              </div>
+
+            </div>
+
+
+            {/* Address */}
+
+            <div className="register-field">
+
+              <label className="mb-2 block text-sm font-bold text-gray-700">
+                Address
+              </label>
+
+              <div className="relative">
+
+                <FaMapMarkerAlt
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                  "
+                />
 
                 <input
                   type="text"
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Enter Address"
-                  className="w-full border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-purple-600"
+                  placeholder="Enter your address"
+                  className="
+                    register-input
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    py-3.5
+                    pl-12
+                    pr-4
+                    text-sm
+                  "
                 />
+
               </div>
+
             </div>
 
-            <div>
-              <label className="font-semibold">Password</label>
 
-              <div className="relative mt-2">
-                <FaLock className="absolute left-4 top-4 text-gray-400" />
+            {/* Password */}
+
+            <div className="register-field">
+
+              <label className="mb-2 block text-sm font-bold text-gray-700">
+                Password
+              </label>
+
+              <div className="relative">
+
+                <FaLock
+                  className="
+                    absolute
+                    left-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                  "
+                />
 
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter Password"
+                  placeholder="Create a secure password"
                   required
-                  className="w-full border rounded-xl py-3 pl-12 pr-12 outline-none focus:ring-2 focus:ring-purple-600"
+                  className="
+                    register-input
+                    w-full
+                    rounded-xl
+                    border
+                    border-gray-200
+                    bg-gray-50
+                    py-3.5
+                    pl-12
+                    pr-12
+                    text-sm
+                  "
                 />
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-4"
+                  onClick={() =>
+                    setShowPassword(
+                      (prev) => !prev
+                    )
+                  }
+                  className="
+                    absolute
+                    right-4
+                    top-1/2
+                    -translate-y-1/2
+                    text-gray-400
+                    transition
+                    hover:text-purple-600
+                  "
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? (
+                    <FaEyeSlash />
+                  ) : (
+                    <FaEye />
+                  )}
                 </button>
+
               </div>
+
             </div>
+
+
+            {/* Error */}
+
             {error && (
-  <p className="text-red-500 text-center text-sm">
-    {error}
-  </p>
-)}
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-red-100
+                  bg-red-50
+                  px-4
+                  py-3
+                  text-center
+                  text-sm
+                  font-medium
+                  text-red-600
+                "
+              >
+                {error}
+              </div>
+            )}
+
+
+            {/* Submit */}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-purple-600 cursor-pointer hover:bg-purple-700 text-white py-3 rounded-xl font-semibold disabled:opacity-50"
+              className="
+                register-button
+                flex
+                w-full
+                items-center
+                justify-center
+                gap-3
+                rounded-xl
+                bg-gradient-to-r
+                from-purple-600
+                to-indigo-600
+                py-3.5
+                font-bold
+                text-white
+                shadow-lg
+                shadow-purple-200
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
-              {loading ? "Creating Account..." : "Create Account"}
+
+              <span className="relative z-10 flex items-center gap-2">
+
+                {loading
+                  ? "Creating Account..."
+                  : "Create Account"}
+
+                {!loading && (
+                  <FaArrowRight className="text-sm" />
+                )}
+
+              </span>
+
             </button>
-            <p className="text-center text-gray-600">
+
+
+            {/* Login */}
+
+            <p className="pt-2 text-center text-sm text-gray-500">
+
               Already have an account?{" "}
-              <Link to="/" className="text-purple-600 font-semibold">
+
+              <Link
+                to="/"
+                className="
+                  font-bold
+                  text-purple-600
+                  transition
+                  hover:text-purple-800
+                "
+              >
                 Login
               </Link>
+
             </p>
+
           </form>
+
         </div>
+
       </div>
+
     </div>
   );
 };

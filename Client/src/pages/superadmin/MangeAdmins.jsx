@@ -22,6 +22,9 @@ import {
   FaUsers,
   FaArrowRight,
   FaEllipsisV,
+  FaGift,
+  FaCreditCard,
+  FaCrown,
 } from "react-icons/fa";
 
 const initialForm = {
@@ -38,6 +41,7 @@ function ManageAdmins() {
 
   const [admins, setAdmins] = useState([]);
   const [clients, setClients] = useState([]);
+  const [subscriptionsMap, setSubscriptionsMap] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState(null);
@@ -50,19 +54,28 @@ function ManageAdmins() {
   const [showModal, setShowModal] = useState(false);
   const [deleteConfirmAdmin, setDeleteConfirmAdmin] = useState(null);
 
-  // Fetch all admins and clients to compute assignments
+  // Fetch all admins, clients and subscription overview
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [adminsRes, clientsRes] = await Promise.all([
+      const [adminsRes, clientsRes, subRes] = await Promise.all([
         axiosInstance.get("/admin/getAllAdmins"),
         axiosInstance.get("/users/getUserByFilter", {
           params: { userType: "User", limit: "All" },
         }),
+        axiosInstance.get("/subscriptions/admin-overview").catch(() => ({ data: { data: { admins: [] } } })),
       ]);
 
       setAdmins(adminsRes.data?.data || []);
       setClients(clientsRes.data?.data || []);
+
+      const subMap = {};
+      (subRes.data?.data?.admins || []).forEach((item) => {
+        if (item.admin?._id) {
+          subMap[item.admin._id] = item;
+        }
+      });
+      setSubscriptionsMap(subMap);
     } catch (error) {
       console.error("Error fetching admin data:", error);
       toast.error(error.response?.data?.message || "Failed to load studio admins");
@@ -313,6 +326,7 @@ function ManageAdmins() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50 text-[11px] uppercase tracking-wider text-gray-400 font-bold">
                   <th className="px-6 py-4">Studio Administrator</th>
+                  <th className="px-6 py-4">Subscription</th>
                   <th className="px-6 py-4">Contact Info</th>
                   <th className="px-6 py-4">Location</th>
                   <th className="px-6 py-4">Assigned Clients</th>
@@ -324,6 +338,10 @@ function ManageAdmins() {
                 {filteredAdmins.map((adm) => {
                   const clientCount = getClientCountForAdmin(adm._id);
                   const isActionLoading = actionLoadingId === adm._id;
+                  const subData = subscriptionsMap[adm._id];
+                  const isFree = subData?.isFreeGrant || subData?.status === "free_grant" || subData?.status === "lifetime_free";
+                  const isPaid = subData?.status === "active_paid";
+                  const isTrial = subData?.status === "trial";
 
                   return (
                     <tr
@@ -357,6 +375,34 @@ function ManageAdmins() {
                             <span className="text-xs text-gray-500">{adm.email}</span>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Subscription Status */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          to="/super-admin/subscription-plans"
+                          className="inline-block"
+                        >
+                          {isFree ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold hover:bg-amber-200 transition">
+                              <FaCrown className="text-amber-600 text-[10px]" />
+                              <span>{subData?.isLifetime ? "VIP Lifetime" : "VIP Free"}</span>
+                            </span>
+                          ) : isPaid ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold hover:bg-emerald-200 transition">
+                              <FaCheck className="text-emerald-600 text-[10px]" />
+                              <span>Active Paid</span>
+                            </span>
+                          ) : isTrial ? (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold hover:bg-indigo-200 transition">
+                              <span>Trial ({subData?.daysRemaining || 0}d)</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold hover:bg-red-200 transition">
+                              <span>Expired</span>
+                            </span>
+                          )}
+                        </Link>
                       </td>
 
                       {/* Contact Info */}
@@ -428,7 +474,14 @@ function ManageAdmins() {
 
                       {/* Actions */}
                       <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link
+                            to="/super-admin/subscription-plans"
+                            title="Manage / Grant Subscription"
+                            className="p-2 rounded-xl text-amber-600 hover:bg-amber-50 transition"
+                          >
+                            <FaGift />
+                          </Link>
                           <button
                             onClick={() => handleEdit(adm)}
                             title="Edit Admin"

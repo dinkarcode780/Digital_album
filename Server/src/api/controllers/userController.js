@@ -35,6 +35,8 @@ export const userRegister = asyncHandler(async (req, res) => {
     email,
     password: hashPassword,
     phoneNumber,
+    subscriptionStatus: "trial",
+    trialEndsAt: new Date(Date.now() + Number(process.env.SUBSCRIPTION_TRIAL_DAYS || 7) * 24 * 60 * 60 * 1000),
   });
 
   res.status(201).json({

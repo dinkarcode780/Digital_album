@@ -21,6 +21,7 @@ import {
   FaFolder,
   FaUserPlus,
   FaHeart,
+  FaCreditCard,
 } from "react-icons/fa";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -86,6 +87,11 @@ const menus = [
     name: "Settings",
     path: "/admin/settings",
     icon: <FaCog />,
+  },
+  {
+    name: "Subscription",
+    path: "/admin/subscription",
+    icon: <FaCreditCard />,
   },
 ];
 

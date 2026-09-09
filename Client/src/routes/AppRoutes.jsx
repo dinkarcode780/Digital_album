@@ -30,6 +30,7 @@ import BlogDetails from "../pages/user/BlogDetails";
 import Booking from "../pages/user/Booking";
 import BookingDetails from "../pages/user/BookingDetails";
 import Support from "../pages/user/Support";
+import AdminSubscription from "../pages/admin/Subscription";
 
 // Admin Pages
 import AdminDashboard from "../pages/admin/AdminDashboard";
@@ -58,6 +59,7 @@ import MangeClient from "../pages/superadmin/MangeClient";
 import SuperSetting from "../pages/superadmin/SuperSetting";
 import SuperAdminMedia from "../pages/superadmin/SuperAdminMedia";
 import SuperAdminEvents from "../pages/superadmin/SuperAdminEvents";
+import SubscriptionPlans from "../pages/superadmin/SubscriptionPlans";
 
 const AppRoutes = () => {
   return (
@@ -123,6 +125,7 @@ const AppRoutes = () => {
             <Route path="/super-admin/events" element={<SuperAdminEvents />} />
             <Route path="/super-admin/categories" element={<Categories />} />
             <Route path="/super-admin/settings" element={<SuperSetting />} />
+            <Route path="/super-admin/subscription-plans" element={<SubscriptionPlans />} />
           </Route>
         </Route>
       </Route>
@@ -227,6 +230,7 @@ const AppRoutes = () => {
               path="/admin/notifications"
               element={<NotificationsPage />}
             />
+            <Route path="/admin/subscription" element={<AdminSubscription />} />
   <Route path="/admin/adminfavorite" element={<AdminFavorites />} />
 
 

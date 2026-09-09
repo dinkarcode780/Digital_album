@@ -62,9 +62,15 @@ const allowedTypes = [
   "image/png",
   "image/jpg",
   "video/mp4",
+  "video/quicktime",
+  "video/x-matroska",
   "video/mkv",
   "video/webm",
   "video/avi",
+  "video/x-msvideo",
+  "video/x-m4v",
+  "video/3gpp",
+  "video/3gpp2",
 ];
 
 export const upload = multer({
@@ -78,9 +84,9 @@ export const upload = multer({
     }
   },
 
-  limits: {
-    fileSize: 200 * 1024 * 1024,
-  },
+  // limits: {
+  //   fileSize: 200 * 1024 * 1024,
+  // },
 });
 
 //--- ye wala
