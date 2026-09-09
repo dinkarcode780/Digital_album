@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaShieldAlt,
   FaCreditCard,
+  FaStore,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "../../../app/admin/adminThunk";
@@ -21,6 +22,12 @@ export const superAdminMenus = [
     path: "/super-admin/dashboard",
     icon: <FaTachometerAlt />,
     badge: null,
+  },
+  {
+    name: "Studio Showcases",
+    path: "/super-admin/studio-showcases",
+    icon: <FaStore />,
+    badge: "Public",
   },
   {
     name: "Studio Admins",
@@ -53,15 +60,15 @@ export const superAdminMenus = [
     badge: null,
   },
   {
-    name: "Settings",
-    path: "/super-admin/settings",
-    icon: <FaCog />,
-    badge: null,
-  },
-  {
     name: "Subscription Plans",
     path: "/super-admin/subscription-plans",
     icon: <FaCreditCard />,
+    badge: null,
+  },
+  {
+    name: "Settings",
+    path: "/super-admin/settings",
+    icon: <FaCog />,
     badge: null,
   },
 ];

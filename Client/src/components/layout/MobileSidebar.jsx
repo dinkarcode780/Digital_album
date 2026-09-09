@@ -16,9 +16,9 @@ import {
 
 const menuItems = [
   {
-    name: "Dashboard",
-    path: "/",
-    icon: <FaHome />,
+    name: "Explore Studios",
+    path: "/studios",
+    icon: <FaImages />,
   },
   {
     name: "My Albums",

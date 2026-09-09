@@ -19,6 +19,7 @@ import {
   FaUserPlus,
   FaHeart,
   FaCreditCard,
+  FaStore,
 } from "react-icons/fa";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +32,11 @@ const menus = [
     icon: <FaTachometerAlt />,
   },
   {
+    name: "Showcase & Profile",
+    path: "/admin/studio-profile",
+    icon: <FaStore />,
+  },
+  {
     name: "Bookings",
     path: "/admin/bookings",
     icon: <FaCalendarCheck />,
@@ -40,26 +46,6 @@ const menus = [
     path: "/admin/users",
     icon: <FaUsers />,
   },
-  // {
-  //   name: "Categories",
-  //   path: "/admin/categories",
-  //   icon: <FaFolder />,
-  // },
-  // {
-  //   name: "Sub Categories",
-  //   path: "/admin/sub-categories",
-  //   icon: <FaLayerGroup />,
-  // },
-  // {
-  //   name: "Upload Media",
-  //   path: "/admin/media",
-  //   icon: <FaImages />,
-  // },
-  // {
-  //     name: "Albums",
-  //     path: "/admin/albums",
-  //     icon: <FaImages />,
-  //   },
   {
     name: "Services",
     path: "/admin/services",

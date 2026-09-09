@@ -59,21 +59,31 @@ import MangeClient from "../pages/superadmin/MangeClient";
 import SuperSetting from "../pages/superadmin/SuperSetting";
 import SuperAdminMedia from "../pages/superadmin/SuperAdminMedia";
 import SuperAdminEvents from "../pages/superadmin/SuperAdminEvents";
+// Public & Studio Showcase
+import PublicStudiosDirectory from "../pages/public/PublicStudiosDirectory";
+import StudioPublicProfile from "../pages/public/StudioPublicProfile";
+import StudioProfileManager from "../pages/admin/StudioProfileManager";
+import SuperAdminStudioShowcases from "../pages/superadmin/SuperAdminStudioShowcases";
 import SubscriptionPlans from "../pages/superadmin/SubscriptionPlans";
+
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* ================= OPEN PUBLIC SHOWCASES (No Login Required) ================= */}
+      <Route path="/" element={<PublicStudiosDirectory />} />
+      <Route path="/studios" element={<PublicStudiosDirectory />} />
+      <Route path="/studio/:id" element={<StudioPublicProfile />} />
 
-      {/* ================= PUBLIC ================= */}
-
+      {/* ================= PUBLIC AUTH ================= */}
       <Route element={<PublicRoute />}>
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/users/register" element={<Register />} />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
-         <Route path="/invite/:token" element={<InvitePage />} />
+        <Route path="/invite/:token" element={<InvitePage />} />
       </Route>
+
 
       {/* ================= USER ================= */}
 
@@ -126,6 +136,7 @@ const AppRoutes = () => {
             <Route path="/super-admin/categories" element={<Categories />} />
             <Route path="/super-admin/settings" element={<SuperSetting />} />
             <Route path="/super-admin/subscription-plans" element={<SubscriptionPlans />} />
+            <Route path="/super-admin/studio-showcases" element={<SuperAdminStudioShowcases />} />
           </Route>
         </Route>
       </Route>
@@ -231,13 +242,11 @@ const AppRoutes = () => {
               element={<NotificationsPage />}
             />
             <Route path="/admin/subscription" element={<AdminSubscription />} />
-  <Route path="/admin/adminfavorite" element={<AdminFavorites />} />
-
-
+            <Route path="/admin/adminfavorite" element={<AdminFavorites />} />
+            <Route path="/admin/studio-profile" element={<StudioProfileManager />} />
           </Route>
         </Route>
       </Route>
-
     </Routes>
   );
 };

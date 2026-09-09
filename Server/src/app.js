@@ -4,12 +4,9 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
-
 const app = express();
 
-
 // import Routes
-
 import userRoute from "./api/routes/userRoute.js";
 import eventRoute from "./api/routes/eventRoute.js";
 import eventCategoryRoute from "./api/routes/eventCategoryRoute.js";
@@ -25,42 +22,36 @@ import blogRoute from "./api/routes/blogRoute.js";
 import userslectedMediaRoute from "./api/routes/userslectedMediaRoute.js";
 import subscriptionRoute from "./api/routes/subscriptionRoute.js";
 import subscriptionWebhookRoute from "./api/routes/subscriptionWebhookRoute.js";
-
-
+import publicStudioRoute from "./api/routes/publicStudioRoute.js";
+import studioShowcaseRoute from "./api/routes/studioShowcaseRoute.js";
 
 app.use("/api/subscriptions/webhook", express.raw({ type: "application/json" }), subscriptionWebhookRoute);
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 app.use(cors({
-    // origin: ["http://localhost:5173"],
-    // origin: ["https://digital-album-ten.vercel.app","https://digital-album-ten.vercel.app/","http://localhost:5173"],
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: process.env.CLIENT_URL || true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  }));
+}));
 
-
-// User routes
-
-app.use("/api",userRoute);
-app.use("/api",eventRoute);
-app.use("/api",eventCategoryRoute);
-app.use("/api",subcategoryRoute);
-app.use("/api",mediaRoute);
-app.use("/api",adminRoute);
-app.use("/api",inviteRoute);
-app.use("/api",aboutRoute);
-app.use("/api",serviceRoute)
-app.use("/api",companyRoute);
-app.use("/api",memberRoute);
-app.use("/api",blogRoute);
-app.use("/api",userslectedMediaRoute);
+// API routes
+app.use("/api", publicStudioRoute);
+app.use("/api", studioShowcaseRoute);
+app.use("/api", userRoute);
+app.use("/api", eventRoute);
+app.use("/api", eventCategoryRoute);
+app.use("/api", subcategoryRoute);
+app.use("/api", mediaRoute);
+app.use("/api", adminRoute);
+app.use("/api", inviteRoute);
+app.use("/api", aboutRoute);
+app.use("/api", serviceRoute);
+app.use("/api", companyRoute);
+app.use("/api", memberRoute);
+app.use("/api", blogRoute);
+app.use("/api", userslectedMediaRoute);
 app.use("/api", subscriptionRoute);
-
-
-
-
 
 export default app;

@@ -7,6 +7,10 @@ const Navbar = () => {
       path: "/",
     },
     {
+      name: "Explore Studios",
+      path: "/studios",
+    },
+    {
       name: "Albums",
       path: "/albums",
     },
