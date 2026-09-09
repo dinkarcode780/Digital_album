@@ -78,16 +78,16 @@ export default function PublicStudiosDirectory() {
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 flex flex-col font-sans">
       {/* Public Top Navbar */}
       <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-purple-200">
-              <FaCamera className="text-xl" />
+        <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+          <Link to="/" className="flex min-w-0 shrink items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-purple-200">
+              <FaCamera className="text-base sm:text-xl" />
             </div>
-            <div>
-              <span className="text-2xl font-black bg-gradient-to-r from-purple-700 to-indigo-600 bg-clip-text text-transparent">
+            <div className="min-w-0">
+              <span className="block truncate text-xl sm:text-2xl font-black bg-gradient-to-r from-purple-700 to-indigo-600 bg-clip-text text-transparent">
                 Album Studio
               </span>
-              <span className="text-[10px] font-bold text-gray-400 block uppercase tracking-wider">
+              <span className="hidden sm:block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 Public Studios Marketplace
               </span>
             </div>
@@ -104,11 +104,11 @@ export default function PublicStudiosDirectory() {
           </div>
 
           {/* Auth Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             {user || admin ? (
               <Link
                 to={admin ? (admin.userType === "SuperAdmin" ? "/super-admin/dashboard" : "/admin/dashboard") : "/user/dashboard"}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md shadow-purple-500/20 transition"
+                className="whitespace-nowrap bg-purple-600 hover:bg-purple-700 px-2.5 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-bold text-white shadow-md shadow-purple-500/20 transition"
               >
                 Go to Dashboard
               </Link>
@@ -116,15 +116,16 @@ export default function PublicStudiosDirectory() {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-xs font-bold text-gray-700 hover:text-purple-600 transition"
+                  className="whitespace-nowrap px-2 py-2 sm:px-4 text-[10px] sm:text-xs font-bold text-gray-700 hover:text-purple-600 transition"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/admin/register"
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md shadow-purple-500/20 transition"
+                  className="whitespace-nowrap bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-2.5 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-bold text-white shadow-md shadow-purple-500/20 transition"
                 >
-                  Studio Partner Register
+                  <span className="sm:hidden">Partner Register</span>
+                  <span className="hidden sm:inline">Studio Partner Register</span>
                 </Link>
               </>
             )}
