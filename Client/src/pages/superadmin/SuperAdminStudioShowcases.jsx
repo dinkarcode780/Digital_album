@@ -33,7 +33,7 @@ const SuperAdminStudioShowcases = () => {
   const fetchShowcases = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/admin/showcase/superadmin/studios");
+      const res = await axiosInstance.get("/super-admin/studio-showcases");
       if (res.data?.success) {
         setShowcases(res.data.data || []);
       }
@@ -52,7 +52,7 @@ const SuperAdminStudioShowcases = () => {
   const handleToggleFeatured = async (adminId) => {
     try {
       setActionLoading(true);
-      const res = await axiosInstance.put(`/admin/showcase/superadmin/studios/${adminId}/toggle-featured`);
+      const res = await axiosInstance.patch(`/super-admin/studio-showcase/${adminId}/feature`);
       if (res.data?.success) {
         toast.success(res.data.message);
         setShowcases((prev) =>
@@ -73,7 +73,7 @@ const SuperAdminStudioShowcases = () => {
   const handleTogglePublic = async (adminId) => {
     try {
       setActionLoading(true);
-      const res = await axiosInstance.put(`/admin/showcase/superadmin/studios/${adminId}/toggle-public`);
+      const res = await axiosInstance.patch(`/super-admin/studio-showcase/${adminId}/visibility`);
       if (res.data?.success) {
         toast.success(res.data.message);
         setShowcases((prev) =>
