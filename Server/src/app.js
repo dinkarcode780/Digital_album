@@ -24,6 +24,7 @@ import subscriptionRoute from "./api/routes/subscriptionRoute.js";
 import subscriptionWebhookRoute from "./api/routes/subscriptionWebhookRoute.js";
 import publicStudioRoute from "./api/routes/publicStudioRoute.js";
 import studioShowcaseRoute from "./api/routes/studioShowcaseRoute.js";
+import bookingRoute from "./api/routes/bookingRoute.js";
 
 app.use("/api/subscriptions/webhook", express.raw({ type: "application/json" }), subscriptionWebhookRoute);
 app.use(express.json());
@@ -39,6 +40,7 @@ app.use(cors({
 // API routes
 app.use("/api", publicStudioRoute);
 app.use("/api", studioShowcaseRoute);
+app.use("/api", bookingRoute);
 app.use("/api", userRoute);
 app.use("/api", eventRoute);
 app.use("/api", eventCategoryRoute);

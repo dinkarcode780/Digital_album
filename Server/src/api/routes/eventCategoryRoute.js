@@ -13,9 +13,9 @@ const router = express.Router();
 
 router.post("/admin/createEventCategory",isAdmin,upload.single("categoryImage"), createEventCategory);
 router.put("/admin/updateEventCategory", isAdmin,upload.single("categoryImage"),updateEventCategory);
-router.get("/admin/getEventCategoryById", isUser, getEventCategoryById);
+router.get("/admin/getEventCategoryById", getEventCategoryById);
+router.get("/admin/geteventCategoryByFilter", getEventCategoryByFilter);
+router.get("/public/categories", getEventCategoryByFilter);
 
-router.get("/admin/geteventCategoryByFilter", isUser, getEventCategoryByFilter);
-
-router.delete("/admin/deleteEventCategory", isAdmin,deleteEventCategory);
+router.delete("/admin/deleteEventCategory", isAdmin, deleteEventCategory);
 export default router;

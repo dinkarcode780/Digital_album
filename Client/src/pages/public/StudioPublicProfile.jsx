@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createBooking,
+  createBookingRazorpayOrder,
+  verifyBookingRazorpayPayment,
+} from "../../app/booking/bookingThunk";
+import { getEventCategoryByFilter } from "../../app/category/categoryThunk";
 import {
   FaMapMarkerAlt,
   FaStar,
@@ -25,14 +32,38 @@ import {
   FaQuoteLeft,
   FaChevronRight,
   FaInfoCircle,
+  FaCreditCard,
+  FaMoneyBillWave,
+  FaQrcode,
+  FaShieldAlt,
+  FaBolt,
+  FaUserCheck,
+  FaLock,
+  FaMobileAlt,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import axiosInstance from "../../config/axios";
 import Footer from "../../components/layout/Footer";
 
+// Helper to load Razorpay Checkout Script
+const loadRazorpay = () =>
+  new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
 export default function StudioPublicProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, token } = useSelector((state) => state.auth);
+  const { loading: bookingLoading } = useSelector((state) => state.booking);
+  const { eventCategories = [] } = useSelector((state) => state.eventCategory);
 
   const [studio, setStudio] = useState(null);
   const [services, setServices] = useState([]);
@@ -46,23 +77,28 @@ export default function StudioPublicProfile() {
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [activeLightboxImage, setActiveLightboxImage] = useState(null);
 
-  // Booking Modal
+  // Booking Modal State
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
+  const [paymentOption, setPaymentOption] = useState("pay_later"); // 'pay_now' | 'pay_later'
+  const [paymentMethod, setPaymentMethod] = useState("Razorpay Online");
+  const [advanceAmount, setAdvanceAmount] = useState(1000);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+
   const [bookingForm, setBookingForm] = useState({
     clientName: "",
     clientEmail: "",
     clientPhone: "",
-    eventType: "Wedding Photography",
+    eventType: "",
     eventDate: "",
     eventEndDate: "",
     location: "",
     notes: "",
   });
-  const [bookingSubmitting, setBookingSubmitting] = useState(false);
 
-  // Check auth
-  const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  // Effective authenticated user
+  const currentUser = user || JSON.parse(localStorage.getItem("user") || "null");
+  const isAuthenticated = Boolean(token || localStorage.getItem("token") || currentUser);
 
   useEffect(() => {
     if (currentUser) {
@@ -73,7 +109,43 @@ export default function StudioPublicProfile() {
         clientPhone: currentUser.phoneNumber ? String(currentUser.phoneNumber) : "",
       }));
     }
-  }, []);
+  }, [user]);
+
+  // Fetch dynamic categories on mount
+  useEffect(() => {
+    dispatch(getEventCategoryByFilter({ page: 1, limit: 100 }));
+  }, [dispatch]);
+
+  // Set default event type when categories load
+  useEffect(() => {
+    if (eventCategories.length > 0 && !bookingForm.eventType) {
+      setBookingForm((prev) => ({
+        ...prev,
+        eventType: eventCategories[0].name,
+      }));
+    }
+  }, [eventCategories]);
+
+  // Handle return after login for pending booking
+  useEffect(() => {
+    const pending = localStorage.getItem("pendingBooking");
+    if (pending && isAuthenticated) {
+      try {
+        const parsed = JSON.parse(pending);
+        setBookingForm((prev) => ({
+          ...prev,
+          ...parsed,
+          clientName: currentUser?.name || parsed.clientName || "",
+          clientEmail: currentUser?.email || parsed.clientEmail || "",
+          clientPhone: currentUser?.phoneNumber ? String(currentUser.phoneNumber) : (parsed.clientPhone || ""),
+        }));
+        setShowBookingModal(true);
+        localStorage.removeItem("pendingBooking");
+      } catch (e) {
+        localStorage.removeItem("pendingBooking");
+      }
+    }
+  }, [isAuthenticated]);
 
   const loadStudioDetails = async () => {
     try {
@@ -97,29 +169,45 @@ export default function StudioPublicProfile() {
   }, [id]);
 
   const handleOpenBooking = (service = null) => {
-    setSelectedService(service);
-    if (service) {
-      setBookingForm((prev) => ({
-        ...prev,
-        eventType: service.title || prev.eventType,
-      }));
+    if (!isAuthenticated) {
+      toast.info("Please log in first to book a photoshoot session with this studio!");
+      localStorage.setItem(
+        "pendingBooking",
+        JSON.stringify({
+          eventType: service?.title || "Wedding Photography",
+          totalAmount: service?.price || 0,
+        })
+      );
+      navigate(`/login?redirect=/studio/${id}`);
+      return;
     }
+
+    setSelectedService(service);
+    const servicePrice = service?.price || 0;
+    setBookingForm((prev) => ({
+      ...prev,
+      clientName: currentUser?.name || prev.clientName || "",
+      clientEmail: currentUser?.email || prev.clientEmail || "",
+      clientPhone: currentUser?.phoneNumber ? String(currentUser.phoneNumber) : prev.clientPhone || "",
+      eventType: service?.title || prev.eventType || (eventCategories[0]?.name || "Wedding Photography"),
+    }));
+
+    if (servicePrice > 0) {
+      setAdvanceAmount(Math.min(1000, servicePrice));
+    } else {
+      setAdvanceAmount(1000);
+    }
+
+    setPaymentOption("pay_later");
+    setPaymentMethod("Pay Later at Shoot");
     setShowBookingModal(true);
   };
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
-    if (!currentUser) {
-      toast.info("Please sign in or register to complete your booking with this studio!");
-      // Save intended booking state in localStorage so we can resume
-      localStorage.setItem(
-        "pendingBooking",
-        JSON.stringify({
-          adminId: studio?.adminId?._id || studio?.adminId,
-          ...bookingForm,
-        })
-      );
+    if (!isAuthenticated) {
+      toast.error("Please login to proceed with booking!");
       navigate(`/login?redirect=/studio/${id}`);
       return;
     }
@@ -129,24 +217,154 @@ export default function StudioPublicProfile() {
       return;
     }
 
+    const adminId = studio?.adminId?._id || studio?.adminId;
+
+    // ==========================================
+    // 1. PAY NOW FLOW WITH RAZORPAY
+    // ==========================================
+    if (paymentOption === "pay_now") {
+      try {
+        setPaymentProcessing(true);
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
+          toast.error("Razorpay payment gateway failed to load. Please check your internet connection.");
+          setPaymentProcessing(false);
+          return;
+        }
+
+        // Create Razorpay Order on server
+        const orderRes = await axiosInstance.post("/booking/razorpay/order", {
+          amount: advanceAmount,
+          clientName: bookingForm.clientName,
+        });
+
+        const orderData = orderRes.data;
+        if (!orderData.success || !orderData.orderId) {
+          throw new Error(orderData.message || "Failed to initialize Razorpay order");
+        }
+
+        // Launch Razorpay Checkout Popup
+        const options = {
+          key: orderData.keyId || process.env.REACT_APP_RAZORPAY_KEY_ID,
+          amount: orderData.amount,
+          currency: orderData.currency || "INR",
+          name: studio?.studioName || "Album Studio",
+          description: `Advance Shoot Booking for ${bookingForm.eventType}`,
+          image: studio?.adminId?.profileImage || "",
+          order_id: orderData.orderId,
+          prefill: {
+            name: bookingForm.clientName,
+            email: bookingForm.clientEmail || currentUser?.email || "",
+            contact: bookingForm.clientPhone,
+          },
+          theme: {
+            color: "#7c3aed",
+          },
+          handler: async (response) => {
+            try {
+              // 1. Save booking in database with Razorpay transaction IDs
+              const bookingPayload = {
+                adminId,
+                serviceId: selectedService?._id || null,
+                clientName: bookingForm.clientName,
+                clientPhone: bookingForm.clientPhone,
+                clientEmail: bookingForm.clientEmail || currentUser?.email || "",
+                eventType: bookingForm.eventType,
+                shootDate: bookingForm.eventDate,
+                shootEndDate: bookingForm.eventEndDate || null,
+                location: bookingForm.location,
+                notes: bookingForm.notes,
+                paymentOption: "pay_now",
+                paymentStatus: "Advance Paid",
+                advanceAmount,
+                totalAmount: selectedService?.price || 0,
+                paymentMethod: "Razorpay Online",
+                transactionId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              };
+
+              const createRes = await dispatch(createBooking(bookingPayload));
+              const createdBooking = createRes.payload?.data;
+
+              // 2. Verify payment HMAC signature on backend
+              await dispatch(
+                verifyBookingRazorpayPayment({
+                  bookingId: createdBooking?._id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                })
+              );
+
+              toast.success(`🎉 Payment of ₹${advanceAmount.toLocaleString("en-IN")} Successful! Booking confirmed.`);
+              setShowBookingModal(false);
+              setSelectedService(null);
+            } catch (err) {
+              console.error("Booking verification error:", err);
+              toast.error("Payment was captured but booking sync encountered an issue.");
+            } finally {
+              setPaymentProcessing(false);
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              setPaymentProcessing(false);
+              toast.info("Payment was cancelled. You can retry or choose Pay Later.");
+            },
+          },
+        };
+
+        const razorpayInstance = new window.Razorpay(options);
+        razorpayInstance.on("payment.failed", (failRes) => {
+          setPaymentProcessing(false);
+          toast.error(`Payment failed: ${failRes.error?.description || "Transaction declined"}`);
+        });
+        razorpayInstance.open();
+      } catch (err) {
+        console.error("Razorpay start error:", err);
+        toast.error(err.response?.data?.message || err.message || "Failed to start Razorpay payment");
+        setPaymentProcessing(false);
+      }
+      return;
+    }
+
+    // ==========================================
+    // 2. PAY LATER FLOW (Direct Booking)
+    // ==========================================
     try {
-      setBookingSubmitting(true);
-      const adminId = studio?.adminId?._id || studio?.adminId;
-
-      await axiosInstance.post("/public/book-inquiry", {
+      const bookingPayload = {
         adminId,
-        ...bookingForm,
         serviceId: selectedService?._id || null,
-      });
+        clientName: bookingForm.clientName,
+        clientPhone: bookingForm.clientPhone,
+        clientEmail: bookingForm.clientEmail,
+        eventType: bookingForm.eventType,
+        shootDate: bookingForm.eventDate,
+        shootEndDate: bookingForm.eventEndDate || null,
+        location: bookingForm.location,
+        notes: bookingForm.notes,
+        paymentOption: "pay_later",
+        paymentStatus: "Pending",
+        advanceAmount: 0,
+        totalAmount: selectedService?.price || 0,
+        paymentMethod: "Pay Later at Shoot",
+        transactionId: "",
+      };
 
-      toast.success("🎉 Shoot booking inquiry submitted successfully! The studio will contact you shortly.");
-      setShowBookingModal(false);
-      setSelectedService(null);
-    } catch (error) {
-      console.error("Booking error:", error);
-      toast.error(error.response?.data?.message || "Failed to submit booking inquiry");
-    } finally {
-      setBookingSubmitting(false);
+      const result = await dispatch(createBooking(bookingPayload));
+
+      if (createBooking.fulfilled.match(result)) {
+        toast.success("🎉 Shoot booking submitted successfully! Pay on shoot date.");
+        setShowBookingModal(false);
+        setSelectedService(null);
+      } else {
+        toast.error(result.payload?.message || "Failed to submit booking");
+      }
+    } catch (err) {
+      console.error("Booking error:", err);
+      toast.error("Failed to submit booking inquiry");
     }
   };
 
@@ -738,66 +956,80 @@ export default function StudioPublicProfile() {
       {/* MODAL: BOOK STUDIO SHOOT */}
       {/* ========================================================================= */}
       {showBookingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b pb-4 mb-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 shadow-2xl border border-gray-100 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b pb-4 mb-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-bold mb-1">
+                  <FaCamera className="text-[11px]" />
+                  <span>Verified Studio Shoot Booking</span>
+                </span>
+                <h3 className="text-xl font-black text-gray-900 leading-tight">
                   Book Shoot with {studio.studioName}
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {selectedService ? `Package: ${selectedService.title}` : "Direct Shoot Inquiry"}
+                  {selectedService
+                    ? `Package: ${selectedService.title} (${selectedService.price > 0 ? `₹${selectedService.price.toLocaleString("en-IN")}` : "Custom Quote"})`
+                    : "Direct Custom Shoot Booking"}
                 </p>
               </div>
               <button
                 onClick={() => setShowBookingModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition"
+                className="p-2 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition text-base"
               >
                 <FaTimes />
               </button>
             </div>
 
-            {!currentUser && (
-              <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2.5">
-                <FaInfoCircle className="text-amber-600 text-sm mt-0.5 shrink-0" />
-                <span>
-                  <strong>Note:</strong> You will be asked to sign in/register so this studio can link your album dashboard and event gallery!
+            {/* Authenticated User Status */}
+            {currentUser && (
+              <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 font-semibold">
+                  <FaUserCheck className="text-emerald-600 text-sm shrink-0" />
+                  <span>
+                    Logged in as <strong>{currentUser.name || currentUser.email}</strong>
+                  </span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold uppercase tracking-wider">
+                  Verified User
                 </span>
               </div>
             )}
 
             <form onSubmit={handleBookingSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Your Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Rahul Sharma"
-                  value={bookingForm.clientName}
-                  onChange={(e) => setBookingForm({ ...bookingForm, clientName: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                    Contact Phone *
+              {/* Client Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Your Full Name *
                   </label>
                   <input
-                    type="tel"
+                    type="text"
                     required
-                    placeholder="10-digit mobile"
-                    value={bookingForm.clientPhone}
-                    onChange={(e) => setBookingForm({ ...bookingForm, clientPhone: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
+                    placeholder="e.g. Rahul Sharma"
+                    value={bookingForm.clientName}
+                    onChange={(e) => setBookingForm({ ...bookingForm, clientName: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Contact Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="10-digit mobile number"
+                    value={bookingForm.clientPhone}
+                    onChange={(e) => setBookingForm({ ...bookingForm, clientPhone: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Email Address
                   </label>
                   <input
@@ -805,32 +1037,42 @@ export default function StudioPublicProfile() {
                     placeholder="name@email.com"
                     value={bookingForm.clientEmail}
                     onChange={(e) => setBookingForm({ ...bookingForm, clientEmail: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Event / Shoot Type *
-                </label>
-                <select
-                  value={bookingForm.eventType}
-                  onChange={(e) => setBookingForm({ ...bookingForm, eventType: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
-                >
-                  <option value="Wedding Photography">Wedding Photography</option>
-                  <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
-                  <option value="Engagement & Ring Ceremony">Engagement & Ring Ceremony</option>
-                  <option value="Birthday & Celebration">Birthday & Celebration</option>
-                  <option value="Cinematic Video & Drone Shoot">Cinematic Video & Drone Shoot</option>
-                  <option value="Fashion / Commercial Shoot">Fashion / Commercial Shoot</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Event Type & Dates */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Event / Shoot Type *
+                  </label>
+                  <select
+                    value={bookingForm.eventType}
+                    onChange={(e) => setBookingForm({ ...bookingForm, eventType: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
+                  >
+                    {eventCategories.length > 0 ? (
+                      eventCategories.map((cat) => (
+                        <option key={cat._id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Wedding Photography">Wedding Photography</option>
+                        <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
+                        <option value="Engagement & Ring Ceremony">Engagement & Ring Ceremony</option>
+                        <option value="Birthday & Celebration">Birthday & Celebration</option>
+                        <option value="Cinematic Video & Drone Shoot">Cinematic Video & Drone Shoot</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
                     Shoot Date *
                   </label>
                   <input
@@ -838,52 +1080,202 @@ export default function StudioPublicProfile() {
                     required
                     value={bookingForm.eventDate}
                     onChange={(e) => setBookingForm({ ...bookingForm, eventDate: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                    Event City / Venue
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Shoot Location / Venue (City / Hall)
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Hotel Grand, Jaipur"
+                    placeholder="e.g. Hotel Grand Hyatt, Jaipur or Studio Location"
                     value={bookingForm.location}
                     onChange={(e) => setBookingForm({ ...bookingForm, location: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Special Requirements or Notes
+                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Special Requirements / Notes (Optional)
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="e.g. Number of functions, 4K Drone requirement..."
+                  placeholder="e.g. 2-day coverage, Drone 4K requirement, album design preferences..."
                   value={bookingForm.notes}
                   onChange={(e) => setBookingForm({ ...bookingForm, notes: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white text-sm"
+                  className="w-full px-4 py-2 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-xs transition"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t">
+              {/* ========================================================= */}
+              {/* PAYMENT OPTION SECTION: PAY NOW VS PAY LATER */}
+              {/* ========================================================= */}
+              <div className="pt-3 border-t border-gray-100">
+                <label className="block text-xs font-black text-gray-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Choose Payment Option</span>
+                  <span className="text-[11px] font-normal text-purple-600 flex items-center gap-1">
+                    <FaShieldAlt className="text-[11px]" /> 100% Safe & Secure
+                  </span>
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  {/* Option 1: Pay Later */}
+                  <div
+                    onClick={() => {
+                      setPaymentOption("pay_later");
+                      setPaymentMethod("Pay Later at Shoot");
+                    }}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between ${
+                      paymentOption === "pay_later"
+                        ? "border-purple-600 bg-purple-50/50 shadow-sm ring-2 ring-purple-500/20"
+                        : "border-gray-200 hover:border-purple-200 bg-gray-50/60"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-900">
+                          <FaMoneyBillWave
+                            className={paymentOption === "pay_later" ? "text-purple-600" : "text-gray-400"}
+                          />
+                          <span>Pay Later</span>
+                        </div>
+                        <input
+                          type="radio"
+                          name="payment_opt"
+                          checked={paymentOption === "pay_later"}
+                          onChange={() => {}}
+                          className="accent-purple-600 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 leading-snug">
+                        Pay on shoot date or after direct studio confirmation.
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-gray-200/60 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                        ₹0 Advance Today
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Option 2: Pay Now */}
+                  <div
+                    onClick={() => {
+                      setPaymentOption("pay_now");
+                      setPaymentMethod("UPI");
+                    }}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between ${
+                      paymentOption === "pay_now"
+                        ? "border-purple-600 bg-purple-50/50 shadow-sm ring-2 ring-purple-500/20"
+                        : "border-gray-200 hover:border-purple-200 bg-gray-50/60"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-900">
+                          <FaCreditCard
+                            className={paymentOption === "pay_now" ? "text-purple-600" : "text-gray-400"}
+                          />
+                          <span>Pay Advance Now</span>
+                        </div>
+                        <input
+                          type="radio"
+                          name="payment_opt"
+                          checked={paymentOption === "pay_now"}
+                          onChange={() => {}}
+                          className="accent-purple-600 w-4 h-4 cursor-pointer"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 leading-snug">
+                        Instant slot reservation & priority studio booking.
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-gray-200/60 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <FaBolt className="text-[10px]" /> Advance: ₹{advanceAmount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sub-Payment details if "Pay Now" is active */}
+                {paymentOption === "pay_now" && (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 space-y-3 animate-fadeIn">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-purple-900 uppercase tracking-wider">
+                        Select Payment Method:
+                      </span>
+                      <span className="text-xs font-black text-purple-700">
+                        Total Token: ₹{advanceAmount.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: "UPI", label: "UPI / QR", icon: <FaQrcode /> },
+                        { id: "GPay/PhonePe", label: "GPay/PhonePe", icon: <FaMobileAlt /> },
+                        { id: "Cards/NetBanking", label: "Cards/NetBanking", icon: <FaCreditCard /> },
+                      ].map((pm) => (
+                        <button
+                          key={pm.id}
+                          type="button"
+                          onClick={() => setPaymentMethod(pm.id)}
+                          className={`py-2 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border ${
+                            paymentMethod === pm.id
+                              ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                              : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                          }`}
+                        >
+                          <span>{pm.icon}</span>
+                          <span className="truncate">{pm.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white border border-purple-100 flex items-center justify-between text-xs text-gray-700">
+                      <div className="flex items-center gap-2">
+                        <FaLock className="text-purple-600 text-xs" />
+                        <span>
+                          UPI ID:{" "}
+                          <strong className="text-purple-900">
+                            {studio?.email?.split("@")[0] || "studio"}@upi
+                          </strong>
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
+                        Instant Verified
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t">
                 <button
                   type="button"
                   onClick={() => setShowBookingModal(false)}
-                  className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition"
+                  className="px-5 py-2.5 rounded-2xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-100 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={bookingSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold shadow-md shadow-purple-500/20 transition disabled:opacity-50 flex items-center gap-2"
+                  disabled={bookingLoading || paymentProcessing}
+                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm font-bold shadow-lg shadow-purple-500/25 transition disabled:opacity-50 flex items-center gap-2"
                 >
-                  {bookingSubmitting && <FaSpinner className="animate-spin" />}
-                  <span>Confirm & Send Inquiry</span>
+                  {(bookingLoading || paymentProcessing) && <FaSpinner className="animate-spin" />}
+                  <span>
+                    {paymentProcessing
+                      ? "Opening Razorpay..."
+                      : paymentOption === "pay_now"
+                      ? `Pay ₹${advanceAmount.toLocaleString("en-IN")} & Confirm Booking`
+                      : "Confirm Booking (Pay Later)"}
+                  </span>
                 </button>
               </div>
             </form>
