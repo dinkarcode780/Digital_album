@@ -1823,6 +1823,26 @@ body {
     gap: 10px;
   }
 
+  /* afetr edit satrt */
+ .album-filters {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    display: flex;
+    flex-wrap: nowrap;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+
+    scrollbar-width: none;
+  }
+   /* afetr edit End */
+   
   .album-filter-label {
     padding-left: 5px;
   }
