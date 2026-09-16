@@ -189,8 +189,7 @@ const BookingDetails = () => {
   const openWhatsApp = () => {
     const studioPhone = booking.adminId?.phoneNumber || "919876543210";
     const msg = encodeURIComponent(
-      `Hello Studio! I'm inquiring about my Photoshoot Booking #${booking._id?.substring(18).toUpperCase()} (${
-        booking.eventType
+      `Hello Studio! I'm inquiring about my Photoshoot Booking #${booking._id?.substring(18).toUpperCase()} (${booking.eventType
       }) scheduled for ${new Date(booking.shootDate).toLocaleDateString("en-IN")}.`
     );
     window.open(`https://wa.me/${studioPhone.replace(/\D/g, "")}?text=${msg}`, "_blank");
@@ -236,27 +235,25 @@ const BookingDetails = () => {
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <span
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    booking.status === "Confirmed"
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${booking.status === "Confirmed"
                       ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                       : booking.status === "Completed"
-                      ? "bg-blue-100 text-blue-800 border border-blue-300"
-                      : booking.status === "Cancelled"
-                      ? "bg-rose-100 text-rose-800 border border-rose-300"
-                      : "bg-amber-100 text-amber-800 border border-amber-300"
-                  }`}
+                        ? "bg-blue-100 text-blue-800 border border-blue-300"
+                        : booking.status === "Cancelled"
+                          ? "bg-rose-100 text-rose-800 border border-rose-300"
+                          : "bg-amber-100 text-amber-800 border border-amber-300"
+                    }`}
                 >
                   {booking.status}
                 </span>
 
                 <span
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${
-                    isFullyPaid
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold ${isFullyPaid
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : paidAmount > 0
-                      ? "bg-purple-50 text-purple-700 border border-purple-200"
-                      : "bg-rose-50 text-rose-700 border border-rose-200"
-                  }`}
+                        ? "bg-purple-50 text-purple-700 border border-purple-200"
+                        : "bg-rose-50 text-rose-700 border border-rose-200"
+                    }`}
                 >
                   Payment: {booking.paymentStatus || (isFullyPaid ? "Paid" : "Pending")}
                 </span>
@@ -356,9 +353,8 @@ const BookingDetails = () => {
               </p>
             </div>
             <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold ${
-                remainingBalance > 0 ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
-              }`}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold ${remainingBalance > 0 ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
+                }`}
             >
               <FaCreditCard />
             </div>
@@ -370,17 +366,17 @@ const BookingDetails = () => {
           {/* Left Column (2 cols): Info & Timeline */}
           <div className="lg:col-span-2 space-y-8">
             {/* FULL TRANSACTION HISTORY LOG TABLE */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 md:p-8">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-4 md:p-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                    <FaHistory className="text-purple-600" /> Transaction History (पूरी ट्रांजेक्शन हिस्ट्री)
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <FaHistory className="text-purple-600 shrink-0" /> Transaction History (पूरी ट्रांजेक्शन हिस्ट्री)
                   </h2>
                   <p className="text-xs text-slate-500 mt-1">
                     Complete record of payments made towards this photoshoot booking
                   </p>
                 </div>
-                <span className="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full shrink-0">
                   {transactionsHistory.length} Payments
                 </span>
               </div>
@@ -390,62 +386,127 @@ const BookingDetails = () => {
                   <p className="text-slate-500 text-sm font-medium">No transaction payments recorded yet.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 text-xs uppercase tracking-wider">
-                        <th className="py-3 px-4 rounded-l-xl">Date & Time</th>
-                        <th className="py-3 px-4">Transaction ID</th>
-                        <th className="py-3 px-4">Payment Method</th>
-                        <th className="py-3 px-4">Amount</th>
-                        <th className="py-3 px-4 rounded-r-xl text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {transactionsHistory.map((t, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-4 px-4 font-medium text-slate-700">
-                            {new Date(t.paymentDate || t.createdAt || Date.now()).toLocaleDateString("en-IN", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                            <span className="block text-xs text-slate-400">
+                <>
+                  {/* MOBILE VIEW (Card Layout for screens < md) */}
+                  <div className="space-y-3 block md:hidden">
+                    {transactionsHistory.map((t, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/70 space-y-3"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="text-[11px] font-bold uppercase text-slate-400">Date & Time</span>
+                            <p className="text-xs font-semibold text-slate-800">
+                              {new Date(t.paymentDate || t.createdAt || Date.now()).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}{" "}
+                              ·{" "}
                               {new Date(t.paymentDate || t.createdAt || Date.now()).toLocaleTimeString("en-IN", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg w-fit">
+                            </p>
+                          </div>
+
+                          <span className="bg-emerald-100 text-emerald-800 font-bold text-[11px] px-2.5 py-0.5 rounded-full border border-emerald-200">
+                            {t.paymentStatus || "Completed"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-purple-700 bg-purple-100/70 px-2.5 py-1 rounded-lg">
+                            <span className="truncate max-w-[140px]">
                               {t.transactionId || t.razorpayPaymentId || "TXN-PAYMENT"}
-                              <button
-                                onClick={() => copyToClipboard(t.transactionId || t.razorpayPaymentId)}
-                                className="text-purple-400 hover:text-purple-700"
-                                title="Copy Transaction ID"
-                              >
-                                <FaCopy />
-                              </button>
-                            </div>
-                            <span className="block text-xs text-slate-400 mt-1">{t.notes || "Shoot Payment"}</span>
-                          </td>
-                          <td className="py-4 px-4 font-semibold text-slate-700">
-                            {t.paymentMethod || "Razorpay Online"}
-                          </td>
-                          <td className="py-4 px-4 font-bold text-emerald-600 text-base">
-                            ₹{(t.amount || 0).toLocaleString("en-IN")}
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            <span className="bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full border border-emerald-200">
-                              {t.paymentStatus || "Completed"}
                             </span>
-                          </td>
+                            <button
+                              onClick={() => copyToClipboard(t.transactionId || t.razorpayPaymentId)}
+                              className="text-purple-600 hover:text-purple-800 shrink-0"
+                              title="Copy Transaction ID"
+                            >
+                              <FaCopy />
+                            </button>
+                          </div>
+
+                          <div className="text-right">
+                            <span className="text-[11px] text-slate-400 font-medium block">
+                              {t.paymentMethod || "Online"}
+                            </span>
+                            <span className="text-base font-extrabold text-emerald-600">
+                              ₹{(t.amount || 0).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        </div>
+
+                        {t.notes && (
+                          <p className="text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-100">
+                            Note: {t.notes}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* TABLE VIEW WITH SMOOTH HORIZONTAL SCROLL (For screens >= md) */}
+                  <div className="hidden md:block overflow-x-auto w-full max-w-full rounded-2xl border border-slate-200/80">
+                    <table className="w-full min-w-[620px] text-left text-sm">
+                      <thead>
+                        <tr className="bg-slate-100/80 text-slate-600 font-bold border-b border-slate-200 text-xs uppercase tracking-wider">
+                          <th className="py-3.5 px-4">Date & Time</th>
+                          <th className="py-3.5 px-4">Transaction ID</th>
+                          <th className="py-3.5 px-4">Payment Method</th>
+                          <th className="py-3.5 px-4">Amount</th>
+                          <th className="py-3.5 px-4 text-right">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        {transactionsHistory.map((t, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-4 px-4 font-medium text-slate-700">
+                              {new Date(t.paymentDate || t.createdAt || Date.now()).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                              <span className="block text-xs text-slate-400">
+                                {new Date(t.paymentDate || t.createdAt || Date.now()).toLocaleTimeString("en-IN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg w-fit">
+                                {t.transactionId || t.razorpayPaymentId || "TXN-PAYMENT"}
+                                <button
+                                  onClick={() => copyToClipboard(t.transactionId || t.razorpayPaymentId)}
+                                  className="text-purple-400 hover:text-purple-700"
+                                  title="Copy Transaction ID"
+                                >
+                                  <FaCopy />
+                                </button>
+                              </div>
+                              <span className="block text-xs text-slate-400 mt-1">{t.notes || "Shoot Payment"}</span>
+                            </td>
+                            <td className="py-4 px-4 font-semibold text-slate-700">
+                              {t.paymentMethod || "Razorpay Online"}
+                            </td>
+                            <td className="py-4 px-4 font-bold text-emerald-600 text-base">
+                              ₹{(t.amount || 0).toLocaleString("en-IN")}
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              <span className="bg-emerald-100 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full border border-emerald-200">
+                                {t.paymentStatus || "Completed"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
 
@@ -475,11 +536,11 @@ const BookingDetails = () => {
                     <h3 className="font-bold text-slate-900 text-base mt-0.5">
                       {booking.shootDate
                         ? new Date(booking.shootDate).toLocaleDateString("en-IN", {
-                            weekday: "short",
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
+                          weekday: "short",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
                         : "N/A"}
                     </h3>
                   </div>
@@ -632,15 +693,15 @@ const BookingDetails = () => {
       {/* PAY BALANCE ONLINE MODAL */}
       {/* ======================================================== */}
       {showPayModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <FaCreditCard className="text-emerald-600" /> Pay Remaining Balance
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-slate-100 my-auto max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                <FaCreditCard className="text-emerald-600 shrink-0" /> Pay Remaining Balance
               </h3>
               <button
                 onClick={() => setShowPayModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold"
+                className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
               >
                 ×
               </button>
@@ -701,54 +762,55 @@ const BookingDetails = () => {
       {/* INVOICE VIEW MODAL */}
       {/* ======================================================== */}
       {showInvoiceModal && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 border border-slate-100 my-8">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
-              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <FaReceipt className="text-purple-600" /> Photoshoot Invoice & Receipt
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-4 sm:p-8 border border-slate-100 my-auto max-h-[92vh] flex flex-col">
+            {/* Header (Always pinned visible at top) */}
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200 shrink-0">
+              <h3 className="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                <FaReceipt className="text-purple-600 shrink-0" /> Photoshoot Invoice
               </h3>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={handlePrintInvoice}
-                  className="bg-purple-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-purple-700 transition-all"
+                  className="bg-purple-600 text-white font-bold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 hover:bg-purple-700 transition-all shadow-sm"
                 >
                   <FaPrint /> Print Receipt
                 </button>
                 <button
                   onClick={() => setShowInvoiceModal(false)}
-                  className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
+                  className="text-slate-400 hover:text-slate-600 text-2xl font-bold px-1"
                 >
                   ×
                 </button>
               </div>
             </div>
 
-            {/* Printable Invoice Body */}
-            <div ref={invoiceRef} className="py-6 space-y-6">
+            {/* Printable Invoice Body (Smoothly scrollable inside modal) */}
+            <div ref={invoiceRef} className="py-6 space-y-6 overflow-y-auto flex-1 pr-1">
               <div className="flex justify-between items-start border-b pb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-purple-900">DIGITAL ALBUM</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-purple-900">DIGITAL ALBUM</h2>
                   <p className="text-xs text-slate-500 mt-1">Official Photoshoot Booking Receipt</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-bold text-slate-400 uppercase block">Invoice Number</span>
-                  <span className="font-mono font-bold text-purple-700 text-sm">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase block">Invoice Number</span>
+                  <span className="font-mono font-bold text-purple-700 text-xs sm:text-sm">
                     #INV-{booking._id?.substring(18).toUpperCase()}
                   </span>
                 </div>
               </div>
 
               {/* Client & Studio Grid */}
-              <div className="grid grid-cols-2 gap-6 text-xs">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6 text-xs">
                 <div>
-                  <p className="font-bold text-slate-400 uppercase">Billed To (Customer):</p>
-                  <p className="font-bold text-slate-900 text-sm mt-1">{booking.clientName}</p>
+                  <p className="font-bold text-slate-400 uppercase text-[10px] sm:text-xs">Billed To (Customer):</p>
+                  <p className="font-bold text-slate-900 text-xs sm:text-sm mt-1">{booking.clientName}</p>
                   <p className="text-slate-600">{booking.clientPhone}</p>
-                  <p className="text-slate-600">{booking.clientEmail}</p>
+                  <p className="text-slate-600 truncate max-w-[150px] sm:max-w-none">{booking.clientEmail}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-slate-400 uppercase">Studio Provider:</p>
-                  <p className="font-bold text-slate-900 text-sm mt-1">{booking.adminId?.name || "Digital Album Studio"}</p>
+                  <p className="font-bold text-slate-400 uppercase text-[10px] sm:text-xs">Studio Provider:</p>
+                  <p className="font-bold text-slate-900 text-xs sm:text-sm mt-1">{booking.adminId?.name || "Digital Album Studio"}</p>
                   <p className="text-slate-600">{booking.adminId?.phoneNumber || "+91 9876543210"}</p>
                   <p className="text-slate-600">{booking.adminId?.address || "Studio Location"}</p>
                 </div>
