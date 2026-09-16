@@ -8,6 +8,7 @@ import {
   cancelBooking,
   createBookingRazorpayOrder,
   verifyBookingRazorpayPayment,
+  addBookingPayment,
 } from "./bookingThunk";
 
 const initialState = {
@@ -169,11 +170,37 @@ const bookingSlice = createSlice({
         if (updated) {
           state.bookings = state.bookings.map((b) => (b._id === updated._id ? updated : b));
           state.studioBookings = state.studioBookings.map((b) => (b._id === updated._id ? updated : b));
+          if (state.booking?._id === updated._id) {
+            state.booking = updated;
+          }
         }
       })
       .addCase(cancelBooking.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "Failed to cancel booking";
+      })
+
+      // ================= ADD BOOKING PAYMENT =================
+      .addCase(addBookingPayment.pending, (state) => {
+        state.paymentLoading = true;
+        state.error = null;
+      })
+      .addCase(addBookingPayment.fulfilled, (state, action) => {
+        state.paymentLoading = false;
+        state.success = true;
+        state.message = action.payload.message || "Payment recorded successfully!";
+        const updated = action.payload.data;
+        if (updated) {
+          state.bookings = state.bookings.map((b) => (b._id === updated._id ? updated : b));
+          state.studioBookings = state.studioBookings.map((b) => (b._id === updated._id ? updated : b));
+          if (state.booking?._id === updated._id) {
+            state.booking = updated;
+          }
+        }
+      })
+      .addCase(addBookingPayment.rejected, (state, action) => {
+        state.paymentLoading = false;
+        state.error = action.payload?.message || "Failed to record payment";
       });
   },
 });

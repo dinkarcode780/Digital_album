@@ -162,3 +162,21 @@ export const cancelBooking = createAsyncThunk(
     }
   }
 );
+
+// 10. Add Booking Payment (Installment/Balance)
+export const addBookingPayment = createAsyncThunk(
+  "booking/addBookingPayment",
+  async ({ bookingId, paymentData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(`/booking/${bookingId}/payment`, paymentData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || {
+          success: false,
+          message: "Failed to record payment",
+        }
+      );
+    }
+  }
+);

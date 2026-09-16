@@ -14,7 +14,7 @@ const bookingSchema = new mongoose.Schema(
     },
     serviceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Services",
+      ref: "Service",
       default: null,
     },
     clientName: {
@@ -68,6 +68,10 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    paidAmount: {
+      type: Number,
+      default: 0,
+    },
     totalAmount: {
       type: Number,
       default: 0,
@@ -80,6 +84,19 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    transactions: [
+      {
+        transactionId: { type: String, default: "" },
+        amount: { type: Number, required: true },
+        paymentMethod: { type: String, default: "Razorpay Online" },
+        paymentStatus: { type: String, default: "Completed" },
+        razorpayOrderId: { type: String, default: "" },
+        razorpayPaymentId: { type: String, default: "" },
+        razorpaySignature: { type: String, default: "" },
+        paymentDate: { type: Date, default: Date.now },
+        notes: { type: String, default: "Payment" },
+      },
+    ],
     razorpayOrderId: {
       type: String,
       default: "",

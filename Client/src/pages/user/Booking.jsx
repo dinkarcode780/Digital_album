@@ -1,1548 +1,978 @@
-// import React, { useState } from "react";
-// import {
-//   FaCalendarAlt,
-//   FaMapMarkerAlt,
-//   FaUsers,
-//   FaRupeeSign,
-//   FaRegStickyNote,
-//   FaCamera,
-// } from "react-icons/fa";
-// import { useNavigate } from "react-router-dom";
-
-// const Booking = () => {
-//   const [formData, setFormData] = useState({
-//   name: "",
-//   phone: "",
-//   email: "",
-//   eventType: "",
-//   eventDate: "",
-//   eventEndDate: "", // New
-//   location: "",
-//   guest: "",
-//   budget: "",
-//   message: "",
-// });
-
-// const navigate = useNavigate();
-
-//   const handleChange = (e) => {
-//     setFormData({
-//       ...formData,
-//       [e.target.name]: e.target.value,
-//     });
-//   };
-
-// //   const handleSubmit = (e) => {
-// //     e.preventDefault();
-
-// //     console.log(formData);
-
-// //     alert("Booking Submitted Successfully");
-// //   };
-
-// const handleSubmit = (e) => {
-//   e.preventDefault();
-
-//   console.log(formData);
-
-//   // API call baad me yahan hogi
-
-//   navigate("/booking-details");
-// };
-
-//   return (
-//     <div className="max-w-7xl mx-auto px-5 py-10">
-
-//       {/* Header */}
-
-//       <div className="text-center mb-10">
-
-//         <h1 className="text-4xl font-bold">
-//           Book Your Event
-//         </h1>
-
-//         <p className="text-gray-500 mt-3">
-//           Fill in your details and we'll contact you shortly.
-//         </p>
-
-//       </div>
-
-//       <div className="grid lg:grid-cols-3 gap-8">
-
-//         {/* Booking Form */}
-
-//         <div className="lg:col-span-2 bg-white rounded-2xl shadow p-8">
-
-//           <form onSubmit={handleSubmit} className="space-y-6">
-
-//             <div className="grid md:grid-cols-2 gap-5">
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Full Name
-//                 </label>
-
-//                 <input
-//                   type="text"
-//                   name="name"
-//                   placeholder="Enter Name"
-//                   value={formData.name}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Phone Number
-//                 </label>
-
-//                 <input
-//                   type="text"
-//                   name="phone"
-//                   placeholder="Enter Phone"
-//                   value={formData.phone}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//             </div>
-
-//             <div className="grid md:grid-cols-2 gap-5">
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Email
-//                 </label>
-
-//                 <input
-//                   type="email"
-//                   name="email"
-//                   placeholder="Enter Email"
-//                   value={formData.email}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Event Type
-//                 </label>
-
-//                 <select
-//                   name="eventType"
-//                   value={formData.eventType}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 >
-
-//                   <option value="">
-//                     Select Event
-//                   </option>
-
-//                   <option>
-//                     Wedding
-//                   </option>
-
-//                   <option>
-//                     Engagement
-//                   </option>
-
-//                   <option>
-//                     Reception
-//                   </option>
-
-//                   <option>
-//                     Birthday
-//                   </option>
-
-//                   <option>
-//                     Pre Wedding
-//                   </option>
-
-//                 </select>
-
-//               </div>
-
-//             </div>
-
-//             <div className="grid md:grid-cols-3 gap-5">
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Event Date
-//                 </label>
-
-//                 <input
-//                   type="date"
-//                   name="eventDate"
-//                   value={formData.eventDate}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//                <div>
-
-//     <label className="font-semibold">
-//       Event End Date
-//     </label>
-
-//     <input
-//       type="date"
-//       name="eventEndDate"
-//       value={formData.eventEndDate}
-//       onChange={handleChange}
-//       className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//     />
-
-//   </div>
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Location
-//                 </label>
-
-//                 <input
-//                   type="text"
-//                   name="location"
-//                   placeholder="Event Location"
-//                   value={formData.location}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//             </div>
-
-//             <div className="grid md:grid-cols-2 gap-5">
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Guest Count
-//                 </label>
-
-//                 <input
-//                   type="number"
-//                   name="guest"
-//                   placeholder="Approx Guests"
-//                   value={formData.guest}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//               <div>
-
-//                 <label className="font-semibold">
-//                   Budget
-//                 </label>
-
-//                 <input
-//                   type="number"
-//                   name="budget"
-//                   placeholder="Approx Budget"
-//                   value={formData.budget}
-//                   onChange={handleChange}
-//                   className="w-full border rounded-lg mt-2 p-3 outline-none focus:ring-2 focus:ring-purple-500"
-//                 />
-
-//               </div>
-
-//             </div>
-
-//             <div>
-
-//               <label className="font-semibold">
-//                 Special Requirements
-//               </label>
-
-//               <textarea
-//                 rows="5"
-//                 name="message"
-//                 placeholder="Write your message..."
-//                 value={formData.message}
-//                 onChange={handleChange}
-//                 className="w-full border rounded-lg mt-2 p-3 outline-none resize-none focus:ring-2 focus:ring-purple-500"
-//               ></textarea>
-
-//             </div>
-
-//             <button
-//               className="w-full bg-purple-600 hover:bg-purple-700 duration-300 text-white py-4 rounded-xl font-semibold text-lg"
-//             >
-//               Submit Booking
-//             </button>
-
-//           </form>
-
-//         </div>
-
-//         {/* Booking Summary */}
-
-//         <div>
-
-//           <div className="bg-white rounded-2xl shadow p-6 sticky top-24">
-
-//             <h2 className="text-2xl font-bold mb-6">
-//               Booking Summary
-//             </h2>
-
-//             <div className="space-y-5">
-
-//               <div className="flex justify-between">
-
-//                 <span className="flex items-center gap-2">
-//                   <FaCamera className="text-purple-600" />
-//                   Service
-//                 </span>
-
-//                 <span className="font-semibold">
-//                   Wedding Shoot
-//                 </span>
-
-//               </div>
-
-//               <div className="flex justify-between">
-
-//   <span className="flex items-center gap-2">
-//     <FaCalendarAlt className="text-purple-600" />
-//     Duration
-//   </span>
-
-//   <span className="text-right text-sm">
-//     {formData.eventDate || "--"}
-//     <br />
-//     to
-//     <br />
-//     {formData.eventEndDate || "--"}
-//   </span>
-
-// </div>
-
-//               <div className="flex justify-between">
-
-//                 <span className="flex items-center gap-2">
-//                   <FaMapMarkerAlt className="text-purple-600" />
-//                   Location
-//                 </span>
-
-//                 <span>
-//                   {formData.location || "--"}
-//                 </span>
-
-//               </div>
-
-//               <div className="flex justify-between">
-
-//                 <span className="flex items-center gap-2">
-//                   <FaUsers className="text-purple-600" />
-//                   Guests
-//                 </span>
-
-//                 <span>
-//                   {formData.guest || "--"}
-//                 </span>
-
-//               </div>
-
-//               <div className="flex justify-between">
-
-//                 <span className="flex items-center gap-2">
-//                   <FaRupeeSign className="text-purple-600" />
-//                   Budget
-//                 </span>
-
-//                 <span>
-//                   ₹ {formData.budget || "--"}
-//                 </span>
-
-//               </div>
-
-//               <hr />
-
-//               <div>
-
-//                 <h3 className="font-semibold mb-2">
-//                   Why Choose Us?
-//                 </h3>
-
-//                 <ul className="text-gray-500 text-sm space-y-2">
-
-//                   <li>✔ Professional Photography</li>
-
-//                   <li>✔ 4K Cinematic Videography</li>
-
-//                   <li>✔ Drone Coverage</li>
-
-//                   <li>✔ Premium Digital Album</li>
-
-//                   <li>✔ Fast Delivery</li>
-
-//                 </ul>
-
-//               </div>
-
-//             </div>
-
-//           </div>
-
-//         </div>
-
-//       </div>
-
-//     </div>
-//   );
-// };
-
-// export default Booking;
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaUsers,
   FaRupeeSign,
+  FaRegStickyNote,
   FaCamera,
-  FaCheckCircle,
-  FaArrowRight,
-  FaHeart,
   FaPhoneAlt,
+  FaEnvelope,
   FaClock,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaSpinner,
+  FaPlus,
+  FaList,
+  FaInfoCircle,
+  FaCreditCard,
+  FaChevronRight,
+  FaStore,
+  FaSearch,
+  FaFilter,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import {
+  getUserBookings,
+  createBooking,
+  cancelBooking,
+  createBookingRazorpayOrder,
+  verifyBookingRazorpayPayment,
+} from "../../app/booking/bookingThunk";
+import { resetBookingState } from "../../app/booking/bookingSlice";
+import axiosInstance from "../../config/axios";
+import toast from "react-hot-toast";
+
+// Helper to load Razorpay SDK dynamically
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 const Booking = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const { bookings = [], loading, paymentLoading, success, error, message } = useSelector(
+    (state) => state.booking
+  );
+  const { user } = useSelector((state) => state.auth);
+
+  // Active Tab: "my_bookings" or "new_booking"
+  const defaultTab = searchParams.get("action") === "new" ? "new_booking" : "my_bookings";
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Studios list for booking form dropdown
+  const [studios, setStudios] = useState([]);
+  const [studiosLoading, setStudiosLoading] = useState(false);
+
+  // Quick Pay Remaining Balance Modal state
+  const [payModalBooking, setPayModalBooking] = useState(null);
+  const [payCustomAmount, setPayCustomAmount] = useState("");
+
+  // Booking Form State
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    eventType: "",
-    eventDate: "",
-    eventEndDate: "",
+    adminId: "",
+    serviceId: "",
+    clientName: user?.name || "",
+    clientPhone: user?.phoneNumber || "",
+    clientEmail: user?.email || "",
+    eventType: "Wedding Photography",
+    shootDate: "",
+    shootEndDate: "",
     location: "",
-    guest: "",
-    budget: "",
-    message: "",
+    notes: "",
+    totalAmount: "25000",
+    advanceAmount: "2000",
+    paymentOption: "pay_later", // "pay_now" or "pay_later"
   });
 
-  const navigate = useNavigate();
+  // Pre-fill user details when auth updates
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        clientName: prev.clientName || user.name || "",
+        clientPhone: prev.clientPhone || user.phoneNumber || "",
+        clientEmail: prev.clientEmail || user.email || "",
+      }));
+    }
+  }, [user]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // Fetch user bookings on mount
+  useEffect(() => {
+    dispatch(getUserBookings());
+    fetchStudios();
+  }, [dispatch]);
+
+  // Handle toast notifications & reset state
+  useEffect(() => {
+    if (success && message) {
+      toast.success(message);
+      dispatch(resetBookingState());
+      dispatch(getUserBookings());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(resetBookingState());
+    }
+  }, [success, error, message, dispatch]);
+
+  // Fetch registered studios list safely
+  const fetchStudios = async () => {
+    try {
+      setStudiosLoading(true);
+      const res = await axiosInstance.get("/public/studios");
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      setStudios(list);
+      if (list.length > 0 && !formData.adminId) {
+        setFormData((prev) => ({ ...prev, adminId: list[0].adminId || list[0]._id }));
+      }
+    } catch (err) {
+      console.warn("Studios list fetch note:", err.message);
+      setStudios([]);
+    } finally {
+      setStudiosLoading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Submit New Booking
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(formData);
+    if (!formData.adminId) {
+      toast.error("Please select a photo studio");
+      return;
+    }
+    if (!formData.clientName || !formData.clientPhone) {
+      toast.error("Please enter Client Name and Phone number");
+      return;
+    }
+    if (!formData.shootDate) {
+      toast.error("Please select the Shoot Date");
+      return;
+    }
 
-    // API call baad me yahan hogi
-    navigate("/booking-details");
+    // 1. Pay Now via Razorpay Flow
+    if (formData.paymentOption === "pay_now") {
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load. Please check your internet connection.");
+        return;
+      }
+
+      const advanceAmt = Number(formData.advanceAmount) || 1000;
+
+      try {
+        const orderRes = await dispatch(
+          createBookingRazorpayOrder({
+            amount: advanceAmt,
+            clientName: formData.clientName,
+          })
+        ).unwrap();
+
+        if (!orderRes?.orderId) {
+          toast.error("Could not create Razorpay order.");
+          return;
+        }
+
+        const options = {
+          key: orderRes.keyId,
+          amount: orderRes.amount,
+          currency: orderRes.currency || "INR",
+          name: "Digital Album Studio",
+          description: `Advance Payment for ${formData.eventType}`,
+          order_id: orderRes.orderId,
+          handler: async function (razorResponse) {
+            const bookingPayload = {
+              ...formData,
+              paymentStatus: "Advance Paid",
+              paymentMethod: "Razorpay Online",
+              razorpayOrderId: razorResponse.razorpay_order_id,
+              razorpayPaymentId: razorResponse.razorpay_payment_id,
+              razorpaySignature: razorResponse.razorpay_signature,
+              transactionId: razorResponse.razorpay_payment_id,
+            };
+
+            const createdBooking = await dispatch(createBooking(bookingPayload)).unwrap();
+            toast.success("🎉 Payment verified and booking created successfully!");
+            setActiveTab("my_bookings");
+            if (createdBooking?.data?._id) {
+              navigate(`/booking-details/${createdBooking.data._id}`);
+            }
+          },
+          prefill: {
+            name: formData.clientName,
+            email: formData.clientEmail,
+            contact: formData.clientPhone,
+          },
+          theme: { color: "#7c3aed" },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        toast.error(err.message || "Failed to initiate payment");
+      }
+    } else {
+      // 2. Pay Later Flow
+      try {
+        const res = await dispatch(createBooking(formData)).unwrap();
+        toast.success("🎉 Booking request submitted! Studio will contact you soon.");
+        setActiveTab("my_bookings");
+        if (res?.data?._id) {
+          navigate(`/booking-details/${res.data._id}`);
+        }
+      } catch (err) {
+        toast.error(err.message || "Booking creation failed");
+      }
+    }
   };
 
-  const formatDate = (date) => {
-    if (!date) return "--";
+  // Quick Pay Balance via Razorpay
+  const handlePayBalanceOnline = async (bookingItem) => {
+    const totalPkg = bookingItem.totalAmount && bookingItem.totalAmount > 0 ? bookingItem.totalAmount : (bookingItem.serviceId?.price || 25000);
+    const paidVal = bookingItem.paidAmount || bookingItem.advanceAmount || 0;
+    const remaining = Math.max(0, totalPkg - paidVal);
+    const payAmt = payCustomAmount ? Number(payCustomAmount) : remaining;
 
-    const newDate = new Date(date);
+    if (payAmt <= 0) {
+      toast.error("No balance pending for this booking");
+      return;
+    }
 
-    return newDate.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const isLoaded = await loadRazorpayScript();
+    if (!isLoaded) {
+      toast.error("Razorpay SDK failed to load");
+      return;
+    }
+
+    try {
+      const orderRes = await dispatch(
+        createBookingRazorpayOrder({
+          amount: payAmt,
+          bookingId: bookingItem._id,
+          clientName: bookingItem.clientName,
+        })
+      ).unwrap();
+
+      const options = {
+        key: orderRes.keyId,
+        amount: orderRes.amount,
+        currency: orderRes.currency || "INR",
+        name: "Digital Album Studio",
+        description: `Balance Payment for Booking #${bookingItem._id?.substring(18).toUpperCase()}`,
+        order_id: orderRes.orderId,
+        handler: async function (razorResponse) {
+          await dispatch(
+            verifyBookingRazorpayPayment({
+              bookingId: bookingItem._id,
+              amount: payAmt,
+              razorpay_order_id: razorResponse.razorpay_order_id,
+              razorpay_payment_id: razorResponse.razorpay_payment_id,
+              razorpay_signature: razorResponse.razorpay_signature,
+              notes: "Balance Online Payment via Razorpay",
+            })
+          ).unwrap();
+
+          toast.success(`🎉 Balance payment of ₹${payAmt.toLocaleString("en-IN")} successful!`);
+          setPayModalBooking(null);
+          setPayCustomAmount("");
+          dispatch(getUserBookings());
+        },
+        prefill: {
+          name: bookingItem.clientName,
+          email: bookingItem.clientEmail,
+          contact: bookingItem.clientPhone,
+        },
+        theme: { color: "#7c3aed" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      toast.error(err.message || "Payment initiation failed");
+    }
   };
 
-  const features = [
-    "Professional Photography",
-    "4K Cinematic Videography",
-    "Drone Coverage",
-    "Premium Digital Album",
-    "Fast Delivery",
-  ];
+  // Cancel Booking handler
+  const handleCancelBooking = (bookingId) => {
+    if (window.confirm("Are you sure you want to cancel this booking?")) {
+      dispatch(cancelBooking(bookingId));
+    }
+  };
+
+  // Safe bookings array
+  const safeBookingsList = Array.isArray(bookings) ? bookings : [];
+
+  // Calculate Summary Stats
+  const totalBookingsCount = safeBookingsList.length;
+  const activeBookingsCount = safeBookingsList.filter((b) => ["Pending", "Confirmed", "In Progress"].includes(b.status)).length;
+  const totalPaidSum = safeBookingsList.reduce((sum, b) => sum + (b.paidAmount || b.advanceAmount || 0), 0);
+  const totalPendingSum = safeBookingsList.reduce((sum, b) => {
+    if (b.status === "Cancelled") return sum;
+    const totalPkg = b.totalAmount && b.totalAmount > 0 ? b.totalAmount : (b.serviceId?.price || 25000);
+    const paid = b.paidAmount || b.advanceAmount || 0;
+    const remaining = Math.max(0, totalPkg - paid);
+    return sum + remaining;
+  }, 0);
+
+  // Filter Bookings List
+  const filteredBookings = safeBookingsList.filter((b) => {
+    const matchesStatus = filterStatus === "All" || b.status === filterStatus;
+    const matchesSearch =
+      b.eventType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.adminId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b._id?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#faf8ff] via-[#f5efff] to-[#eee5ff] px-4 py-8 md:px-8">
-
-      {/* =====================================================
-          ANIMATED BACKGROUND
-      ====================================================== */}
-
-      <div className="pointer-events-none absolute -left-40 top-10 h-[400px] w-[400px] rounded-full bg-purple-300/20 blur-[100px] animate-pulse" />
-
-      <div
-        className="pointer-events-none absolute right-[-150px] top-[25%] h-[450px] w-[450px] rounded-full bg-violet-400/20 blur-[110px]"
-        style={{
-          animation: "floatingBlob 8s ease-in-out infinite",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute bottom-[-150px] left-[35%] h-[400px] w-[400px] rounded-full bg-fuchsia-300/15 blur-[100px]"
-        style={{
-          animation: "floatingBlob 10s ease-in-out infinite reverse",
-        }}
-      />
-
-      {/* Floating circles */}
-
-      <div
-        className="pointer-events-none absolute left-[12%] top-[30%] h-4 w-4 rounded-full bg-purple-400/40"
-        style={{
-          animation: "floatingSmall 5s ease-in-out infinite",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute right-[20%] top-[15%] h-3 w-3 rounded-full bg-violet-500/50"
-        style={{
-          animation: "floatingSmall 6s ease-in-out infinite reverse",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute right-[35%] bottom-[20%] h-5 w-5 rounded-full bg-fuchsia-400/30"
-        style={{
-          animation: "floatingSmall 7s ease-in-out infinite",
-        }}
-      />
-
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
-
-      <div className="relative z-10 mx-auto max-w-7xl">
-
-        {/* =====================================================
-            HERO HEADER
-        ====================================================== */}
-
-        <div className="mb-10 text-center">
-
-          {/* Badge */}
-
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-purple-200/70 bg-white/60 px-4 py-2 shadow-sm backdrop-blur-xl">
-
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-md">
-
-              <FaHeart className="text-xs" />
-
-            </span>
-
-            <span className="text-sm font-semibold text-purple-700">
-              Create Your Perfect Event
-            </span>
-
-          </div>
-
-          {/* Heading */}
-
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-800 md:text-5xl lg:text-6xl">
-
-            Book Your{" "}
-
-            <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
-
-              Dream Event
-
-            </span>
-
-          </h1>
-
-          <p className="mx-auto mt-4 max-w-2xl text-gray-500 md:text-lg">
-
-            Tell us about your special day and our team will
-            help you create unforgettable memories.
-
-          </p>
-
-          {/* Small status */}
-
-          <div className="mt-5 inline-flex items-center gap-2 text-sm text-gray-500">
-
-            <span className="relative flex h-3 w-3">
-
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
-
-            </span>
-
-            Our booking team is available
-
-          </div>
-
-        </div>
-
-
-        {/* =====================================================
-            MAIN GRID
-        ====================================================== */}
-
-        <div className="grid gap-8 lg:grid-cols-[1.65fr_0.85fr]">
-
-          {/* =================================================
-              BOOKING FORM
-          ================================================== */}
-
-          <div
-            className="
-              relative
-              overflow-hidden
-              rounded-[30px]
-              border
-              border-white/80
-              bg-white/55
-              p-6
-              shadow-[0_20px_70px_rgba(124,58,237,0.12)]
-              backdrop-blur-2xl
-              md:p-8
-            "
-          >
-
-            {/* Card glow */}
-
-            <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-purple-200/30 blur-3xl" />
-
-            <div className="relative">
-
-              {/* Form heading */}
-
-              <div className="mb-8 flex items-center gap-4">
-
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg shadow-purple-300/40">
-
-                  <FaCamera className="text-xl" />
-
-                </div>
-
-                <div>
-
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    Event Details
-                  </h2>
-
-                  <p className="mt-1 text-sm text-gray-500">
-                    Fill in the details below to get started.
-                  </p>
-
-                </div>
-
-              </div>
-
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-
-                {/* =========================================
-                    PERSONAL DETAILS
-                ========================================== */}
-
-                <div>
-
-                  <div className="mb-4 flex items-center gap-2">
-
-                    <div className="h-2 w-2 rounded-full bg-purple-600" />
-
-                    <h3 className="font-bold text-gray-700">
-                      Personal Information
-                    </h3>
-
-                  </div>
-
-
-                  <div className="grid gap-5 md:grid-cols-2">
-
-                    {/* Name */}
-
-                    <div className="group">
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Full Name
-                      </label>
-
-                      <input
-                        type="text"
-                        name="name"
-                        placeholder="Enter your name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="
-                          mt-2
-                          w-full
-                          rounded-xl
-                          border
-                          border-purple-100
-                          bg-white/70
-                          px-4
-                          py-3.5
-                          text-gray-700
-                          outline-none
-                          transition-all
-                          duration-300
-                          placeholder:text-gray-400
-                          hover:border-purple-200
-                          focus:border-purple-400
-                          focus:bg-white
-                          focus:ring-4
-                          focus:ring-purple-100
-                        "
-                      />
-
-                    </div>
-
-
-                    {/* Phone */}
-
-                    <div className="group">
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Phone Number
-                      </label>
-
-                      <input
-                        type="tel"
-                        name="phone"
-                        placeholder="Enter phone number"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="
-                          mt-2
-                          w-full
-                          rounded-xl
-                          border
-                          border-purple-100
-                          bg-white/70
-                          px-4
-                          py-3.5
-                          text-gray-700
-                          outline-none
-                          transition-all
-                          duration-300
-                          placeholder:text-gray-400
-                          hover:border-purple-200
-                          focus:border-purple-400
-                          focus:bg-white
-                          focus:ring-4
-                          focus:ring-purple-100
-                        "
-                      />
-
-                    </div>
-
-                  </div>
-
-
-                  {/* Email + Event */}
-
-                  <div className="mt-5 grid gap-5 md:grid-cols-2">
-
-                    {/* Email */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Email Address
-                      </label>
-
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter email address"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="
-                          mt-2
-                          w-full
-                          rounded-xl
-                          border
-                          border-purple-100
-                          bg-white/70
-                          px-4
-                          py-3.5
-                          text-gray-700
-                          outline-none
-                          transition-all
-                          duration-300
-                          placeholder:text-gray-400
-                          hover:border-purple-200
-                          focus:border-purple-400
-                          focus:bg-white
-                          focus:ring-4
-                          focus:ring-purple-100
-                        "
-                      />
-
-                    </div>
-
-
-                    {/* Event Type */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Event Type
-                      </label>
-
-                      <select
-                        name="eventType"
-                        value={formData.eventType}
-                        onChange={handleChange}
-                        className="
-                          mt-2
-                          w-full
-                          rounded-xl
-                          border
-                          border-purple-100
-                          bg-white/70
-                          px-4
-                          py-3.5
-                          text-gray-700
-                          outline-none
-                          transition-all
-                          duration-300
-                          hover:border-purple-200
-                          focus:border-purple-400
-                          focus:bg-white
-                          focus:ring-4
-                          focus:ring-purple-100
-                        "
-                      >
-
-                        <option value="">
-                          Select Event
-                        </option>
-
-                        <option value="Wedding">
-                          Wedding
-                        </option>
-
-                        <option value="Engagement">
-                          Engagement
-                        </option>
-
-                        <option value="Reception">
-                          Reception
-                        </option>
-
-                        <option value="Birthday">
-                          Birthday
-                        </option>
-
-                        <option value="Pre Wedding">
-                          Pre Wedding
-                        </option>
-
-                      </select>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                {/* =========================================
-                    EVENT INFORMATION
-                ========================================== */}
-
-                <div>
-
-                  <div className="mb-4 mt-8 flex items-center gap-2">
-
-                    <div className="h-2 w-2 rounded-full bg-violet-600" />
-
-                    <h3 className="font-bold text-gray-700">
-                      Event Information
-                    </h3>
-
-                  </div>
-
-
-                  <div className="grid gap-5 md:grid-cols-3">
-
-                    {/* Start Date */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Event Date
-                      </label>
-
-                      <div className="relative">
-
-                        <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500" />
-
-                        <input
-                          type="date"
-                          name="eventDate"
-                          value={formData.eventDate}
-                          onChange={handleChange}
-                          className="
-                            mt-2
-                            w-full
-                            rounded-xl
-                            border
-                            border-purple-100
-                            bg-white/70
-                            py-3.5
-                            pl-11
-                            pr-4
-                            text-gray-700
-                            outline-none
-                            transition-all
-                            focus:border-purple-400
-                            focus:bg-white
-                            focus:ring-4
-                            focus:ring-purple-100
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-
-                    {/* End Date */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        End Date
-                      </label>
-
-                      <div className="relative">
-
-                        <FaCalendarAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500" />
-
-                        <input
-                          type="date"
-                          name="eventEndDate"
-                          value={formData.eventEndDate}
-                          onChange={handleChange}
-                          className="
-                            mt-2
-                            w-full
-                            rounded-xl
-                            border
-                            border-purple-100
-                            bg-white/70
-                            py-3.5
-                            pl-11
-                            pr-4
-                            text-gray-700
-                            outline-none
-                            transition-all
-                            focus:border-purple-400
-                            focus:bg-white
-                            focus:ring-4
-                            focus:ring-purple-100
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-
-                    {/* Location */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Location
-                      </label>
-
-                      <div className="relative">
-
-                        <FaMapMarkerAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500" />
-
-                        <input
-                          type="text"
-                          name="location"
-                          placeholder="Event location"
-                          value={formData.location}
-                          onChange={handleChange}
-                          className="
-                            mt-2
-                            w-full
-                            rounded-xl
-                            border
-                            border-purple-100
-                            bg-white/70
-                            py-3.5
-                            pl-11
-                            pr-4
-                            text-gray-700
-                            outline-none
-                            transition-all
-                            focus:border-purple-400
-                            focus:bg-white
-                            focus:ring-4
-                            focus:ring-purple-100
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* Guests + Budget */}
-
-                  <div className="mt-5 grid gap-5 md:grid-cols-2">
-
-                    {/* Guests */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Guest Count
-                      </label>
-
-                      <div className="relative">
-
-                        <FaUsers className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500" />
-
-                        <input
-                          type="number"
-                          name="guest"
-                          placeholder="Approx guests"
-                          value={formData.guest}
-                          onChange={handleChange}
-                          className="
-                            mt-2
-                            w-full
-                            rounded-xl
-                            border
-                            border-purple-100
-                            bg-white/70
-                            py-3.5
-                            pl-11
-                            pr-4
-                            text-gray-700
-                            outline-none
-                            transition-all
-                            focus:border-purple-400
-                            focus:bg-white
-                            focus:ring-4
-                            focus:ring-purple-100
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-
-                    {/* Budget */}
-
-                    <div>
-
-                      <label className="text-sm font-semibold text-gray-700">
-                        Estimated Budget
-                      </label>
-
-                      <div className="relative">
-
-                        <FaRupeeSign className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-500" />
-
-                        <input
-                          type="number"
-                          name="budget"
-                          placeholder="Approx budget"
-                          value={formData.budget}
-                          onChange={handleChange}
-                          className="
-                            mt-2
-                            w-full
-                            rounded-xl
-                            border
-                            border-purple-100
-                            bg-white/70
-                            py-3.5
-                            pl-11
-                            pr-4
-                            text-gray-700
-                            outline-none
-                            transition-all
-                            focus:border-purple-400
-                            focus:bg-white
-                            focus:ring-4
-                            focus:ring-purple-100
-                          "
-                        />
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                {/* =========================================
-                    MESSAGE
-                ========================================== */}
-
-                <div>
-
-                  <div className="mb-4 mt-8 flex items-center gap-2">
-
-                    <div className="h-2 w-2 rounded-full bg-fuchsia-600" />
-
-                    <h3 className="font-bold text-gray-700">
-                      Special Requirements
-                    </h3>
-
-                  </div>
-
-                  <textarea
-                    rows="5"
-                    name="message"
-                    placeholder="Tell us about your requirements..."
-                    value={formData.message}
-                    onChange={handleChange}
-                    className="
-                      w-full
-                      resize-none
-                      rounded-xl
-                      border
-                      border-purple-100
-                      bg-white/70
-                      px-4
-                      py-3.5
-                      text-gray-700
-                      outline-none
-                      transition-all
-                      placeholder:text-gray-400
-                      hover:border-purple-200
-                      focus:border-purple-400
-                      focus:bg-white
-                      focus:ring-4
-                      focus:ring-purple-100
-                    "
-                  />
-
-                </div>
-
-
-                {/* =========================================
-                    SUBMIT
-                ========================================== */}
-
-                <button
-                  type="submit"
-                  className="
-                    group
-                    relative
-                    w-full
-                    overflow-hidden
-                    rounded-xl
-                    bg-gradient-to-r
-                    from-purple-600
-                    via-violet-600
-                    to-fuchsia-600
-                    py-4
-                    text-lg
-                    font-bold
-                    text-white
-                    shadow-lg
-                    shadow-purple-300/40
-                    transition-all
-                    duration-300
-                    hover:-translate-y-1
-                    hover:shadow-xl
-                    hover:shadow-purple-300/50
-                    active:translate-y-0
-                  "
-                >
-
-                  {/* Shine animation */}
-
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-
-                  <span className="relative flex items-center justify-center gap-3">
-
-                    Submit Booking
-
-                    <FaArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
-
-                  </span>
-
-                </button>
-
-
-                <p className="flex items-center justify-center gap-2 text-xs text-gray-400">
-
-                  <FaCheckCircle className="text-green-500" />
-
-                  Your information is safe and secure
-
-                </p>
-
-              </form>
-
-            </div>
-
-          </div>
-
-
-          {/* =================================================
-              BOOKING SUMMARY
-          ================================================== */}
-
+    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+      {/* Top Banner Header */}
+      <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white py-12 px-6 shadow-xl">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-
-            <div className="sticky top-24 space-y-6">
-
-              {/* Summary Card */}
-
-              <div
-                className="
-                  relative
-                  overflow-hidden
-                  rounded-[30px]
-                  border
-                  border-white/80
-                  bg-white/60
-                  p-6
-                  shadow-[0_20px_60px_rgba(124,58,237,0.12)]
-                  backdrop-blur-2xl
-                "
-              >
-
-                {/* Header gradient */}
-
-                <div className="relative mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 via-violet-600 to-fuchsia-600 p-5 text-white">
-
-                  <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10" />
-
-                  <div className="relative">
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
-
-                        <FaCamera />
-
-                      </div>
-
-                      <div>
-
-                        <h2 className="text-xl font-bold">
-                          Booking Summary
-                        </h2>
-
-                        <p className="text-xs text-purple-100">
-                          Live preview of your booking
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                {/* Summary details */}
-
-                <div className="space-y-4">
-
-                  {/* Service */}
-
-                  <div className="flex items-center justify-between rounded-xl bg-purple-50/70 p-3">
-
-                    <div className="flex items-center gap-3">
-
-                      <FaCamera className="text-purple-600" />
-
-                      <span className="text-sm text-gray-600">
-                        Service
-                      </span>
-
-                    </div>
-
-                    <span className="text-sm font-bold text-gray-800">
-                      {formData.eventType || "Wedding Shoot"}
-                    </span>
-
-                  </div>
-
-
-                  {/* Date */}
-
-                  <div className="rounded-xl bg-purple-50/70 p-3">
-
-                    <div className="flex items-center gap-3">
-
-                      <FaCalendarAlt className="text-purple-600" />
-
-                      <span className="text-sm text-gray-600">
-                        Event Duration
-                      </span>
-
-                    </div>
-
-                    <div className="mt-2 ml-7 text-sm font-semibold text-gray-700">
-
-                      <div>
-                        {formatDate(formData.eventDate)}
-                      </div>
-
-                      <div className="my-1 text-xs text-gray-400">
-                        to
-                      </div>
-
-                      <div>
-                        {formatDate(formData.eventEndDate)}
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* Location */}
-
-                  <div className="flex items-center justify-between rounded-xl bg-purple-50/70 p-3">
-
-                    <div className="flex items-center gap-3">
-
-                      <FaMapMarkerAlt className="text-purple-600" />
-
-                      <span className="text-sm text-gray-600">
-                        Location
-                      </span>
-
-                    </div>
-
-                    <span className="max-w-[150px] truncate text-right text-sm font-semibold text-gray-800">
-                      {formData.location || "--"}
-                    </span>
-
-                  </div>
-
-
-                  {/* Guests */}
-
-                  <div className="flex items-center justify-between rounded-xl bg-purple-50/70 p-3">
-
-                    <div className="flex items-center gap-3">
-
-                      <FaUsers className="text-purple-600" />
-
-                      <span className="text-sm text-gray-600">
-                        Guests
-                      </span>
-
-                    </div>
-
-                    <span className="font-semibold text-gray-800">
-                      {formData.guest || "--"}
-                    </span>
-
-                  </div>
-
-
-                  {/* Budget */}
-
-                  <div className="flex items-center justify-between rounded-xl bg-purple-50/70 p-3">
-
-                    <div className="flex items-center gap-3">
-
-                      <FaRupeeSign className="text-purple-600" />
-
-                      <span className="text-sm text-gray-600">
-                        Budget
-                      </span>
-
-                    </div>
-
-                    <span className="font-bold text-purple-700">
-
-                      {formData.budget
-                        ? `₹ ${Number(formData.budget).toLocaleString("en-IN")}`
-                        : "--"}
-
-                    </span>
-
-                  </div>
-
-                </div>
-
-
-                {/* Divider */}
-
-                <div className="my-6 h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent" />
-
-
-                {/* Why Choose Us */}
-
-                <div>
-
-                  <div className="mb-4 flex items-center gap-2">
-
-                    <FaHeart className="text-purple-600" />
-
-                    <h3 className="font-bold text-gray-800">
-                      Why Choose Us?
-                    </h3>
-
-                  </div>
-
-
-                  <div className="space-y-3">
-
-                    {features.map((feature, index) => (
-
-                      <div
-                        key={feature}
-                        className="group flex items-center gap-3 rounded-xl p-2 transition-all duration-300 hover:bg-purple-50 hover:translate-x-1"
-                      >
-
-                        <div
-                          className="
-                            flex
-                            h-7
-                            w-7
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-green-100
-                            text-green-600
-                            transition-transform
-                            duration-300
-                            group-hover:scale-110
-                          "
-                        >
-
-                          <FaCheckCircle className="text-sm" />
-
-                        </div>
-
-                        <span className="text-sm text-gray-600">
-                          {feature}
-                        </span>
-
-                      </div>
-
-                    ))}
-
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              {/* Support card */}
-
-              <div className="overflow-hidden rounded-[25px] bg-gradient-to-br from-gray-900 via-purple-950 to-violet-900 p-6 text-white shadow-xl">
-
-                <div className="flex items-start gap-4">
-
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md">
-
-                    <FaPhoneAlt />
-
-                  </div>
-
-                  <div>
-
-                    <h3 className="font-bold">
-                      Need help?
-                    </h3>
-
-                    <p className="mt-1 text-sm text-purple-200">
-                      Our team is available to assist you.
-                    </p>
-
-                    <div className="mt-3 flex items-center gap-2 text-xs text-purple-200">
-
-                      <FaClock />
-
-                      Mon - Sat · 9 AM - 7 PM
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
+            <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs px-3 py-1 rounded-full font-medium mb-3">
+              <FaCamera className="text-purple-400" /> Professional Photoshoot Management
             </div>
-
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+              Event <span className="text-purple-400">Bookings</span>
+            </h1>
+            <p className="text-slate-300 text-sm md:text-base mt-2 max-w-xl">
+              Book photography sessions, track booking status, view detailed transaction history & pay remaining balances seamlessly.
+            </p>
           </div>
 
+          <div className="flex gap-3">
+            <button
+              onClick={() => setActiveTab("my_bookings")}
+              className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shadow-md ${
+                activeTab === "my_bookings"
+                  ? "bg-purple-600 text-white ring-2 ring-purple-400"
+                  : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
+              }`}
+            >
+              <FaList /> My Bookings ({totalBookingsCount})
+            </button>
+            <button
+              onClick={() => setActiveTab("new_booking")}
+              className={`px-5 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 shadow-md ${
+                activeTab === "new_booking"
+                  ? "bg-purple-600 text-white ring-2 ring-purple-400"
+                  : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md"
+              }`}
+            >
+              <FaPlus /> Book New Shoot
+            </button>
+          </div>
         </div>
-
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-6">
+        {/* ======================================================== */}
+        {/* TAB 1: MY BOOKINGS LIST */}
+        {/* ======================================================== */}
+        {activeTab === "my_bookings" && (
+          <div className="space-y-8">
+            {/* Overview Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Bookings</p>
+                <div className="flex items-baseline justify-between mt-2">
+                  <h3 className="text-2xl md:text-3xl font-black text-slate-800">{totalBookingsCount}</h3>
+                  <span className="p-2 rounded-xl bg-purple-50 text-purple-600"><FaCalendarAlt /></span>
+                </div>
+              </div>
 
-      {/* =====================================================
-          ANIMATION CSS
-      ====================================================== */}
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Shoots</p>
+                <div className="flex items-baseline justify-between mt-2">
+                  <h3 className="text-2xl md:text-3xl font-black text-amber-600">{activeBookingsCount}</h3>
+                  <span className="p-2 rounded-xl bg-amber-50 text-amber-600"><FaClock /></span>
+                </div>
+              </div>
 
-      <style>{`
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Amount Paid</p>
+                <div className="flex items-baseline justify-between mt-2">
+                  <h3 className="text-2xl md:text-3xl font-black text-emerald-600">
+                    ₹{totalPaidSum.toLocaleString("en-IN")}
+                  </h3>
+                  <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><FaRupeeSign /></span>
+                </div>
+              </div>
 
-        @keyframes floatingBlob {
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Balance</p>
+                <div className="flex items-baseline justify-between mt-2">
+                  <h3 className="text-2xl md:text-3xl font-black text-rose-600">
+                    ₹{totalPendingSum.toLocaleString("en-IN")}
+                  </h3>
+                  <span className="p-2 rounded-xl bg-rose-50 text-rose-600"><FaCreditCard /></span>
+                </div>
+              </div>
+            </div>
 
-          0% {
-            transform: translate(0px, 0px);
-          }
+            {/* Filter & Search Bar */}
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-col md:flex-row justify-between items-center gap-4">
+              {/* Status Filter Pills */}
+              <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                {["All", "Pending", "Confirmed", "In Progress", "Completed", "Cancelled"].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setFilterStatus(st)}
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      filterStatus === st
+                        ? "bg-purple-600 text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
 
-          50% {
-            transform: translate(-25px, -25px);
-          }
+              {/* Search Box */}
+              <div className="relative w-full md:w-72">
+                <FaSearch className="absolute left-3.5 top-3.5 text-slate-400 text-sm" />
+                <input
+                  type="text"
+                  placeholder="Search event or studio..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                />
+              </div>
+            </div>
 
-          100% {
-            transform: translate(0px, 0px);
-          }
+            {/* Loading Spinner */}
+            {loading && (
+              <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
+                <FaSpinner className="animate-spin text-4xl text-purple-600 mx-auto" />
+                <p className="text-slate-500 text-sm mt-3 font-medium">Fetching your photoshoot bookings...</p>
+              </div>
+            )}
 
-        }
+            {/* Empty State */}
+            {!loading && filteredBookings.length === 0 && (
+              <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
+                <div className="w-20 h-20 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+                  <FaCalendarAlt />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800">No Bookings Found</h3>
+                <p className="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+                  {searchQuery || filterStatus !== "All"
+                    ? "No photoshoot bookings match your filter criteria."
+                    : "You haven't booked any photoshoot events yet. Book your first event with our top studios!"}
+                </p>
+                <button
+                  onClick={() => setActiveTab("new_booking")}
+                  className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-purple-600/20 inline-flex items-center gap-2"
+                >
+                  <FaPlus /> Book Photoshoot Now
+                </button>
+              </div>
+            )}
 
+            {/* Bookings List Cards */}
+            {!loading && filteredBookings.length > 0 && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredBookings.map((b) => {
+                  const totalPkg = b.totalAmount && b.totalAmount > 0 ? b.totalAmount : (b.serviceId?.price || 25000);
+                  const paid = b.paidAmount || b.advanceAmount || 0;
+                  const remaining = Math.max(0, totalPkg - paid);
+                  const isFullyPaid = b.paymentStatus === "Paid" || remaining === 0;
 
-        @keyframes floatingSmall {
+                  return (
+                    <div
+                      key={b._id}
+                      className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                    >
+                      {/* Top Header Card */}
+                      <div className="p-6">
+                        <div className="flex justify-between items-start gap-2 mb-3">
+                          <span className="text-xs font-mono font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
+                            #{b._id ? b._id.substring(18).toUpperCase() : "BK"}
+                          </span>
+                          <div className="flex flex-wrap gap-1 justify-end">
+                            {/* Status Badge */}
+                            <span
+                              className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                                b.status === "Confirmed"
+                                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                  : b.status === "Completed"
+                                  ? "bg-blue-100 text-blue-700 border border-blue-200"
+                                  : b.status === "Cancelled"
+                                  ? "bg-rose-100 text-rose-700 border border-rose-200"
+                                  : "bg-amber-100 text-amber-700 border border-amber-200"
+                              }`}
+                            >
+                              {b.status}
+                            </span>
+                          </div>
+                        </div>
 
-          0% {
-            transform: translateY(0px);
-          }
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
+                          {b.eventType}
+                        </h3>
 
-          50% {
-            transform: translateY(-20px);
-          }
+                        {/* Studio Info */}
+                        <div className="mt-3 space-y-2 text-sm text-slate-600">
+                          <div className="flex items-center gap-2">
+                            <FaStore className="text-purple-600 text-xs shrink-0" />
+                            <span className="font-semibold text-slate-800">
+                              {b.adminId?.name || "Studio Partner"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <FaCalendarAlt className="text-purple-600 text-xs shrink-0" />
+                            <span>
+                              {b.shootDate
+                                ? new Date(b.shootDate).toLocaleDateString("en-IN", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })
+                                : "N/A"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <FaMapMarkerAlt className="text-purple-600 text-xs shrink-0" />
+                            <span className="truncate">{b.location || "Client Location"}</span>
+                          </div>
+                        </div>
 
-          100% {
-            transform: translateY(0px);
-          }
+                        {/* Payment Breakdown Box */}
+                        <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-2">
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>Total Package:</span>
+                            <span className="font-bold text-slate-800">₹{totalPkg.toLocaleString("en-IN")}</span>
+                          </div>
 
-        }
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>Paid Amount:</span>
+                            <span className="font-bold text-emerald-600">₹{paid.toLocaleString("en-IN")}</span>
+                          </div>
 
-      `}</style>
+                          <div className="flex justify-between text-xs font-semibold pt-1 border-t border-slate-200">
+                            <span>Remaining Balance:</span>
+                            <span className={remaining > 0 ? "text-rose-600 font-bold" : "text-emerald-600 font-bold"}>
+                              {remaining > 0 ? `₹${remaining.toLocaleString("en-IN")}` : "Fully Paid ✓"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
+                      {/* Bottom Footer Actions */}
+                      <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => navigate(`/booking-details/${b._id}`)}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                        >
+                          <FaInfoCircle /> Details & History
+                        </button>
+
+                        {remaining > 0 && b.status !== "Cancelled" && (
+                          <button
+                            onClick={() => {
+                              setPayModalBooking(b);
+                              setPayCustomAmount(remaining.toString());
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition-all flex items-center gap-1 shadow-sm"
+                          >
+                            <FaCreditCard /> Pay Balance
+                          </button>
+                        )}
+
+                        {b.status === "Pending" && (
+                          <button
+                            onClick={() => handleCancelBooking(b._id)}
+                            className="p-2.5 text-rose-600 hover:bg-rose-50 rounded-xl transition-all text-xs font-semibold"
+                            title="Cancel Booking"
+                          >
+                            <FaTimesCircle className="text-base" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 2: BOOK NEW SHOOT FORM */}
+        {/* ======================================================== */}
+        {activeTab === "new_booking" && (
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 md:p-10 max-w-4xl mx-auto">
+            <div className="mb-8">
+              <span className="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                New Photoshoot
+              </span>
+              <h2 className="text-3xl font-black text-slate-900 mt-2">Book Your Event Photography</h2>
+              <p className="text-slate-500 text-sm mt-1">
+                Select your preferred studio, enter event details, and reserve your photoshoot date.
+              </p>
+            </div>
+
+            <form onSubmit={handleBookingSubmit} className="space-y-6">
+              {/* Studio Selection */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">
+                  Select Studio <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    name="adminId"
+                    value={formData.adminId || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
+                  >
+                    {studiosLoading ? (
+                      <option value="">Loading available studios...</option>
+                    ) : Array.isArray(studios) && studios.length > 0 ? (
+                      studios.map((s) => (
+                        <option key={s._id} value={s.adminId || s._id}>
+                          {s.studioName || s.name || "Studio Partner"} ({s.address || s.city || "Studio Location"})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">No studios available</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* Event Type & Location */}
+              <div className="grid md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">
+                    Event / Shoot Type <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    name="eventType"
+                    value={formData.eventType || "Wedding Photography"}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                  >
+                    <option value="Wedding Photography">Wedding Photography</option>
+                    <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
+                    <option value="Engagement Ceremony">Engagement Ceremony</option>
+                    <option value="Birthday Celebration">Birthday Celebration</option>
+                    <option value="Maternity & Baby Shoot">Maternity & Baby Shoot</option>
+                    <option value="Corporate Event">Corporate Event</option>
+                    <option value="Product Photography">Product Photography</option>
+                    <option value="Model & Portfolio Shoot">Model & Portfolio Shoot</option>
+                    <option value="Other Event">Other Event</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">
+                    Shoot Location / Venue <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="e.g. City Palace, Udaipur or Home Venue"
+                    value={formData.location || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Shoot Dates */}
+              <div className="grid md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">
+                    Shoot Start Date <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="shootDate"
+                    value={formData.shootDate || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">Shoot End Date (Optional)</label>
+                  <input
+                    type="date"
+                    name="shootEndDate"
+                    value={formData.shootEndDate || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Client Info */}
+              <div className="grid md:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">Your Name</label>
+                  <input
+                    type="text"
+                    name="clientName"
+                    value={formData.clientName || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">Phone Number</label>
+                  <input
+                    type="tel"
+                    name="clientPhone"
+                    value={formData.clientPhone || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    name="clientEmail"
+                    value={formData.clientEmail || ""}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Pricing & Budget */}
+              <div className="grid md:grid-cols-2 gap-5 p-5 bg-purple-50/50 rounded-2xl border border-purple-100">
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-1">
+                    Estimated Package Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="totalAmount"
+                    placeholder="25000"
+                    value={formData.totalAmount || "25000"}
+                    onChange={handleInputChange}
+                    className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </div>
+
+                {formData.paymentOption === "pay_now" && (
+                  <div>
+                    <label className="block text-sm font-bold text-slate-800 mb-1">Advance Payment Amount (₹)</label>
+                    <input
+                      type="number"
+                      name="advanceAmount"
+                      placeholder="2000"
+                      value={formData.advanceAmount || "2000"}
+                      onChange={handleInputChange}
+                      className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm font-bold text-emerald-600 outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Payment Option Selection */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-3">Payment Option</label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <label
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+                      formData.paymentOption === "pay_now"
+                        ? "border-purple-600 bg-purple-50/40 shadow-md"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentOption"
+                      value="pay_now"
+                      checked={formData.paymentOption === "pay_now"}
+                      onChange={handleInputChange}
+                      className="mt-1 accent-purple-600"
+                    />
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">Pay Advance Now (Online Razorpay)</h4>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Pay ₹{formData.advanceAmount || "2,000"} advance online via Razorpay for instant booking confirmation.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-start gap-3 ${
+                      formData.paymentOption === "pay_later"
+                        ? "border-purple-600 bg-purple-50/40 shadow-md"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentOption"
+                      value="pay_later"
+                      checked={formData.paymentOption === "pay_later"}
+                      onChange={handleInputChange}
+                      className="mt-1 accent-purple-600"
+                    />
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">Pay Later at Shoot</h4>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Submit booking request now with ₹0 advance. Studio will confirm and collect payment later.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">Special Requests / Notes</label>
+                <textarea
+                  name="notes"
+                  rows="3"
+                  placeholder="Mention any specific requirements, timing preferences, or theme notes..."
+                  value={formData.notes || ""}
+                  onChange={handleInputChange}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                ></textarea>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex gap-4 pt-4 border-t border-slate-100">
+                <button
+                  type="submit"
+                  disabled={loading || paymentLoading}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-xl shadow-purple-600/20 text-base transition-all flex items-center justify-center gap-2"
+                >
+                  {loading || paymentLoading ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Processing Booking...
+                    </>
+                  ) : formData.paymentOption === "pay_now" ? (
+                    <>
+                      <FaCreditCard /> Proceed to Pay ₹{formData.advanceAmount || "2,000"} & Confirm
+                    </>
+                  ) : (
+                    <>
+                      <FaCheckCircle /> Submit Booking Request
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+
+      {/* ======================================================== */}
+      {/* PAY BALANCE ONLINE MODAL */}
+      {/* ======================================================== */}
+      {payModalBooking && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <FaCreditCard className="text-emerald-600" /> Pay Remaining Balance
+              </h3>
+              <button
+                onClick={() => setPayModalBooking(null)}
+                className="text-slate-400 hover:text-slate-600 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="py-5 space-y-4">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Event:</span>
+                  <span className="font-bold text-slate-800">{payModalBooking.eventType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Total Package:</span>
+                  <span className="font-bold">
+                    ₹
+                    {(
+                      payModalBooking.totalAmount && payModalBooking.totalAmount > 0
+                        ? payModalBooking.totalAmount
+                        : payModalBooking.serviceId?.price || 25000
+                    ).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Already Paid:</span>
+                  <span className="font-bold text-emerald-600">
+                    ₹{(payModalBooking.paidAmount || payModalBooking.advanceAmount || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-slate-200 font-bold">
+                  <span className="text-slate-800">Remaining Due:</span>
+                  <span className="text-rose-600">
+                    ₹
+                    {Math.max(
+                      0,
+                      (payModalBooking.totalAmount && payModalBooking.totalAmount > 0
+                        ? payModalBooking.totalAmount
+                        : payModalBooking.serviceId?.price || 25000) -
+                        (payModalBooking.paidAmount || payModalBooking.advanceAmount || 0)
+                    ).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Enter Payment Amount (₹)</label>
+                <input
+                  type="number"
+                  value={payCustomAmount}
+                  onChange={(e) => setPayCustomAmount(e.target.value)}
+                  className="w-full border border-slate-300 rounded-xl p-3 text-base font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Enter amount"
+                />
+              </div>
+
+              <button
+                onClick={() => handlePayBalanceOnline(payModalBooking)}
+                disabled={paymentLoading}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 text-sm transition-all flex items-center justify-center gap-2"
+              >
+                {paymentLoading ? (
+                  <>
+                    <FaSpinner className="animate-spin" /> Processing Payment...
+                  </>
+                ) : (
+                  <>
+                    <FaCreditCard /> Pay ₹{Number(payCustomAmount || 0).toLocaleString("en-IN")} Now via Razorpay
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

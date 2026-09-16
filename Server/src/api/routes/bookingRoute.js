@@ -9,6 +9,7 @@ import {
   getBookingRazorpayConfig,
   createBookingRazorpayOrder,
   verifyBookingRazorpayPayment,
+  addBookingPayment,
 } from "../controllers/bookingController.js";
 import { isUser, isAdmin } from "../middleware/authMiddleware.js";
 
@@ -21,6 +22,7 @@ router.post("/booking/razorpay/verify", isUser, verifyBookingRazorpayPayment);
 
 // Standard Booking CRUD (User must be logged in)
 router.post("/booking/create", isUser, createBooking);
+router.post("/booking/:id/payment", isUser, addBookingPayment);
 router.get("/booking/user", isUser, getUserBookings);
 router.get("/booking/studio", isAdmin, getStudioBookings);
 router.get("/booking/:id", isUser, getBookingById);

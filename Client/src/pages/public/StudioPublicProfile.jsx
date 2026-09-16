@@ -301,6 +301,11 @@ export default function StudioPublicProfile() {
               toast.success(`🎉 Payment of ₹${advanceAmount.toLocaleString("en-IN")} Successful! Booking confirmed.`);
               setShowBookingModal(false);
               setSelectedService(null);
+              if (createdBooking?._id) {
+                navigate(`/booking-details/${createdBooking._id}`);
+              } else {
+                navigate("/book");
+              }
             } catch (err) {
               console.error("Booking verification error:", err);
               toast.error("Payment was captured but booking sync encountered an issue.");
@@ -356,9 +361,15 @@ export default function StudioPublicProfile() {
       const result = await dispatch(createBooking(bookingPayload));
 
       if (createBooking.fulfilled.match(result)) {
+        const createdBooking = result.payload?.data;
         toast.success("🎉 Shoot booking submitted successfully! Pay on shoot date.");
         setShowBookingModal(false);
         setSelectedService(null);
+        if (createdBooking?._id) {
+          navigate(`/booking-details/${createdBooking._id}`);
+        } else {
+          navigate("/book");
+        }
       } else {
         toast.error(result.payload?.message || "Failed to submit booking");
       }

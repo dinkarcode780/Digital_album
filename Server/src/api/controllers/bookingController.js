@@ -3,6 +3,7 @@ import Razorpay from "razorpay";
 import Booking from "../../models/bookingModel.js";
 import Event from "../../models/eventModel.js";
 import userModel from "../../models/userModel.js";
+import Service from "../../models/servicesModel.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
 // Razorpay SDK Instance
@@ -67,12 +68,17 @@ export const createBookingRazorpayOrder = asyncHandler(async (req, res) => {
 // ==========================================
 // 3. VERIFY RAZORPAY PAYMENT & CONFIRM BOOKING
 // ==========================================
+// ==========================================
+// 3. VERIFY RAZORPAY PAYMENT & CONFIRM BOOKING
+// ==========================================
 export const verifyBookingRazorpayPayment = asyncHandler(async (req, res) => {
   const {
     bookingId,
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
+    amount,
+    notes,
   } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -100,8 +106,32 @@ export const verifyBookingRazorpayPayment = asyncHandler(async (req, res) => {
   if (bookingId) {
     booking = await Booking.findById(bookingId);
     if (booking) {
-      booking.paymentStatus = "Advance Paid";
-      booking.status = "Confirmed";
+      const paymentVal = Number(amount) || booking.advanceAmount || 0;
+
+      // Add to transaction log
+      booking.transactions.push({
+        transactionId: razorpay_payment_id,
+        amount: paymentVal,
+        paymentMethod: "Razorpay Online",
+        paymentStatus: "Completed",
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+        paymentDate: new Date(),
+        notes: notes || (booking.paidAmount > 0 ? "Balance Payment via Razorpay" : "Advance Booking Payment via Razorpay"),
+      });
+
+      // Recalculate total paid amount
+      const totalPaidSum = booking.transactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+      booking.paidAmount = totalPaidSum > 0 ? totalPaidSum : (booking.paidAmount + paymentVal);
+
+      if (booking.totalAmount > 0 && booking.paidAmount >= booking.totalAmount) {
+        booking.paymentStatus = "Paid";
+      } else if (booking.paidAmount > 0) {
+        booking.paymentStatus = "Advance Paid";
+      }
+
+      booking.status = booking.status === "Pending" ? "Confirmed" : booking.status;
       booking.paymentMethod = "Razorpay Online";
       booking.razorpayOrderId = razorpay_order_id;
       booking.razorpayPaymentId = razorpay_payment_id;
@@ -117,7 +147,7 @@ export const verifyBookingRazorpayPayment = asyncHandler(async (req, res) => {
       await Event.updateMany(
         { userId: booking.userId, adminId: booking.adminId, eventDate: booking.shootDate },
         {
-          paymentStatus: "Advance Paid",
+          paymentStatus: booking.paymentStatus,
           status: "Upcoming",
           paymentMethod: "Razorpay Online",
           transactionId: razorpay_payment_id,
@@ -130,13 +160,13 @@ export const verifyBookingRazorpayPayment = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "🎉 Razorpay payment verified and booking confirmed successfully!",
-    data: {
+    message: "🎉 Razorpay payment verified and transaction recorded successfully!",
+    data: booking || {
       bookingId,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
-      paymentStatus: "Advance Paid",
-      status: "Confirmed",
+      paymentStatus: booking?.paymentStatus || "Advance Paid",
+      status: booking?.status || "Confirmed",
     },
   });
 });
@@ -190,6 +220,24 @@ export const createBooking = asyncHandler(async (req, res) => {
     paymentMethod || (finalPaymentOption === "pay_now" ? "Razorpay Online" : "Pay Later at Shoot");
   const finalAdvance = finalPaymentOption === "pay_now" ? Number(advanceAmount) || 1000 : 0;
   const initialStatus = finalPaymentStatus === "Advance Paid" ? "Confirmed" : "Pending";
+  const parsedTotal = Number(totalAmount) || 0;
+  const initialPaid = finalPaymentStatus === "Advance Paid" ? finalAdvance : 0;
+
+  // Initial Transaction Log
+  const initialTransactions = [];
+  if (initialPaid > 0) {
+    initialTransactions.push({
+      transactionId: transactionId || razorpayPaymentId || `TXN-${Date.now()}`,
+      amount: initialPaid,
+      paymentMethod: finalPaymentMethod,
+      paymentStatus: "Completed",
+      razorpayOrderId: razorpayOrderId || "",
+      razorpayPaymentId: razorpayPaymentId || "",
+      razorpaySignature: razorpaySignature || "",
+      paymentDate: new Date(),
+      notes: "Advance Booking Online Payment",
+    });
+  }
 
   // 1. Create Booking record
   const booking = await Booking.create({
@@ -207,13 +255,15 @@ export const createBooking = asyncHandler(async (req, res) => {
     paymentOption: finalPaymentOption,
     paymentStatus: finalPaymentStatus,
     advanceAmount: finalAdvance,
-    totalAmount: Number(totalAmount) || 0,
+    paidAmount: initialPaid,
+    totalAmount: parsedTotal,
     paymentMethod: finalPaymentMethod,
     transactionId: transactionId || razorpayPaymentId || "",
     razorpayOrderId: razorpayOrderId || "",
     razorpayPaymentId: razorpayPaymentId || "",
     razorpaySignature: razorpaySignature || "",
     status: initialStatus,
+    transactions: initialTransactions,
     isActive: true,
   });
 
@@ -233,7 +283,7 @@ export const createBooking = asyncHandler(async (req, res) => {
       paymentOption: finalPaymentOption,
       paymentStatus: finalPaymentStatus,
       advanceAmount: finalAdvance,
-      totalAmount: Number(totalAmount) || 0,
+      totalAmount: parsedTotal,
       paymentMethod: finalPaymentMethod,
       transactionId: transactionId || razorpayPaymentId || "",
       status: "Upcoming",
@@ -258,6 +308,56 @@ export const createBooking = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
+// 4.1 ADD MANUAL OR BALANCE PAYMENT TO BOOKING
+// ==========================================
+export const addBookingPayment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { amount, paymentMethod, notes, transactionId } = req.body;
+
+  const booking = await Booking.findById(id);
+  if (!booking) {
+    return res.status(404).json({ success: false, message: "Booking not found" });
+  }
+
+  const payAmt = Number(amount);
+  if (!payAmt || payAmt <= 0) {
+    return res.status(400).json({ success: false, message: "A valid payment amount is required" });
+  }
+
+  const newTxn = {
+    transactionId: transactionId || `TXN-${Date.now().toString(36).toUpperCase()}`,
+    amount: payAmt,
+    paymentMethod: paymentMethod || "Online Payment",
+    paymentStatus: "Completed",
+    paymentDate: new Date(),
+    notes: notes || "Booking Payment",
+  };
+
+  booking.transactions.push(newTxn);
+
+  const totalPaidSum = booking.transactions.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+  booking.paidAmount = totalPaidSum;
+
+  if (booking.totalAmount > 0 && booking.paidAmount >= booking.totalAmount) {
+    booking.paymentStatus = "Paid";
+  } else if (booking.paidAmount > 0) {
+    booking.paymentStatus = "Advance Paid";
+  }
+
+  await booking.save();
+
+  const populatedBooking = await Booking.findById(booking._id)
+    .populate("adminId", "name email phoneNumber address profileImage")
+    .populate("serviceId", "title price description features");
+
+  res.status(200).json({
+    success: true,
+    message: `Payment of ₹${payAmt} recorded successfully!`,
+    data: populatedBooking,
+  });
+});
+
+// ==========================================
 // 5. GET USER'S BOOKINGS (Client Profile)
 // ==========================================
 export const getUserBookings = asyncHandler(async (req, res) => {
@@ -268,10 +368,24 @@ export const getUserBookings = asyncHandler(async (req, res) => {
     .populate("serviceId", "title price description features")
     .sort({ createdAt: -1 });
 
+  const formattedBookings = bookings.map((b) => {
+    const obj = b.toObject();
+    const servicePrice = obj.serviceId?.price || 25000;
+    if (!obj.totalAmount || obj.totalAmount <= 0) {
+      obj.totalAmount = servicePrice;
+    }
+    const transactionsPaid = (obj.transactions || []).reduce(
+      (sum, t) => sum + (Number(t.amount) || 0),
+      0
+    );
+    obj.paidAmount = transactionsPaid > 0 ? transactionsPaid : (obj.paidAmount || obj.advanceAmount || 0);
+    return obj;
+  });
+
   res.status(200).json({
     success: true,
-    count: bookings.length,
-    data: bookings,
+    count: formattedBookings.length,
+    data: formattedBookings,
   });
 });
 
@@ -286,10 +400,24 @@ export const getStudioBookings = asyncHandler(async (req, res) => {
     .populate("serviceId", "title price description features")
     .sort({ createdAt: -1 });
 
+  const formattedBookings = bookings.map((b) => {
+    const obj = b.toObject();
+    const servicePrice = obj.serviceId?.price || 25000;
+    if (!obj.totalAmount || obj.totalAmount <= 0) {
+      obj.totalAmount = servicePrice;
+    }
+    const transactionsPaid = (obj.transactions || []).reduce(
+      (sum, t) => sum + (Number(t.amount) || 0),
+      0
+    );
+    obj.paidAmount = transactionsPaid > 0 ? transactionsPaid : (obj.paidAmount || obj.advanceAmount || 0);
+    return obj;
+  });
+
   res.status(200).json({
     success: true,
-    count: bookings.length,
-    data: bookings,
+    count: formattedBookings.length,
+    data: formattedBookings,
   });
 });
 
@@ -311,9 +439,20 @@ export const getBookingById = asyncHandler(async (req, res) => {
     });
   }
 
+  const obj = booking.toObject();
+  const servicePrice = obj.serviceId?.price || 25000;
+  if (!obj.totalAmount || obj.totalAmount <= 0) {
+    obj.totalAmount = servicePrice;
+  }
+  const transactionsPaid = (obj.transactions || []).reduce(
+    (sum, t) => sum + (Number(t.amount) || 0),
+    0
+  );
+  obj.paidAmount = transactionsPaid > 0 ? transactionsPaid : (obj.paidAmount || obj.advanceAmount || 0);
+
   res.status(200).json({
     success: true,
-    data: booking,
+    data: obj,
   });
 });
 
