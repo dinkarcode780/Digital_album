@@ -397,6 +397,19 @@ const Login = () => {
   };
 
   useEffect(() => {
+    const expiredType = sessionStorage.getItem("sessionExpiredType");
+    if (expiredType === "Admin") {
+      setLoginType("Admin");
+      sessionStorage.removeItem("sessionExpiredType");
+    }
+
+    if (sessionStorage.getItem("sessionExpired")) {
+      toast.error("Your session has expired. Please login again.");
+      sessionStorage.removeItem("sessionExpired");
+    }
+  }, []);
+
+  useEffect(() => {
     if (adminState.isAuthenticated && adminState.admin?.userType === "SuperAdmin") {
       navigate("/super-admin/dashboard");
       return;

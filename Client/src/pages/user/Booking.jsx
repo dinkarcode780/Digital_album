@@ -126,7 +126,11 @@ const Booking = () => {
     try {
       setStudiosLoading(true);
       const res = await axiosInstance.get("/public/studios");
-      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      const list = Array.isArray(res.data?.data?.studios)
+        ? res.data.data.studios
+        : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
       setStudios(list);
       if (list.length > 0 && !formData.adminId) {
         setFormData((prev) => ({ ...prev, adminId: list[0].adminId || list[0]._id }));
