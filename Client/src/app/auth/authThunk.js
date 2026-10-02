@@ -61,17 +61,14 @@ export const userUpdateProfile = createAsyncThunk(
     try {
       const formData = new FormData();
 
-      formData.append("userId", profileData.userId);
-      formData.append("name", profileData.name);
-      formData.append("email", profileData.email);
-      formData.append("phoneNumber", profileData.phoneNumber);
-      formData.append("address", profileData.address);
+      if (profileData.userId) formData.append("userId", profileData.userId);
+      if (profileData.name !== undefined) formData.append("name", profileData.name);
+      if (profileData.email !== undefined) formData.append("email", profileData.email);
+      if (profileData.phoneNumber !== undefined) formData.append("phoneNumber", profileData.phoneNumber);
+      if (profileData.address !== undefined) formData.append("address", profileData.address);
 
-      if (profileData.profileImage) {
-        formData.append(
-          "profileImage",
-          profileData.profileImage
-        );
+      if (profileData.profileImage && profileData.profileImage instanceof File) {
+        formData.append("profileImage", profileData.profileImage);
       }
 
       const response = await axiosInstance.put(

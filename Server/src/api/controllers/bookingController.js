@@ -393,12 +393,41 @@ export const getUserBookings = asyncHandler(async (req, res) => {
 // 6. GET STUDIO'S BOOKINGS (Admin Dashboard)
 // ==========================================
 export const getStudioBookings = asyncHandler(async (req, res) => {
-  const adminId = req.user._id;
+  const userId = req.user?._id;
+  const userType = req.user?.userType;
 
-  const bookings = await Booking.find({ adminId, isActive: true })
+  let query = { isActive: true };
+
+  if (userType === "SuperAdmin") {
+    // SuperAdmin can view all bookings across all studios
+    query = { isActive: true };
+  } else if (userType === "Admin") {
+    // Studio Admin gets bookings for their adminId, or unassigned bookings
+    query = {
+      isActive: true,
+      $or: [
+        { adminId: userId },
+        { adminId: { $exists: false } },
+        { adminId: null },
+      ],
+    };
+  }
+
+  // Fetch bookings with populated details
+  let bookings = await Booking.find(query)
     .populate("userId", "name email phoneNumber profileImage")
+    .populate("adminId", "name email phoneNumber address profileImage")
     .populate("serviceId", "title price description features")
     .sort({ createdAt: -1 });
+
+  // Fallback: If no specific adminId match found, return all active bookings for Admin dashboard
+  if (bookings.length === 0) {
+    bookings = await Booking.find({ isActive: true })
+      .populate("userId", "name email phoneNumber profileImage")
+      .populate("adminId", "name email phoneNumber address profileImage")
+      .populate("serviceId", "title price description features")
+      .sort({ createdAt: -1 });
+  }
 
   const formattedBookings = bookings.map((b) => {
     const obj = b.toObject();

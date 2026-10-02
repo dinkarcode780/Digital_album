@@ -13,6 +13,7 @@ import {
   FaHeadset,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { FaCalendarCheck } from "react-icons/fa6";
 
 const menuItems = [
   {
@@ -30,6 +31,11 @@ const menuItems = [
     path: "/favorites",
     icon: <FaHeart />,
   },
+ {
+  name: "Book Now",
+  path: "/book",
+  icon: <FaCalendarCheck />,
+},
   {
     name: "Downloads",
     path: "/downloads",

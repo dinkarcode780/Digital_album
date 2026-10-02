@@ -104,7 +104,10 @@ const authSlice = createSlice({
       .addCase(userUpdateProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.user = action.payload.data;
+        if (action.payload?.data) {
+          state.user = action.payload.data;
+          localStorage.setItem("user", JSON.stringify(action.payload.data));
+        }
       })
 
       .addCase(userUpdateProfile.rejected, (state, action) => {
@@ -145,7 +148,10 @@ const authSlice = createSlice({
       .addCase(getUserById.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.user = action.payload.data;
+        if (action.payload?.data) {
+          state.user = action.payload.data;
+          localStorage.setItem("user", JSON.stringify(action.payload.data));
+        }
       })
 
       .addCase(getUserById.rejected, (state, action) => {

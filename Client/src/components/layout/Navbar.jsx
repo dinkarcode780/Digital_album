@@ -4,7 +4,7 @@ const Navbar = () => {
   const menus = [
     {
       name: "Home",
-      path: "/",
+      path: "/user/dashboard",
     },
     {
       name: "Studios",
