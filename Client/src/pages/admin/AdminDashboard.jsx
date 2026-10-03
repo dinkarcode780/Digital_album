@@ -425,7 +425,7 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700 font-medium">
-                          {booking.eventType || "Event"}
+                          {booking.eventCategory?.name || booking.eventType || "Event"}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {shootDateStr}
@@ -487,7 +487,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-gray-700">
-                        {b.eventType || "Photoshoot"} - {b.location || "Studio"}
+                        {b.eventCategory?.name || b.eventType || "Photoshoot"} - {b.location || "Studio"}
                       </p>
                       <p className="mt-0.5 text-xs text-gray-400">
                         Client: {b.clientName || "User"}

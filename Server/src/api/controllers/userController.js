@@ -1,5 +1,6 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import userModel from "../../models/userModel.js";
+import Booking from "../../models/bookingModel.js";
 import { compareValue, hashValue } from "../../utils/hashValue.js";
 import jwt from "jsonwebtoken";
 import {
@@ -488,6 +489,31 @@ export const getUserByFilter = asyncHandler(async (req, res) => {
     page = 1,
     limit = 10,
   } = req.query;
+
+  // Sync unassigned users who have existing bookings with a studio admin
+  try {
+    const unassignedWithBookings = await Booking.aggregate([
+      { $match: { adminId: { $exists: true, $ne: null } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$userId",
+          latestAdminId: { $first: "$adminId" },
+        },
+      },
+    ]);
+
+    for (const item of unassignedWithBookings) {
+      if (item._id && item.latestAdminId) {
+        await userModel.updateOne(
+          { _id: item._id, ownerAdminId: null, userType: "User" },
+          { $set: { ownerAdminId: item.latestAdminId } }
+        );
+      }
+    }
+  } catch (syncErr) {
+    console.warn("User booking sync notice:", syncErr.message);
+  }
 
   const filter = {};
 

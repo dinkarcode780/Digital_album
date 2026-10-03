@@ -32,9 +32,15 @@ const bookingSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    eventCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EventCategory",
+      required: function () {
+        return !this.eventType;
+      },
+    },
     eventType: {
       type: String,
-      required: [true, "Event / shoot type is required"],
       trim: true,
     },
     shootDate: {

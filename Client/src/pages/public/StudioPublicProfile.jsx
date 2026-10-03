@@ -89,7 +89,7 @@ export default function StudioPublicProfile() {
     clientName: "",
     clientEmail: "",
     clientPhone: "",
-    eventType: "",
+    eventCategory: "",
     eventDate: "",
     eventEndDate: "",
     location: "",
@@ -113,15 +113,15 @@ export default function StudioPublicProfile() {
 
   // Fetch dynamic categories on mount
   useEffect(() => {
-    dispatch(getEventCategoryByFilter({ page: 1, limit: 100 }));
+    dispatch(getEventCategoryByFilter({ page: 1, limit: 100, isActive: true }));
   }, [dispatch]);
 
-  // Set default event type when categories load
+  // Set default event category when categories load
   useEffect(() => {
-    if (eventCategories.length > 0 && !bookingForm.eventType) {
+    if (eventCategories.length > 0 && !bookingForm.eventCategory) {
       setBookingForm((prev) => ({
         ...prev,
-        eventType: eventCategories[0].name,
+        eventCategory: eventCategories[0]._id,
       }));
     }
   }, [eventCategories]);
@@ -174,7 +174,7 @@ export default function StudioPublicProfile() {
       localStorage.setItem(
         "pendingBooking",
         JSON.stringify({
-          eventType: service?.title || "Wedding Photography",
+          eventCategory: eventCategories[0]?._id || "",
           totalAmount: service?.price || 0,
         })
       );
@@ -189,7 +189,7 @@ export default function StudioPublicProfile() {
       clientName: currentUser?.name || prev.clientName || "",
       clientEmail: currentUser?.email || prev.clientEmail || "",
       clientPhone: currentUser?.phoneNumber ? String(currentUser.phoneNumber) : prev.clientPhone || "",
-      eventType: service?.title || prev.eventType || (eventCategories[0]?.name || "Wedding Photography"),
+      eventCategory: prev.eventCategory || eventCategories[0]?._id || "",
     }));
 
     if (servicePrice > 0) {
@@ -249,7 +249,9 @@ export default function StudioPublicProfile() {
           amount: orderData.amount,
           currency: orderData.currency || "INR",
           name: studio?.studioName || "Album Studio",
-          description: `Advance Shoot Booking for ${bookingForm.eventType}`,
+          description: `Advance Shoot Booking for ${
+            eventCategories.find((category) => category._id === bookingForm.eventCategory)?.name || "Photoshoot"
+          }`,
           image: studio?.adminId?.profileImage || "",
           order_id: orderData.orderId,
           prefill: {
@@ -269,7 +271,7 @@ export default function StudioPublicProfile() {
                 clientName: bookingForm.clientName,
                 clientPhone: bookingForm.clientPhone,
                 clientEmail: bookingForm.clientEmail || currentUser?.email || "",
-                eventType: bookingForm.eventType,
+                eventCategory: bookingForm.eventCategory,
                 shootDate: bookingForm.eventDate,
                 shootEndDate: bookingForm.eventEndDate || null,
                 location: bookingForm.location,
@@ -345,7 +347,7 @@ export default function StudioPublicProfile() {
         clientName: bookingForm.clientName,
         clientPhone: bookingForm.clientPhone,
         clientEmail: bookingForm.clientEmail,
-        eventType: bookingForm.eventType,
+        eventCategory: bookingForm.eventCategory,
         shootDate: bookingForm.eventDate,
         shootEndDate: bookingForm.eventEndDate || null,
         location: bookingForm.location,
@@ -1060,25 +1062,17 @@ export default function StudioPublicProfile() {
                     Event / Shoot Type *
                   </label>
                   <select
-                    value={bookingForm.eventType}
-                    onChange={(e) => setBookingForm({ ...bookingForm, eventType: e.target.value })}
+                    value={bookingForm.eventCategory}
+                    onChange={(e) => setBookingForm({ ...bookingForm, eventCategory: e.target.value })}
+                    required
                     className="w-full px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-purple-500 text-sm font-medium transition"
                   >
-                    {eventCategories.length > 0 ? (
-                      eventCategories.map((cat) => (
-                        <option key={cat._id} value={cat.name}>
-                          {cat.name}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="Wedding Photography">Wedding Photography</option>
-                        <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
-                        <option value="Engagement & Ring Ceremony">Engagement & Ring Ceremony</option>
-                        <option value="Birthday & Celebration">Birthday & Celebration</option>
-                        <option value="Cinematic Video & Drone Shoot">Cinematic Video & Drone Shoot</option>
-                      </>
-                    )}
+                    <option value="">Select event category</option>
+                    {eventCategories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

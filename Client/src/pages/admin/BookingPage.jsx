@@ -94,7 +94,7 @@ const BookingPage = () => {
 
     const clientName = b.clientName || b.userId?.name || "";
     const clientPhone = b.clientPhone || b.userId?.phoneNumber || "";
-    const eventType = b.eventType || "";
+    const eventType = b.eventCategory?.name || b.eventType || "";
     const location = b.location || "";
     const bookingIdStr = b._id || "";
 
@@ -270,7 +270,7 @@ const BookingPage = () => {
                       <td className="p-4">
                         <span className="inline-flex items-center gap-1 font-semibold text-gray-800">
                           <FaTag className="text-xs text-purple-500" />
-                          {booking.eventType || "Event"}
+                          {booking.eventCategory?.name || booking.eventType || "Event"}
                         </span>
                       </td>
 

@@ -30,6 +30,7 @@ import {
   createBookingRazorpayOrder,
   verifyBookingRazorpayPayment,
 } from "../../app/booking/bookingThunk";
+import { getEventCategoryByFilter } from "../../app/category/categoryThunk";
 import { resetBookingState } from "../../app/booking/bookingSlice";
 import axiosInstance from "../../config/axios";
 import toast from "react-hot-toast";
@@ -58,6 +59,9 @@ const Booking = () => {
     (state) => state.booking
   );
   const { user } = useSelector((state) => state.auth);
+  const { eventCategories = [], loading: categoriesLoading } = useSelector(
+    (state) => state.eventCategory
+  );
 
   // Active Tab: "my_bookings" or "new_booking"
   const defaultTab = searchParams.get("action") === "new" ? "new_booking" : "my_bookings";
@@ -80,7 +84,7 @@ const Booking = () => {
     clientName: user?.name || "",
     clientPhone: user?.phoneNumber || "",
     clientEmail: user?.email || "",
-    eventType: "Wedding Photography",
+    eventCategory: "",
     shootDate: "",
     shootEndDate: "",
     location: "",
@@ -105,8 +109,18 @@ const Booking = () => {
   // Fetch user bookings on mount
   useEffect(() => {
     dispatch(getUserBookings());
+    dispatch(getEventCategoryByFilter({ page: 1, limit: 100, isActive: true }));
     fetchStudios();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!formData.eventCategory && eventCategories.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        eventCategory: eventCategories[0]._id,
+      }));
+    }
+  }, [eventCategories, formData.eventCategory]);
 
   // Handle toast notifications & reset state
   useEffect(() => {
@@ -164,6 +178,10 @@ const Booking = () => {
       toast.error("Please select the Shoot Date");
       return;
     }
+    if (!formData.eventCategory) {
+      toast.error("Please select an event category");
+      return;
+    }
 
     // 1. Pay Now via Razorpay Flow
     if (formData.paymentOption === "pay_now") {
@@ -193,7 +211,9 @@ const Booking = () => {
           amount: orderRes.amount,
           currency: orderRes.currency || "INR",
           name: "Digital Album Studio",
-          description: `Advance Payment for ${formData.eventType}`,
+          description: `Advance Payment for ${
+            eventCategories.find((category) => category._id === formData.eventCategory)?.name || "Photoshoot"
+          }`,
           order_id: orderRes.orderId,
           handler: async function (razorResponse) {
             const bookingPayload = {
@@ -333,7 +353,7 @@ const Booking = () => {
   const filteredBookings = safeBookingsList.filter((b) => {
     const matchesStatus = filterStatus === "All" || b.status === filterStatus;
     const matchesSearch =
-      b.eventType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (b.eventCategory?.name || b.eventType || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.adminId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b._id?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -528,7 +548,7 @@ const Booking = () => {
 
                         {/* Title */}
                         <h3 className="text-xl font-bold text-slate-900 group-hover:text-purple-600 transition-colors">
-                          {b.eventType}
+                          {b.eventCategory?.name || b.eventType || "Event"}
                         </h3>
 
                         {/* Studio Info */}
@@ -668,21 +688,26 @@ const Booking = () => {
                     Event / Shoot Type <span className="text-rose-500">*</span>
                   </label>
                   <select
-                    name="eventType"
-                    value={formData.eventType || "Wedding Photography"}
+                    name="eventCategory"
+                    value={formData.eventCategory}
                     onChange={handleInputChange}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all"
+                    required
                   >
-                    <option value="Wedding Photography">Wedding Photography</option>
-                    <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
-                    <option value="Engagement Ceremony">Engagement Ceremony</option>
-                    <option value="Birthday Celebration">Birthday Celebration</option>
-                    <option value="Maternity & Baby Shoot">Maternity & Baby Shoot</option>
-                    <option value="Corporate Event">Corporate Event</option>
-                    <option value="Product Photography">Product Photography</option>
-                    <option value="Model & Portfolio Shoot">Model & Portfolio Shoot</option>
-                    <option value="Other Event">Other Event</option>
+                    <option value="">
+                      {categoriesLoading ? "Loading event categories..." : "Select event category"}
+                    </option>
+                    {eventCategories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
                   </select>
+                  {!categoriesLoading && eventCategories.length === 0 && (
+                    <p className="mt-1 text-xs text-rose-600">
+                      No active event categories are available. Please contact the studio.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -913,7 +938,9 @@ const Booking = () => {
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Event:</span>
-                  <span className="font-bold text-slate-800">{payModalBooking.eventType}</span>
+                  <span className="font-bold text-slate-800">
+                    {payModalBooking.eventCategory?.name || payModalBooking.eventType || "Event"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Total Package:</span>

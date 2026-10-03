@@ -1,7 +1,9 @@
 import crypto from "crypto";
+import mongoose from "mongoose";
 import Razorpay from "razorpay";
 import Booking from "../../models/bookingModel.js";
 import Event from "../../models/eventModel.js";
+import EventCategory from "../../models/eventCateogoryModel.js";
 import userModel from "../../models/userModel.js";
 import Service from "../../models/servicesModel.js";
 import asyncHandler from "../../utils/asyncHandler.js";
@@ -181,7 +183,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     clientName,
     clientPhone,
     clientEmail,
-    eventType,
+    eventCategory: eventCategoryId,
     shootDate,
     shootEndDate,
     location,
@@ -206,10 +208,29 @@ export const createBooking = asyncHandler(async (req, res) => {
     });
   }
 
-  if (!adminId || !clientName || !clientPhone || !shootDate || !eventType) {
+  if (!adminId || !clientName || !clientPhone || !shootDate || !eventCategoryId) {
     return res.status(400).json({
       success: false,
-      message: "Studio, Client Name, Contact Phone, Shoot Date, and Event Type are required.",
+      message: "Studio, Client Name, Contact Phone, Shoot Date, and Event Category are required.",
+    });
+  }
+
+  if (!mongoose.isValidObjectId(eventCategoryId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please select a valid event category.",
+    });
+  }
+
+  const eventCategory = await EventCategory.findOne({
+    _id: eventCategoryId,
+    isActive: true,
+  });
+
+  if (!eventCategory) {
+    return res.status(400).json({
+      success: false,
+      message: "Selected event category is unavailable.",
     });
   }
 
@@ -247,7 +268,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     clientName,
     clientPhone,
     clientEmail: clientEmail || req.user.email || "",
-    eventType,
+    eventCategory: eventCategory._id,
     shootDate: new Date(shootDate),
     shootEndDate: shootEndDate ? new Date(shootEndDate) : null,
     location: location || "Studio Client Location",
@@ -267,13 +288,22 @@ export const createBooking = asyncHandler(async (req, res) => {
     isActive: true,
   });
 
+  // Auto-assign/associate client user to selected studio admin
+  if (userId && adminId) {
+    try {
+      await userModel.findByIdAndUpdate(userId, { ownerAdminId: adminId });
+    } catch (assignErr) {
+      console.warn("User studio assignment notice:", assignErr.message);
+    }
+  }
+
   // 2. Also register in Event model for studio calendar synchronization
   try {
     await Event.create({
       userId,
       adminId,
       brideName: clientName,
-      groomName: eventType,
+      groomName: eventCategory.name,
       clientPhone,
       clientEmail: clientEmail || req.user.email || "",
       location: location || "Studio Client Location",
@@ -295,7 +325,8 @@ export const createBooking = asyncHandler(async (req, res) => {
 
   const populatedBooking = await Booking.findById(booking._id)
     .populate("adminId", "name email phoneNumber address profileImage")
-    .populate("serviceId", "title price description features");
+    .populate("serviceId", "title price description features")
+    .populate("eventCategory", "name");
 
   res.status(201).json({
     success: true,
@@ -348,7 +379,8 @@ export const addBookingPayment = asyncHandler(async (req, res) => {
 
   const populatedBooking = await Booking.findById(booking._id)
     .populate("adminId", "name email phoneNumber address profileImage")
-    .populate("serviceId", "title price description features");
+    .populate("serviceId", "title price description features")
+    .populate("eventCategory", "name");
 
   res.status(200).json({
     success: true,
@@ -366,6 +398,7 @@ export const getUserBookings = asyncHandler(async (req, res) => {
   const bookings = await Booking.find({ userId, isActive: true })
     .populate("adminId", "name email phoneNumber address profileImage")
     .populate("serviceId", "title price description features")
+    .populate("eventCategory", "name")
     .sort({ createdAt: -1 });
 
   const formattedBookings = bookings.map((b) => {
@@ -418,6 +451,7 @@ export const getStudioBookings = asyncHandler(async (req, res) => {
     .populate("userId", "name email phoneNumber profileImage")
     .populate("adminId", "name email phoneNumber address profileImage")
     .populate("serviceId", "title price description features")
+    .populate("eventCategory", "name")
     .sort({ createdAt: -1 });
 
   // Fallback: If no specific adminId match found, return all active bookings for Admin dashboard
@@ -426,6 +460,7 @@ export const getStudioBookings = asyncHandler(async (req, res) => {
       .populate("userId", "name email phoneNumber profileImage")
       .populate("adminId", "name email phoneNumber address profileImage")
       .populate("serviceId", "title price description features")
+      .populate("eventCategory", "name")
       .sort({ createdAt: -1 });
   }
 
@@ -459,7 +494,8 @@ export const getBookingById = asyncHandler(async (req, res) => {
   const booking = await Booking.findById(id)
     .populate("adminId", "name email phoneNumber address profileImage")
     .populate("userId", "name email phoneNumber profileImage")
-    .populate("serviceId", "title price description features");
+    .populate("serviceId", "title price description features")
+    .populate("eventCategory", "name");
 
   if (!booking) {
     return res.status(404).json({
@@ -506,6 +542,7 @@ export const updateBookingStatus = asyncHandler(async (req, res) => {
   if (notes) booking.notes = notes;
 
   await booking.save();
+  await booking.populate("eventCategory", "name");
 
   res.status(200).json({
     success: true,
@@ -531,6 +568,7 @@ export const cancelBooking = asyncHandler(async (req, res) => {
 
   booking.status = "Cancelled";
   await booking.save();
+  await booking.populate("eventCategory", "name");
 
   res.status(200).json({
     success: true,

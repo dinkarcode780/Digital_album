@@ -102,6 +102,8 @@ const BookingDetails = () => {
     );
   }
 
+  const eventCategoryName = booking.eventCategory?.name || booking.eventType || "Event";
+
   // Calculations for financial history
   const totalAmount = booking.totalAmount || 0;
   const paidAmount = booking.paidAmount || booking.advanceAmount || 0;
@@ -189,7 +191,7 @@ const BookingDetails = () => {
   const openWhatsApp = () => {
     const studioPhone = booking.adminId?.phoneNumber || "919876543210";
     const msg = encodeURIComponent(
-      `Hello Studio! I'm inquiring about my Photoshoot Booking #${booking._id?.substring(18).toUpperCase()} (${booking.eventType
+      `Hello Studio! I'm inquiring about my Photoshoot Booking #${booking._id?.substring(18).toUpperCase()} (${eventCategoryName
       }) scheduled for ${new Date(booking.shootDate).toLocaleDateString("en-IN")}.`
     );
     window.open(`https://wa.me/${studioPhone.replace(/\D/g, "")}?text=${msg}`, "_blank");
@@ -259,7 +261,7 @@ const BookingDetails = () => {
                 </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-black text-slate-900 mt-4">{booking.eventType}</h1>
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 mt-4">{eventCategoryName}</h1>
 
               <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mt-2">
                 <p>
@@ -523,7 +525,7 @@ const BookingDetails = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase">Event Type</p>
-                    <h3 className="font-bold text-slate-900 text-base mt-0.5">{booking.eventType}</h3>
+                    <h3 className="font-bold text-slate-900 text-base mt-0.5">{eventCategoryName}</h3>
                   </div>
                 </div>
 
@@ -711,7 +713,7 @@ const BookingDetails = () => {
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Event:</span>
-                  <span className="font-bold text-slate-800">{booking.eventType}</span>
+                  <span className="font-bold text-slate-800">{eventCategoryName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Total Package Amount:</span>
@@ -828,7 +830,7 @@ const BookingDetails = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     <tr>
-                      <td className="p-3 font-bold text-slate-800">{booking.eventType}</td>
+                      <td className="p-3 font-bold text-slate-800">{eventCategoryName}</td>
                       <td className="p-3 text-slate-600">
                         {new Date(booking.shootDate).toLocaleDateString("en-IN")}
                       </td>

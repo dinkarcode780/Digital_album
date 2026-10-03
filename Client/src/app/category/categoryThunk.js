@@ -107,7 +107,7 @@ export const getEventCategoryByFilter = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(
-        "/admin/geteventCategoryByFilter",
+        "/public/categories",
         {
           params,
         }
