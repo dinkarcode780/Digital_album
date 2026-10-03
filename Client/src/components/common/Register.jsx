@@ -10,6 +10,8 @@ import {
   FaCamera,
   FaArrowRight,
   FaShieldAlt,
+  FaArrowLeft,
+  FaHome,
 } from "react-icons/fa";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -331,11 +333,33 @@ const Register = () => {
             register-card
             w-full
             max-w-2xl
-            rounded-[30px]
-            border
-            border-white
-            bg-white/90
-            p-6
+          "
+        >
+          {/* Back to Home Button */}
+          <div className="mb-4 flex items-center justify-between">
+            <Link
+              to="/"
+              className="group inline-flex items-center gap-2 rounded-2xl border border-purple-200/80 bg-white/90 px-4 py-2 text-xs font-bold text-purple-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:to-violet-600 hover:text-white hover:shadow-md hover:shadow-purple-200 hover:-translate-y-0.5"
+            >
+              <FaArrowLeft className="text-xs transition-transform duration-300 group-hover:-translate-x-1" />
+              <span>Back to Home</span>
+            </Link>
+            <Link
+              to="/"
+              className="flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline"
+            >
+              <FaHome className="text-xs" />
+              <span>Explore Studios</span>
+            </Link>
+          </div>
+
+          <div
+            className="
+              rounded-[30px]
+              border
+              border-white
+              bg-white/90
+              p-6
             shadow-[0_25px_80px_rgba(76,29,149,0.13)]
             backdrop-blur-xl
             sm:p-9
@@ -769,6 +793,8 @@ const Register = () => {
             </p>
 
           </form>
+
+        </div>
 
         </div>
 

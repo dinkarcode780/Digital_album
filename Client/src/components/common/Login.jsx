@@ -334,6 +334,8 @@ import {
   FaHeart,
   FaArrowRight,
   FaShieldAlt,
+  FaArrowLeft,
+  FaHome,
 } from "react-icons/fa";
 
 import { toast } from "react-toastify";
@@ -535,27 +537,39 @@ const Login = () => {
 
           <div className="relative z-10 flex min-h-screen flex-col justify-between px-12 py-12 xl:px-20">
 
-            {/* Logo */}
+            {/* Logo & Back to Home Button */}
 
-            <div className="flex items-center gap-3 text-white">
+            <div className="flex items-center justify-between text-white">
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
 
-                <FaCamera className="text-xl" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl">
+
+                  <FaCamera className="text-xl" />
+
+                </div>
+
+                <div>
+
+                  <h2 className="text-xl font-bold tracking-wide">
+                    Album Studio
+                  </h2>
+
+                  <p className="text-xs text-purple-200">
+                    Capture • Preserve • Relive
+                  </p>
+
+                </div>
 
               </div>
 
-              <div>
-
-                <h2 className="text-xl font-bold tracking-wide">
-                  Album Studio
-                </h2>
-
-                <p className="text-xs text-purple-200">
-                  Capture • Preserve • Relive
-                </p>
-
-              </div>
+              <Link
+                to="/"
+                className="group flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-xl transition hover:bg-white hover:text-purple-900 shadow-md"
+              >
+                <FaArrowLeft className="text-xs transition-transform duration-300 group-hover:-translate-x-1" />
+                <span>Back to Home</span>
+              </Link>
 
             </div>
 
@@ -654,6 +668,27 @@ const Login = () => {
 
           <div className="w-full max-w-[480px]">
 
+            {/* Back to Home Navigation */}
+
+            <div className="mb-6 flex items-center justify-between">
+
+              <Link
+                to="/"
+                className="group inline-flex items-center gap-2 rounded-2xl border border-purple-200/80 bg-white/90 px-4 py-2.5 text-xs font-bold text-purple-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:to-violet-600 hover:text-white hover:shadow-md hover:shadow-purple-200 hover:-translate-y-0.5"
+              >
+                <FaArrowLeft className="text-xs transition-transform duration-300 group-hover:-translate-x-1" />
+                <span>Back to Home</span>
+              </Link>
+
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-800 hover:underline"
+              >
+                <FaHome className="text-xs" />
+                <span>Explore Studios</span>
+              </Link>
+
+            </div>
 
             {/* Mobile Logo */}
 

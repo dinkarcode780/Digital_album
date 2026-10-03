@@ -246,6 +246,17 @@ const AdminRegister = () => {
 
             </div>
 
+            {/* Back to Home Button */}
+            <div className="mb-6 flex items-center justify-between">
+              <Link
+                to="/"
+                className="group inline-flex items-center gap-2 rounded-2xl border border-purple-200/80 bg-white/90 px-4 py-2.5 text-xs font-bold text-purple-700 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:to-violet-600 hover:text-white hover:shadow-md hover:shadow-purple-200 hover:-translate-y-0.5"
+              >
+                <FaArrowLeft className="text-xs transition-transform duration-300 group-hover:-translate-x-1" />
+                <span>Back to Home</span>
+              </Link>
+            </div>
+
             {/* =================================================
                 REGISTER CARD
             ================================================== */}
