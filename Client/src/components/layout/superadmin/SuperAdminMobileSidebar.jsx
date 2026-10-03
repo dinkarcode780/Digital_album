@@ -15,11 +15,8 @@ const SuperAdminMobileSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const result = await dispatch(adminLogout());
-
-    if (adminLogout.fulfilled.match(result)) {
-      navigate("/");
-    }
+    await dispatch(adminLogout());
+    navigate("/");
   };
 
   return (

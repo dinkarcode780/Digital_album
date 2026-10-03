@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
   FaSearch,
@@ -71,8 +72,8 @@ export default function PublicStudiosDirectory() {
     fetchStudios();
   };
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const admin = JSON.parse(localStorage.getItem("admin") || "null");
+  const user = useSelector((state) => state.auth.user);
+  const admin = useSelector((state) => state.admin.admin);
 
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 flex flex-col font-sans">

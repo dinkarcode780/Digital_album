@@ -295,6 +295,8 @@ const authSlice = createSlice({
       .addCase(userLogout.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
+        state.user = null;
+        state.token = null;
         state.error = action.payload?.message || "Something went wrong";
       });
   },

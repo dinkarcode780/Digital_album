@@ -205,7 +205,7 @@ const AdminMedia = () => {
         <div className="grid md:grid-cols-2 gap-5">
 
           <div>
-            <label className="font-semibold">Event</label>
+            <label className="font-semibold">Event Person</label>
             <select
               name="eventId"
               value={formState.eventId}

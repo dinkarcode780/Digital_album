@@ -175,6 +175,9 @@ const adminSlice = createSlice({
 .addCase(adminLogout.rejected, (state, action) => {
   state.loading = false;
   state.success = false;
+  state.admin = null;
+  state.token = null;
+  state.isAuthenticated = false;
   state.error =
     action.payload?.message || "Something went wrong";
 });

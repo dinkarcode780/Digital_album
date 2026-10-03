@@ -86,11 +86,8 @@ const AdminSidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const result = await dispatch(adminLogout());
-
-    if (adminLogout.fulfilled.match(result)) {
-      navigate("/");
-    }
+    await dispatch(adminLogout());
+    navigate("/");
   };
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 w-72 h-screen bg-white shadow-xl flex-col z-40">
