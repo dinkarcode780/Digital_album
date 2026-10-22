@@ -8,6 +8,7 @@ import subCategoryReducer from "./subcategory/subcategorySlice";
 import mediaReducer from "./media/mediaSlice";
 import slectedmediaReducer from "./slectedmedia/slectedmediaSlice";
 import bookingReducer from "./booking/bookingSlice";
+import blogReducer from "./blog/blogSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +21,6 @@ export const store = configureStore({
     media: mediaReducer,
     slectedmedia: slectedmediaReducer,
     booking: bookingReducer,
+    blog: blogReducer,
   },
 });

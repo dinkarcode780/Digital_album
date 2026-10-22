@@ -23,6 +23,7 @@ import {
   FaHeart,
   FaCreditCard,
   FaStore,
+  FaBookOpen,
 } from "react-icons/fa";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,6 +54,11 @@ const menus = [
     name: "Services",
     path: "/admin/services",
     icon: <FaServicestack />,
+  },
+  {
+    name: "Blogs",
+    path: "/admin/blogs",
+    icon: <FaBookOpen />,
   },
   {
     name: "Reports",

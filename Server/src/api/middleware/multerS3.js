@@ -61,6 +61,12 @@ const allowedTypes = [
   "image/jpeg",
   "image/png",
   "image/jpg",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+  "image/svg+xml",
+  "image/heic",
+  "image/heif",
   "video/mp4",
   "video/quicktime",
   "video/x-matroska",
@@ -77,7 +83,11 @@ export const upload = multer({
   storage: multer.memoryStorage(),
 
   fileFilter: (req, file, cb) => {
-    if (allowedTypes.includes(file.mimetype)) {
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype.startsWith("video/") ||
+      allowedTypes.includes(file.mimetype.toLowerCase())
+    ) {
       cb(null, true);
     } else {
       cb(new Error("Only images and videos are allowed"));

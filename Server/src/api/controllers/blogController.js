@@ -1,6 +1,8 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 import blogModel from "../../models/blogModel.js";
+import userModel from "../../models/userModel.js";
 import {
   deleteFromCloudinary,
   uploadToCloudinary,
@@ -57,11 +59,16 @@ export const createBlog = asyncHandler(async (req, res) => {
   }
 
   const imageUpload = await uploadToCloudinary(req.file, "blogs");
+  const authorName =
+    typeof author === "string" && author.trim()
+      ? author.trim()
+      : req.user?.name || "Album Studio";
+
   const blog = await blogModel.create({
     title: title.trim(),
     slug: uniqueSlug,
     category: category.trim(),
-    author: typeof author === "string" ? author.trim() || undefined : undefined,
+    author: authorName,
     image: imageUpload.secure_url,
     publicId: imageUpload.public_id,
     description,
@@ -222,31 +229,77 @@ export const updateBlog = asyncHandler(async (req, res) => {
 });
 
 
-export const getBlogById = asyncHandler(async(req,res)=>{
+export const getBlogById = asyncHandler(async (req, res) => {
+  const blogId = req.query.blogId || req.params.blogId || req.params.id;
+  const includeUnpublished =
+    req.query.includeUnpublished === "true" ||
+    req.query.includeUnpublished === true ||
+    req.query.admin === "true";
 
-    const {blogId} =req.query;
-    if (!mongoose.isValidObjectId(blogId)) {
-        return res.status(400).json({
-            success:false,
-            message:"A valid blogId is required"
-        })
+  if (!blogId) {
+    return res.status(400).json({
+      success: false,
+      message: "A valid blogId or slug is required",
+    });
+  }
+
+  // Resolve user if not set by middleware
+  let currentUser = req.user;
+  if (!currentUser && req.headers?.authorization) {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        currentUser = await userModel.findById(decoded.id).select("-password");
+      }
+    } catch {
+      // ignore token error for public view
     }
+  }
 
-    const blog = await blogModel.findOne({ _id: blogId, isPublished: true });
+  const query = mongoose.isValidObjectId(blogId)
+    ? { _id: blogId }
+    : { slug: blogId };
 
-    if(!blog){
-        return res.status(404).json({
-            success:false,
-            message:"Blog not found"
-        })
+  const isAdminView =
+    includeUnpublished ||
+    req.originalUrl?.includes("/admin") ||
+    req.baseUrl?.includes("/admin");
+
+  if (isAdminView) {
+    // Admin request: If Admin, scope to their own blog only
+    if (currentUser && currentUser.userType === "Admin") {
+      query.createdBy = currentUser._id;
     }
+  } else {
+    // Public requests: must be published
+    query.isPublished = true;
+  }
 
-    return res.status(200).json({
-        success:true,
-        message:"Blog fetched successfully",
-        data:blog
-    })
-})
+  // Only increment views on public visits, not in admin dashboard
+  const shouldIncrementViews = !isAdminView;
+
+  const blog = shouldIncrementViews
+    ? await blogModel
+        .findOneAndUpdate(query, { $inc: { views: 1 } }, { new: true })
+        .populate("createdBy", "name email profileImage userType")
+    : await blogModel
+        .findOne(query)
+        .populate("createdBy", "name email profileImage userType");
+
+  if (!blog) {
+    return res.status(404).json({
+      success: false,
+      message: "Blog not found",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Blog fetched successfully",
+    data: blog,
+  });
+});
 
 export const getBlogByFilter = asyncHandler(async (req, res) => {
   const {
@@ -256,6 +309,11 @@ export const getBlogByFilter = asyncHandler(async (req, res) => {
     category,
     author,
     sortBy = "latest",
+    isPublished,
+    all,
+    adminId,
+    createdBy,
+    isAdmin: isAdminParam,
   } = req.query;
 
   const pageNumber = Number(page);
@@ -273,7 +331,60 @@ export const getBlogByFilter = asyncHandler(async (req, res) => {
   }
 
   const safeLimit = Math.min(limitNumber, 100);
-  const filter = { isPublished: true };
+  const filter = {};
+
+  // Resolve user if not set by middleware
+  let currentUser = req.user;
+  if (!currentUser && req.headers?.authorization) {
+    try {
+      const token = req.headers.authorization.split(" ")[1];
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        currentUser = await userModel.findById(decoded.id).select("-password");
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const isAdminContext =
+    req.originalUrl?.includes("/admin") ||
+    req.baseUrl?.includes("/admin") ||
+    all === "true" ||
+    all === true ||
+    isAdminParam === "true" ||
+    isAdminParam === true;
+
+  // Separate blogs by studio / admin:
+  if (currentUser && currentUser.userType === "Admin" && isAdminContext) {
+    // Logged in admin in their dashboard MUST only see their own blogs!
+    filter.createdBy = currentUser._id;
+  } else if (currentUser && currentUser.userType === "SuperAdmin") {
+    // SuperAdmin can see all or filter by requested admin/studio
+    const targetAdmin = adminId || createdBy;
+    if (targetAdmin && mongoose.isValidObjectId(targetAdmin)) {
+      filter.createdBy = targetAdmin;
+    }
+  } else {
+    // Public / User requests: filter by studio if adminId/createdBy provided
+    const targetAdmin = adminId || createdBy;
+    if (targetAdmin && mongoose.isValidObjectId(targetAdmin)) {
+      filter.createdBy = targetAdmin;
+    }
+  }
+
+  if (all === "true" || all === true) {
+    // include all blogs regardless of publish status
+    if (isPublished !== undefined && isPublished !== "all") {
+      filter.isPublished = isPublished === "true" || isPublished === true;
+    }
+  } else if (isPublished !== undefined) {
+    if (isPublished !== "all") {
+      filter.isPublished = isPublished === "true" || isPublished === true;
+    }
+  } else {
+    filter.isPublished = true;
+  }
 
   if (typeof search === "string" && search.trim()) {
     const escapedSearch = escapeRegex(search.trim());
@@ -320,6 +431,7 @@ export const getBlogByFilter = asyncHandler(async (req, res) => {
   const [blogs, totalRecords] = await Promise.all([
     blogModel
       .find(filter)
+      .populate("createdBy", "name email profileImage userType")
       .sort(sortOptions[sortBy])
       .skip((pageNumber - 1) * safeLimit)
       .limit(safeLimit),

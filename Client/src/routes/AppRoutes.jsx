@@ -35,6 +35,7 @@ import AdminSubscription from "../pages/admin/Subscription";
 // Admin Pages
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import BookingPage from "../pages/admin/BookingPage";
+import BlogPage from "../pages/admin/BlogPage";
 import Categories from "../pages/admin/CategoriesPage";
 import SubCategory from "../pages/admin/SubCategoryPage";
 import UsersPage from "../pages/admin/UsersPage";
@@ -63,6 +64,8 @@ import SuperAdminEvents from "../pages/superadmin/SuperAdminEvents";
 import PublicStudiosDirectory from "../pages/public/PublicStudiosDirectory";
 import StudioPublicProfile from "../pages/public/StudioPublicProfile";
 import StudioProfileManager from "../pages/admin/StudioProfileManager";
+import AdminBlogPage from "../pages/admin/BlogPage";
+import AdminBlogDetailsPage from "../pages/admin/BlogDetailsPage";
 import SuperAdminStudioShowcases from "../pages/superadmin/SuperAdminStudioShowcases";
 import SubscriptionPlans from "../pages/superadmin/SubscriptionPlans";
 
@@ -152,8 +155,11 @@ const AppRoutes = () => {
               path="/admin/bookings"
               element={<BookingPage />}
             />
-  <Route path="/admin/invites" element={<Invites />} />
-  <Route path="/admin/admininvite" element={<AdminInvite />} />
+            <Route path="/admin/blogs" element={<BlogPage />} />
+            <Route path="/admin/blog-details" element={<BlogDetails />} />
+            <Route path="/admin/blog-details/:id" element={<BlogDetails />} />
+            <Route path="/admin/invites" element={<Invites />} />
+            <Route path="/admin/admininvite" element={<AdminInvite />} />
 
             <Route
               path="/admin/bookings/:id"
@@ -242,6 +248,8 @@ const AppRoutes = () => {
             <Route path="/admin/subscription" element={<AdminSubscription />} />
             <Route path="/admin/adminfavorite" element={<AdminFavorites />} />
             <Route path="/admin/studio-profile" element={<StudioProfileManager />} />
+            <Route path="/admin/blogs" element={<AdminBlogPage />} />
+            <Route path="/admin/blogs/:id" element={<AdminBlogDetailsPage />} />
           </Route>
         </Route>
       </Route>
